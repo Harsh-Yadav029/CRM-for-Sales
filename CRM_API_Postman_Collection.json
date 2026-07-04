@@ -1,0 +1,607 @@
+{
+	"info": {
+		"_postman_id": "9b12a83e-9023-4c9c-b8e7-573cd8a3812b",
+		"name": "Sales CRM API Collection",
+		"description": "Complete Postman collection to test the expanded Sales CRM APIs (Communication Hub, Custom Layout Builder, Workflow Automations, and Analytics Reports).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register Admin User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"System Admin\",\n    \"email\": \"admin@company.com\",\n    \"password\": \"password123\",\n    \"role\": \"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", jsonData.token);",
+									"    console.log(\"Token extracted and saved to collection variable 'token'\");",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@company.com\",\n    \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Profile",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/profile",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Team Salespeople",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/auth/salespeople",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"salespeople"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Leads",
+			"item": [
+				{
+					"name": "Create Lead Prospect",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Alex Mercer\",\n    \"company\": \"NexaCore Solutions\",\n    \"email\": \"alex.mercer@nexacore.com\",\n    \"phone\": \"+15125550198\",\n    \"source\": \"Website\",\n    \"expectedRevenue\": 450000,\n    \"customFields\": {\n        \"Contract Term\": \"12 Months\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/leads",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Import Leads in Batch",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"leads\": [\n        {\n            \"name\": \"Alice Vance\",\n            \"company\": \"Vance Refrigeration\",\n            \"email\": \"alice@vance.com\",\n            \"phone\": \"+15125550244\",\n            \"source\": \"Referral\",\n            \"expectedRevenue\": 120000,\n            \"customFields\": {\n                \"Contract Term\": \"12 Months\"\n            }\n        },\n        {\n            \"name\": \"Charlie Green\",\n            \"company\": \"Green Forestry\",\n            \"email\": \"charlie@green.org\",\n            \"phone\": \"+15125550399\",\n            \"source\": \"Cold Call\",\n            \"expectedRevenue\": 90000\n        }\n    ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/leads/import",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads",
+								"import"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Leads",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leads?search=&status=",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": ""
+								},
+								{
+									"key": "status",
+									"value": ""
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Lead Details",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/leads/{{leadId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads",
+								"{{leadId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Lead Status (Moves Pipeline)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"Proposal Sent\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/leads/{{leadId}}/status",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"leads",
+								"{{leadId}}",
+								"status"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Communication",
+			"item": [
+				{
+					"name": "Send Simulated Email",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"leadId\": \"{{leadId}}\",\n    \"subject\": \"Proposal Delivery Review\",\n    \"body\": \"Hi Alex, here is the full licensing pricing. Let us discuss this tomorrow.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/communication/email",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"communication",
+								"email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Log VoIP Call Session",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"leadId\": \"{{leadId}}\",\n    \"duration\": 210,\n    \"status\": \"completed\",\n    \"notes\": \"Discussed standard onboarding specifications.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/communication/call",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"communication",
+								"call"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Custom Fields",
+			"item": [
+				{
+					"name": "Define Layout Field",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fieldName\": \"Contract Term\",\n    \"fieldType\": \"select\",\n    \"options\": [\"12 Months\", \"24 Months\", \"Custom\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/custom-fields",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"custom-fields"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Layout Fields",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/custom-fields",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"custom-fields"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Workflows",
+			"item": [
+				{
+					"name": "Define Workflow Rule",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Follow Up on Proposal Sent\",\n    \"triggerStage\": \"Proposal Sent\",\n    \"actionType\": \"task\",\n    \"taskTitle\": \"Call customer to check proposal receipt\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/workflows",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workflows"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workflow Rules",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/workflows",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"workflows"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Get BI Reports Analytics",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/reports/analytics",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"reports",
+								"analytics"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5000/api",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "leadId",
+			"value": "replace_with_actual_lead_id",
+			"type": "string"
+		}
+	]
+}

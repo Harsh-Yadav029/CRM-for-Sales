@@ -17,8 +17,10 @@ const Sidebar = () => {
     <aside className="w-60 bg-surface-container-lowest border-r border-outline-variant fixed inset-y-0 left-0 flex flex-col z-20">
       {/* Brand Header */}
       <div className="h-16 flex items-center gap-3 px-5 border-b border-outline-variant shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">S</div>
-        <span className="text-base font-extrabold text-primary tracking-tight">SalesPro CRM</span>
+        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-sm">
+          <span className="material-symbols-outlined text-white text-base" style={{ fontVariationSettings: "'FILL' 1" }}>insights</span>
+        </div>
+        <span className="text-base font-extrabold text-primary tracking-tight">LeadStack CRM</span>
       </div>
 
       {/* Navigation */}

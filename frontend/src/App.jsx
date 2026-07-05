@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
+import LinkedInCallback from './pages/LinkedInCallback';
 import Dashboard from './pages/Dashboard';
 import Leads from './pages/Leads';
 import LeadDetails from './pages/LeadDetails';
@@ -83,6 +84,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/login/callback" element={<LinkedInCallback />} />
           <Route path="/" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
           <Route path="/leads" element={<ProtectedLayout><Leads /></ProtectedLayout>} />
           <Route path="/leads/:id" element={<ProtectedLayout><LeadDetails /></ProtectedLayout>} />

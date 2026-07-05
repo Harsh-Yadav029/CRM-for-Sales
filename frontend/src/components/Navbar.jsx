@@ -12,8 +12,10 @@ const Navbar = ({ title }) => {
       <div className="flex items-center gap-3">
         {/* Mobile branding */}
         <div className="flex md:hidden items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xs">S</div>
-          <h1 className="font-bold text-primary text-base leading-none">SalesPro CRM</h1>
+          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xs">
+            <span className="material-symbols-outlined text-white text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>insights</span>
+          </div>
+          <h1 className="font-bold text-primary text-base leading-none">LeadStack CRM</h1>
         </div>
         
         {/* Desktop Title */}

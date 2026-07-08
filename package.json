@@ -8,7 +8,9 @@
     "install-all": "npm install && npm run install-backend && npm run install-frontend",
     "server": "npm run dev --prefix backend",
     "client": "npm run dev --prefix frontend",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "start": "node backend/server.js",
+    "postinstall": "npm install --prefix backend"
   },
   "dependencies": {},
   "devDependencies": {

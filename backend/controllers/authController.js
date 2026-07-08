@@ -194,7 +194,7 @@ const linkedinLogin = async (req, res, next) => {
     } else {
       const client_id = process.env.LINKEDIN_CLIENT_ID;
       const client_secret = process.env.LINKEDIN_CLIENT_SECRET;
-      const redirect_uri = 'http://localhost:5173/login/callback';
+      const redirect_uri = process.env.LINKEDIN_REDIRECT_URI || 'http://localhost:5173/login/callback';
 
       const tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
       const tokenParams = new URLSearchParams({

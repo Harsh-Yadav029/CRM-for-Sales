@@ -11,11 +11,11 @@ const Navbar = ({ title }) => {
       {/* Left section: Branding on mobile, Page Title on desktop */}
       <div className="flex items-center gap-3">
         {/* Mobile branding */}
-        <div className="flex md:hidden items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xs">
-            <span className="material-symbols-outlined text-white text-xs" style={{ fontVariationSettings: "'FILL' 1" }}>insights</span>
+        <div className="flex md:hidden items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-white border border-outline-variant flex items-center justify-center overflow-hidden">
+            <img src="/logo.png" alt="Walk The Plan Logo" className="w-6 h-6 object-contain" />
           </div>
-          <h1 className="font-bold text-primary text-base leading-none">LeadStack CRM</h1>
+          <h1 className="font-bold text-primary text-sm leading-none">Walk The Plan CRM</h1>
         </div>
         
         {/* Desktop Title */}

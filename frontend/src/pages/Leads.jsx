@@ -176,18 +176,53 @@ const Leads = () => {
       maximumFractionDigits: 0
     }).format(v);
 
+  const getIndustryIcon = (company = '') => {
+    const c = company.toLowerCase();
+    if (c.includes('tech') || c.includes('api') || c.includes('software') || c.includes('saas') || c.includes('data')) {
+      return 'precision_manufacturing';
+    }
+    if (c.includes('heights') || c.includes('landscape') || c.includes('loft') || c.includes('plaza') || c.includes('tower') || c.includes('hill') || c.includes('park')) {
+      return 'landscape';
+    }
+    return 'apartment';
+  };
+
+  const getPriorityTier = (score) => {
+    if (score >= 85) return 'Tier 1 Priority';
+    if (score >= 60) return 'Tier 2 Priority';
+    return 'Standard Priority';
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
+      {/* Dashboard Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-widest text-primary">Pipeline Management</span>
+          <h2 className="text-xl md:text-2xl font-black text-on-surface mt-1 uppercase tracking-tight">Leads Inventory</h2>
+          <p className="text-xs text-on-surface-variant max-w-2xl mt-1 leading-relaxed">
+            Track and manage high-potential architectural partnerships and construction site projects.
+          </p>
+        </div>
+        <button
+          onClick={openCreate}
+          className="bg-on-surface text-white font-bold text-xs uppercase px-6 py-3 flex items-center gap-2 hover:bg-primary transition-all block-shadow-black"
+        >
+          <span className="material-symbols-outlined text-sm">add</span>
+          Capture New Lead
+        </button>
+      </div>
+
       {/* Search and Filters Section */}
-      <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <section className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-xl">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={16} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search leads by name, email or company..."
-            className="w-full pl-11 pr-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all font-body-md text-xs md:text-sm text-on-surface"
+            placeholder="SEARCH PROJECTS, CLIENTS, OR LEAD SCORES..."
+            className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border-2 border-on-surface focus:ring-0 focus:border-primary font-bold text-xs uppercase placeholder:text-outline/50 transition-all text-on-surface"
           />
         </div>
         
@@ -195,7 +230,7 @@ const Leads = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
           <button
             onClick={() => setStatusFilter('')}
-            className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${statusFilter === '' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface-container-low text-on-surface-variant border-outline-variant hover:bg-surface-container-high'}`}
+            className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap border-2 ${statusFilter === '' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-on-surface text-on-surface hover:bg-surface-container-high'}`}
           >
             All Leads
           </button>
@@ -203,7 +238,7 @@ const Leads = () => {
             <button
               key={stage}
               onClick={() => setStatusFilter(stage)}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all whitespace-nowrap border ${statusFilter === stage ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface-container-low text-on-surface-variant border-outline-variant hover:bg-surface-container-high'}`}
+              className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap border-2 ${statusFilter === stage ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-on-surface text-on-surface hover:bg-surface-container-high'}`}
             >
               {stage}
             </button>
@@ -211,144 +246,98 @@ const Leads = () => {
           
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1 border border-outline-variant hover:bg-surface-container-low text-primary text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-sm whitespace-nowrap ml-2"
+            className="flex items-center gap-1 border-2 border-dashed border-outline-variant hover:bg-surface-container-low text-primary text-xs font-bold px-4 py-2 transition-all uppercase whitespace-nowrap ml-2"
           >
-            <span className="material-symbols-outlined text-sm">publish</span> Import CSV
-          </button>
-
-          <button
-            onClick={openCreate}
-            className="flex items-center gap-1 bg-primary text-white hover:brightness-110 text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md whitespace-nowrap ml-1"
-          >
-            <Plus size={14} /> Add Lead
+            Import CSV
           </button>
         </div>
       </section>
 
-      {/* Leads Stats Bento Grid */}
-      <section className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
-          <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider font-bold">Total Leads</span>
-          <div className="flex items-end justify-between mt-2">
-            <span className="font-headline-lg text-2xl font-extrabold text-primary">{totalLeadsCount}</span>
-            <span className="text-secondary font-bold text-xs flex items-center gap-1">+12%</span>
+      {/* Leads Grid Card Layout */}
+      <section className="pb-12">
+        {leads.length === 0 ? (
+          <div className="text-center py-16 border-2 border-dashed border-outline-variant text-xs text-on-surface-variant italic bg-white uppercase font-bold tracking-wide">
+            No leads found matching criteria.
           </div>
-        </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {leads.map((l) => {
+              const score = calculateScore(l.status);
+              const priority = getPriorityTier(score);
+              const industryIcon = getIndustryIcon(l.company);
+              
+              return (
+                <div 
+                  key={l._id} 
+                  className="bg-surface-container-lowest border border-outline-variant p-6 hover:border-on-surface transition-all flex flex-col group relative"
+                >
+                  <div className="absolute top-0 left-0 w-full h-1 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+                  
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="h-14 w-14 bg-surface-container flex items-center justify-center border border-outline-variant">
+                      <span className="material-symbols-outlined text-on-surface text-2xl">{industryIcon}</span>
+                    </div>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${l.status === 'Won' ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-high border border-outline-variant text-on-surface-variant'}`}>
+                        {l.status}
+                      </span>
+                      <div className="flex items-center gap-0.5 text-primary">
+                        <span className="font-extrabold text-xs">{score}%</span>
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+                      </div>
+                    </div>
+                  </div>
 
-        <div className="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant shadow-sm flex flex-col justify-between">
-          <span className="font-label-md text-xs text-on-surface-variant uppercase tracking-wider font-bold">Pipeline Deals</span>
-          <div className="flex items-end justify-between mt-2">
-            <span className="font-headline-lg text-2xl font-extrabold text-on-surface">{qualifiedLeadsCount}</span>
-            <span className="text-secondary font-bold text-xs flex items-center gap-1">+5%</span>
-          </div>
-        </div>
+                  <div className="mb-6">
+                    <h3 className="font-bold text-base text-on-surface leading-tight mb-1 group-hover:text-primary transition-colors">
+                      <Link to={`/leads/${l._id}`}>{l.company}</Link>
+                    </h3>
+                    <p className="text-xs text-on-surface-variant font-medium flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">person</span>
+                      {l.name}
+                    </p>
+                  </div>
 
-        <div className="md:col-span-2 bg-primary p-4 rounded-xl border border-primary-container shadow-md flex items-center justify-between text-white">
-          <div>
-            <h3 className="font-bold text-sm md:text-base">Conversion Goal</h3>
-            <p className="text-xs opacity-90 mt-1">Goal is to reach 20% won-lead ratio this quarter.</p>
-          </div>
-          <div className="relative w-14 h-14 shrink-0 flex items-center justify-center">
-            {/* SVG progress ring */}
-            <svg className="w-full h-full transform -rotate-90">
-              <circle className="opacity-20" cx="28" cy="28" r="24" fill="transparent" stroke="currentColor" strokeWidth="4"></circle>
-              <circle 
-                cx="28" 
-                cy="28" 
-                r="24" 
-                fill="transparent" 
-                stroke="currentColor" 
-                strokeWidth="4"
-                strokeDasharray="150.7"
-                strokeDashoffset={150.7 - (150.7 * Math.min(conversionRate, 100)) / 100}
-              ></circle>
-            </svg>
-            <span className="absolute text-[10px] font-bold">{conversionRate}%</span>
-          </div>
-        </div>
-      </section>
+                  <div className="mt-auto space-y-4">
+                    <div className="w-full bg-surface-variant h-1 overflow-hidden">
+                      <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${score}%` }}></div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center text-on-surface-variant text-[10px] uppercase font-bold">
+                      <span>Lead Score</span>
+                      <span className="font-black text-on-surface">{priority}</span>
+                    </div>
 
-      {/* Leads Table Card */}
-      <section className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="hidden md:grid md:grid-cols-12 px-6 py-3 border-b border-outline-variant bg-surface-container-low font-bold text-[11px] text-on-surface-variant uppercase tracking-wider">
-                <th className="col-span-4 flex items-center">LEAD NAME & COMPANY</th>
-                <th className="col-span-2 flex items-center">STATUS</th>
-                <th className="col-span-2 flex items-center">SCORE</th>
-                <th className="col-span-2 flex items-center">SOURCE</th>
-                <th className="col-span-2 flex items-center justify-end text-right">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant/60 block md:table-row-group">
-              {leads.length === 0 ? (
-                <div className="text-center py-12 text-xs text-on-surface-variant italic">No leads found matching criteria.</div>
-              ) : (
-                leads.map((l) => {
-                  const score = calculateScore(l.status);
-                  return (
-                    <tr 
-                      key={l._id} 
-                      className="grid grid-cols-1 md:grid-cols-12 px-4 md:px-6 py-3.5 hover:bg-surface-container-low/40 transition-colors items-center gap-y-3 group cursor-pointer border-b md:border-b-0 border-outline-variant/40 md:table-row"
-                    >
-                      <td className="col-span-1 md:col-span-4 flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-primary font-bold text-xs uppercase shrink-0">
-                          {l.name.slice(0, 2)}
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="font-bold text-xs md:text-sm text-on-surface group-hover:text-primary transition-colors truncate">
-                            <Link to={`/leads/${l._id}`}>{l.name}</Link>
-                          </h4>
-                          <p className="text-[10px] md:text-xs text-on-surface-variant truncate">{l.company} • {fmt(l.expectedRevenue)}</p>
-                        </div>
-                      </td>
-                      <td className="col-span-1 md:col-span-2 flex items-center">
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${statusColor(l.status)}`}>
-                          {l.status}
-                        </span>
-                      </td>
-                      <td className="col-span-1 md:col-span-2 flex items-center gap-2">
-                        <div className="w-16 h-1.5 bg-surface-container rounded-full overflow-hidden shrink-0">
-                          <div 
-                            className="h-full bg-primary" 
-                            style={{ width: `${score}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-[11px] font-extrabold text-on-surface">{score}</span>
-                      </td>
-                      <td className="col-span-1 md:col-span-2 flex items-center text-xs text-on-surface-variant font-medium">
-                        {l.source}
-                      </td>
-                      <td className="col-span-1 md:col-span-2 flex items-center justify-end gap-1 text-right">
-                        <Link 
-                          to={`/leads/${l._id}`} 
-                          className="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors"
-                        >
-                          <Eye size={15} />
-                        </Link>
-                        <button 
-                          onClick={() => openEdit(l)} 
-                          className="p-1.5 text-on-surface-variant hover:text-primary rounded-lg hover:bg-surface-container transition-colors"
-                        >
-                          <Edit2 size={15} />
-                        </button>
-                        {user?.role === 'admin' && (
-                          <button 
-                            onClick={() => handleDelete(l._id)} 
-                            className="p-1.5 text-on-surface-variant hover:text-error rounded-lg hover:bg-error-container transition-colors"
-                          >
-                            <Trash2 size={15} />
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      <Link 
+                        to={`/leads/${l._id}`}
+                        className="border-2 border-on-surface py-2 text-center text-[10px] font-bold uppercase hover:bg-on-surface hover:text-white transition-all flex items-center justify-center"
+                      >
+                        Details
+                      </Link>
+                      <button 
+                        onClick={() => openEdit(l)}
+                        className="bg-on-surface text-white py-2 text-[10px] font-bold uppercase hover:bg-primary hover:border-primary transition-all flex items-center justify-center"
+                      >
+                        Update
+                      </button>
+                    </div>
+
+                    {user?.role === 'admin' && (
+                      <button 
+                        onClick={() => handleDelete(l._id)}
+                        className="w-full border border-error/20 text-error hover:bg-error-container hover:border-error-container py-1.5 text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1"
+                      >
+                        <span className="material-symbols-outlined text-xs">delete</span>
+                        Remove Lead
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </section>
 
       {/* Modal Dialog Form */}

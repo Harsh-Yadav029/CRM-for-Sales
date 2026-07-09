@@ -5,23 +5,27 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background-color: #f0f2f5;
-  color: #1a1a2e;
+  background-color: #f9f9f9;
+  color: #1a1c1c;
   font-family: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
+  background-image: 
+    linear-gradient(to right, #eeeeee 1px, transparent 1px),
+    linear-gradient(to bottom, #eeeeee 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #f0f2f5; }
-::-webkit-scrollbar-thumb { background: #c1c7d0; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #a5adba; }
+::-webkit-scrollbar-track { background: #f9f9f9; }
+::-webkit-scrollbar-thumb { background: #dadada; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #bfbebe; }
 
-::selection { background: #d0e2ff; color: #0043ce; }
+::selection { background: #ffe08c; color: #241a00; }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: #004ac6 !important;
-  box-shadow: 0 0 0 3px rgba(0, 74, 198, 0.12);
+  border-color: #745b00 !important;
+  box-shadow: 0 0 0 3px rgba(116, 91, 0, 0.15);
 }
 
 .material-symbols-outlined {
@@ -33,12 +37,27 @@ input:focus, select:focus, textarea:focus {
 .glass-card {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(195, 198, 215, 0.5);
+  border: 1px solid rgba(209, 197, 173, 0.6);
 }
 
 .glass-effect {
-  background: rgba(248, 249, 255, 0.8);
+  background: rgba(249, 249, 249, 0.8);
   backdrop-filter: blur(12px);
+}
+
+.blueprint-bg {
+  background-image: 
+    linear-gradient(to right, #eeeeee 1px, transparent 1px),
+    linear-gradient(to bottom, #eeeeee 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.block-shadow {
+  box-shadow: 4px 4px 0px 0px #745b00;
+}
+
+.block-shadow-black {
+  box-shadow: 4px 4px 0px 0px #1a1c1c;
 }
 
 .hide-scrollbar::-webkit-scrollbar {

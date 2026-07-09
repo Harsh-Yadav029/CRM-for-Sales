@@ -93,10 +93,10 @@ const Login = () => {
       <main className="relative z-10 w-full max-w-md flex flex-col items-center">
         {/* Branding Section */}
         <header className="mb-8 flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-primary rounded-xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
-            <span className="material-symbols-outlined text-white text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>insights</span>
+          <div className="w-20 h-20 bg-white border border-outline-variant rounded-2xl flex items-center justify-center mb-4 shadow-sm overflow-hidden">
+            <img src="/logo.png" alt="Walk The Plan Logo" className="w-16 h-16 object-contain" />
           </div>
-          <h1 className="text-2xl font-bold text-on-surface tracking-tight" style={{ lineHeight: '32px' }}>LeadStack CRM</h1>
+          <h1 className="text-2xl font-bold text-on-surface tracking-tight" style={{ lineHeight: '32px' }}>Walk The Plan CRM</h1>
           <p className="text-xs text-on-surface-variant mt-1">Empowering high-velocity sales teams</p>
         </header>
 

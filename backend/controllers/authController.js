@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Tenant = require('../models/Tenant');
+const Invite = require('../models/Invite');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -9,7 +10,7 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res, next) => {
-  const { name, email, password, role, tenantName } = req.body;
+  const { name, email, password, role, tenantName, token } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -21,8 +22,24 @@ const registerUser = async (req, res, next) => {
     const userCount = await User.countDocuments({});
     let tenantId;
     let assignedRole = 'rep';
+    let inviteReportsTo = null;
 
-    if (userCount === 0) {
+    if (token) {
+      // Validate invite token
+      const invite = await Invite.findOne({ token, status: 'pending' });
+      if (!invite || invite.expiresAt < new Date()) {
+        res.status(400);
+        return next(new Error('Invitation token is invalid or has expired'));
+      }
+      
+      tenantId = invite.tenantId;
+      assignedRole = invite.role;
+      inviteReportsTo = invite.reportsTo;
+      
+      // Update invite status
+      invite.status = 'accepted';
+      await invite.save();
+    } else if (userCount === 0) {
       // First user is automatically system administrator and creates a root tenant
       const defaultTenantName = tenantName || 'Default Organization';
       const emailDomain = email.split('@')[1] || '';
@@ -78,7 +95,8 @@ const registerUser = async (req, res, next) => {
       email,
       password,
       role: assignedRole,
-      tenantId
+      tenantId,
+      reportsTo: inviteReportsTo
     });
 
     res.status(201).json({

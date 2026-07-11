@@ -16,9 +16,22 @@ const app = express();
 app.use(helmet());
 app.use(mongoSanitize());
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps or curl) and dev environments
+      if (!origin || allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true
   })
 );
@@ -43,6 +56,16 @@ app.use('/api/communication', require('./routes/communicationRoutes'));
 app.use('/api/custom-fields', require('./routes/customFieldRoutes'));
 app.use('/api/workflows', require('./routes/workflowRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
+
+app.get('/api/health', (req, res) => {
+  const mongoose = require('mongoose');
+  res.json({
+    status: 'UP',
+    timestamp: new Date(),
+    database: mongoose.connection.readyState === 1 ? 'CONNECTED' : 'DISCONNECTED',
+    memory: process.memoryUsage()
+  });
+});
 
 app.get('/', (req, res) => {
   res.json({ message: 'Sales CRM API is running' });

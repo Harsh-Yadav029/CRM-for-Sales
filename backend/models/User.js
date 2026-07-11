@@ -3,6 +3,11 @@ const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema(
   {
+    tenantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: false // Allow root system admin creation without a tenant, but enforce on signups
+    },
     name: {
       type: String,
       required: true,
@@ -21,8 +26,16 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'sales'],
-      default: 'sales'
+      enum: ['admin', 'manager', 'rep'],
+      default: 'rep'
+    },
+    loginAttempts: {
+      type: Number,
+      default: 0
+    },
+    lockUntil: {
+      type: Date,
+      default: null
     }
   },
   {

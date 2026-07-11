@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Tenant = require('../models/Tenant');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -8,14 +9,9 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res, next) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role, tenantName } = req.body;
 
   try {
-    if (!name || !email || !password) {
-      res.status(400);
-      return next(new Error('Please provide all required fields'));
-    }
-
     const userExists = await User.findOne({ email });
     if (userExists) {
       res.status(400);
@@ -23,29 +19,57 @@ const registerUser = async (req, res, next) => {
     }
 
     const userCount = await User.countDocuments({});
-    
-    let assignedRole = 'sales';
+    let tenantId;
+    let assignedRole = 'rep';
+
     if (userCount === 0) {
+      // First user is automatically system administrator and creates a root tenant
+      const defaultTenantName = tenantName || 'Default Organization';
+      const emailDomain = email.split('@')[1] || '';
+      
+      const tenant = await Tenant.create({
+        name: defaultTenantName,
+        domain: emailDomain,
+        subscriptionLevel: 'enterprise'
+      });
+      tenantId = tenant._id;
       assignedRole = 'admin';
     } else {
-      let token;
+      // For subsequent signups
+      let adminToken;
       if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
-          token = req.headers.authorization.split(' ')[1];
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          adminToken = req.headers.authorization.split(' ')[1];
+          const decoded = jwt.verify(adminToken, process.env.JWT_SECRET);
           const requestor = await User.findById(decoded.id);
+          
           if (!requestor || requestor.role !== 'admin') {
             res.status(403);
             return next(new Error('Only system administrators can register new accounts'));
           }
-          assignedRole = (role && ['admin', 'sales'].includes(role)) ? role : 'sales';
+          
+          tenantId = requestor.tenantId;
+          assignedRole = (role && ['admin', 'manager', 'rep'].includes(role)) ? role : 'rep';
         } catch (err) {
           res.status(401);
           return next(new Error('Not authorized, admin token validation failed'));
         }
       } else {
-        res.status(401);
-        return next(new Error('Not authorized, no admin token provided'));
+        // Self-serve domain lookup or manual registration
+        const emailDomain = email.split('@')[1] || '';
+        let matchingTenant = await Tenant.findOne({ domain: emailDomain });
+        
+        if (matchingTenant) {
+          tenantId = matchingTenant._id;
+        } else {
+          const finalTenantName = tenantName || `${emailDomain.split('.')[0].toUpperCase()} Organization`;
+          const newTenant = await Tenant.create({
+            name: finalTenantName,
+            domain: emailDomain
+          });
+          tenantId = newTenant._id;
+          assignedRole = 'admin'; // First user of a new tenant is the admin
+        }
       }
     }
 
@@ -53,7 +77,8 @@ const registerUser = async (req, res, next) => {
       name,
       email,
       password,
-      role: assignedRole
+      role: assignedRole,
+      tenantId
     });
 
     res.status(201).json({
@@ -61,6 +86,7 @@ const registerUser = async (req, res, next) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      tenantId: user.tenantId,
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -72,26 +98,103 @@ const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    if (!email || !password) {
-      res.status(400);
-      return next(new Error('Please provide email and password'));
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(401);
+      return next(new Error('Invalid email or password'));
     }
 
-    const user = await User.findOne({ email });
-    if (user && (await user.matchPassword(password))) {
+    // Lockout check
+    if (user.lockUntil && user.lockUntil > Date.now()) {
+      res.status(403);
+      const remainingMinutes = Math.ceil((user.lockUntil - Date.now()) / (60 * 1000));
+      return next(new Error(`Account is temporarily locked. Please try again in ${remainingMinutes} minutes.`));
+    }
+
+    if (await user.matchPassword(password)) {
+      // Reset lockout values on success
+      user.loginAttempts = 0;
+      user.lockUntil = null;
+      await user.save();
+
       res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
+        tenantId: user.tenantId,
         token: generateToken(user._id)
       });
     } else {
+      // Increment login attempts
+      user.loginAttempts += 1;
+      if (user.loginAttempts >= 5) {
+        user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes lock
+        user.loginAttempts = 0;
+        await user.save();
+        res.status(403);
+        return next(new Error('Account locked due to 5 consecutive failed attempts. Try again in 15 minutes.'));
+      }
+      await user.save();
       res.status(401);
       next(new Error('Invalid email or password'));
     }
   } catch (error) {
     next(error);
+  }
+};
+
+const forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      // For security, don't reveal if user does not exist
+      return res.json({ message: 'If that email address exists, reset instructions have been logged to the server.' });
+    }
+
+    // Generate a stateless 1-hour reset token containing email
+    const resetToken = jwt.sign({ email: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Simulate sending email by logging in server console
+    console.log('\n--- [SIMULATED MAILER LOG] ---');
+    console.log(`To: ${user.email}`);
+    console.log('Subject: Password Reset Request');
+    console.log(`Link: http://localhost:5173/reset-password?token=${resetToken}`);
+    console.log('------------------------------\n');
+
+    res.json({ 
+      message: 'If that email address exists, reset instructions have been logged to the server.',
+      token: resetToken // Expose in response for simplified local development/testing
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const resetPassword = async (req, res, next) => {
+  const { token, password } = req.body;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findOne({ email: decoded.email });
+    
+    if (!user) {
+      res.status(404);
+      return next(new Error('User not found'));
+    }
+
+    // Update password (triggers hashing middleware)
+    user.password = password;
+    user.loginAttempts = 0;
+    user.lockUntil = null;
+    await user.save();
+
+    res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(400);
+    next(new Error('Password reset token is invalid or has expired'));
   }
 };
 
@@ -111,7 +214,8 @@ const getUserProfile = async (req, res, next) => {
 
 const getSalespeople = async (req, res, next) => {
   try {
-    const salespeople = await User.find({ role: 'sales' }).select('name email');
+    // Return all users belonging to this tenant, excluding admin
+    const salespeople = await User.find({ tenantId: req.tenantId }).select('name email role');
     res.json(salespeople);
   } catch (error) {
     next(error);
@@ -129,7 +233,6 @@ const googleLogin = async (req, res, next) => {
 
     let email, name;
     
-    // Check if token is mock for local tests, otherwise attempt real Firebase Admin verification
     if (idToken.startsWith('mock_')) {
       email = req.body.email || 'google-test@company.com';
       name = req.body.name || 'Google Test User';
@@ -141,13 +244,11 @@ const googleLogin = async (req, res, next) => {
           email = decodedToken.email;
           name = decodedToken.name || decodedToken.email.split('@')[0];
         } else {
-          const jwt = require('jsonwebtoken');
           const decoded = jwt.decode(idToken);
           email = decoded?.email || 'google-user@company.com';
           name = decoded?.name || 'Google User';
         }
       } catch (err) {
-        const jwt = require('jsonwebtoken');
         const decoded = jwt.decode(idToken);
         email = decoded?.email || 'google-user@company.com';
         name = decoded?.name || 'Google User';
@@ -156,12 +257,28 @@ const googleLogin = async (req, res, next) => {
 
     let user = await User.findOne({ email });
     if (!user) {
-      const userCount = await User.countDocuments({});
+      const emailDomain = email.split('@')[1] || '';
+      let tenantId;
+      let assignedRole = 'rep';
+
+      let matchingTenant = await Tenant.findOne({ domain: emailDomain });
+      if (matchingTenant) {
+        tenantId = matchingTenant._id;
+      } else {
+        const newTenant = await Tenant.create({
+          name: `${emailDomain.split('.')[0].toUpperCase()} Org`,
+          domain: emailDomain
+        });
+        tenantId = newTenant._id;
+        assignedRole = 'admin';
+      }
+
       user = await User.create({
         name,
         email,
         password: require('crypto').randomBytes(16).toString('hex'),
-        role: userCount === 0 ? 'admin' : 'sales'
+        role: assignedRole,
+        tenantId
       });
     }
 
@@ -170,6 +287,7 @@ const googleLogin = async (req, res, next) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      tenantId: user.tenantId,
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -233,12 +351,28 @@ const linkedinLogin = async (req, res, next) => {
 
     let user = await User.findOne({ email });
     if (!user) {
-      const userCount = await User.countDocuments({});
+      const emailDomain = email.split('@')[1] || '';
+      let tenantId;
+      let assignedRole = 'rep';
+
+      let matchingTenant = await Tenant.findOne({ domain: emailDomain });
+      if (matchingTenant) {
+        tenantId = matchingTenant._id;
+      } else {
+        const newTenant = await Tenant.create({
+          name: `${emailDomain.split('.')[0].toUpperCase()} Org`,
+          domain: emailDomain
+        });
+        tenantId = newTenant._id;
+        assignedRole = 'admin';
+      }
+
       user = await User.create({
         name,
         email,
         password: require('crypto').randomBytes(16).toString('hex'),
-        role: userCount === 0 ? 'admin' : 'sales'
+        role: assignedRole,
+        tenantId
       });
     }
 
@@ -247,6 +381,7 @@ const linkedinLogin = async (req, res, next) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      tenantId: user.tenantId,
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -257,6 +392,8 @@ const linkedinLogin = async (req, res, next) => {
 module.exports = {
   registerUser,
   loginUser,
+  forgotPassword,
+  resetPassword,
   getUserProfile,
   getSalespeople,
   googleLogin,

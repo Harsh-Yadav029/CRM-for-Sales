@@ -36,6 +36,11 @@ const noteSchema = new mongoose.Schema(
 
 const leadSchema = new mongoose.Schema(
   {
+    tenantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: true
+    },
     name: {
       type: String,
       required: true,

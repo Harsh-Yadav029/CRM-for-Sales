@@ -1,8 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { sendEmail, logCall, getTwilioToken } = require('../controllers/communicationController');
+const { 
+  sendEmail, 
+  logCall, 
+  getTwilioToken,
+  nylasChallenge,
+  nylasWebhook,
+  twilioWebhook 
+} = require('../controllers/communicationController');
 const { protect } = require('../middleware/authMiddleware');
 
+// Public Webhook routes (called by Nylas & Twilio servers directly, bypassing JWT checks)
+router.get('/webhooks/nylas', nylasChallenge);
+router.post('/webhooks/nylas', nylasWebhook);
+router.post('/webhooks/twilio', twilioWebhook);
+
+// Protected client-side routes (used by logged-in users session)
 router.use(protect);
 
 router.post('/email', sendEmail);

@@ -19,6 +19,7 @@
     "migrate-mongo": "^14.0.7",
     "mongodb": "^7.4.0",
     "mongoose": "^8.3.1",
+    "twilio": "^6.0.2",
     "winston": "^3.19.0",
     "zod": "^4.4.3"
   },

@@ -39,4 +39,19 @@ const companySchema = new mongoose.Schema(
   }
 );
 
+// Performance compound index
+companySchema.index({ tenantId: 1, name: 1 });
+
+// Full text search index
+companySchema.index({ 
+  name: 'text', 
+  industry: 'text' 
+}, {
+  weights: {
+    name: 10,
+    industry: 3
+  },
+  name: "CompanyTextIndex"
+});
+
 module.exports = mongoose.model('Company', companySchema);

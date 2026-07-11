@@ -7,12 +7,21 @@ let automationQueue = null;
 let useRedisFallback = true;
 let redisConnection = null;
 
+let warnedRedisFailed = false;
+
 try {
   // Test connection to Redis
   redisConnection = new IORedis(REDIS_URL, {
     maxRetriesPerRequest: null,
     enableReadyCheck: false,
-    connectTimeout: 2000 // fail fast if Redis is offline
+    connectTimeout: 2000, // fail fast if Redis is offline
+    retryStrategy(times) {
+      if (times > 3) {
+        // Stop attempting to reconnect after 3 attempts
+        return null; 
+      }
+      return Math.min(times * 200, 1000);
+    }
   });
 
   redisConnection.on('connect', () => {
@@ -22,12 +31,16 @@ try {
   });
 
   redisConnection.on('error', (err) => {
-    if (useRedisFallback) {
-      console.warn('Redis connection failed. Falling back to in-memory asynchronous worker...');
+    if (useRedisFallback && !warnedRedisFailed) {
+      console.warn('Redis connection failed. Falling back to in-memory asynchronous worker (bullmq bypassed)...');
+      warnedRedisFailed = true;
     }
   });
 } catch (e) {
-  console.warn('Redis connection could not be instantiated. Using local fallback.');
+  if (!warnedRedisFailed) {
+    console.warn('Redis connection could not be instantiated. Using local fallback.');
+    warnedRedisFailed = true;
+  }
 }
 
 function initializeBullMQ() {

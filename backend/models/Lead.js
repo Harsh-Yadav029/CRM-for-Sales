@@ -92,4 +92,25 @@ const leadSchema = new mongoose.Schema(
   }
 );
 
+// Performance compound indexes
+leadSchema.index({ tenantId: 1, createdAt: -1 });
+leadSchema.index({ tenantId: 1, status: 1 });
+leadSchema.index({ tenantId: 1, assignedTo: 1 });
+
+// Full text search index
+leadSchema.index({ 
+  name: 'text', 
+  company: 'text', 
+  email: 'text', 
+  phone: 'text' 
+}, {
+  weights: {
+    name: 10,
+    company: 5,
+    email: 3,
+    phone: 1
+  },
+  name: "LeadTextIndex"
+});
+
 module.exports = mongoose.model('Lead', leadSchema);

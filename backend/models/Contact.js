@@ -47,4 +47,22 @@ const contactSchema = new mongoose.Schema(
   }
 );
 
+// Performance compound index
+contactSchema.index({ tenantId: 1, companyId: 1 });
+contactSchema.index({ tenantId: 1, email: 1 });
+
+// Full text search index
+contactSchema.index({ 
+  firstName: 'text', 
+  lastName: 'text', 
+  email: 'text' 
+}, {
+  weights: {
+    lastName: 10,
+    firstName: 5,
+    email: 3
+  },
+  name: "ContactTextIndex"
+});
+
 module.exports = mongoose.model('Contact', contactSchema);

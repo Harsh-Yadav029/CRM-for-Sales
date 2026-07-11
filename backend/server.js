@@ -56,6 +56,11 @@ app.use('/api/communication', require('./routes/communicationRoutes'));
 app.use('/api/custom-fields', require('./routes/customFieldRoutes'));
 app.use('/api/workflows', require('./routes/workflowRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/companies', require('./routes/companyRoutes'));
+app.use('/api/contacts', require('./routes/contactRoutes'));
+app.use('/api/products', require('./routes/productRoutes'));
+app.use('/api/quotes', require('./routes/quoteRoutes'));
+app.use('/api/invoices', require('./routes/invoiceRoutes'));
 
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');

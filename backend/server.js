@@ -61,6 +61,10 @@ app.use('/api/contacts', require('./routes/contactRoutes'));
 app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/quotes', require('./routes/quoteRoutes'));
 app.use('/api/invoices', require('./routes/invoiceRoutes'));
+app.use('/api/pipelines', require('./routes/pipelineRoutes'));
+app.use('/api/assignment-rules', require('./routes/assignmentRuleRoutes'));
+app.use('/api/quotas', require('./routes/quotaRoutes'));
+app.use('/api/blueprints', require('./routes/blueprintRoutes'));
 
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');

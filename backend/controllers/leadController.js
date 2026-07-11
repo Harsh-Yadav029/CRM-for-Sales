@@ -1,24 +1,30 @@
 const Lead = require('../models/Lead');
 const User = require('../models/User');
+const { buildLeadSharingQuery } = require('../utils/sharingRules');
+const { assignLeadToRepresentative } = require('../utils/assignmentEngine');
+const { validateBlueprintTransition } = require('../utils/blueprintEngine');
+const { enqueueAutomationJob } = require('../utils/automationQueue');
 
 const getLeads = async (req, res, next) => {
   try {
-    const query = {};
+    const baseQuery = await buildLeadSharingQuery(req);
+    const query = { ...baseQuery };
 
-    if (req.user.role === 'sales') {
-      query.assignedTo = req.user._id;
-    } else if (req.query.assignedTo) {
+    if (req.query.assignedTo) {
       query.assignedTo = req.query.assignedTo;
     }
 
     if (req.query.search) {
       const searchRegex = new RegExp(req.query.search, 'i');
-      query.$or = [
-        { name: searchRegex },
-        { company: searchRegex },
-        { email: searchRegex },
-        { phone: searchRegex }
-      ];
+      query.$and = query.$and || [];
+      query.$and.push({
+        $or: [
+          { name: searchRegex },
+          { company: searchRegex },
+          { email: searchRegex },
+          { phone: searchRegex }
+        ]
+      });
     }
 
     if (req.query.status) {
@@ -44,14 +50,10 @@ const createLead = async (req, res, next) => {
       return next(new Error('Please fill in name, company, email, and phone'));
     }
 
-    let finalAssignedTo = null;
-    if (req.user.role === 'sales') {
-      finalAssignedTo = req.user._id;
-    } else if (assignedTo) {
-      finalAssignedTo = assignedTo;
-    }
+    let finalAssignedTo = assignedTo || null;
 
-    const lead = await Lead.create({
+    const leadData = {
+      tenantId: req.tenantId,
       name,
       company,
       email,
@@ -62,10 +64,17 @@ const createLead = async (req, res, next) => {
       assignedTo: finalAssignedTo,
       customFields: req.body.customFields || {},
       notes: []
-    });
+    };
 
-    const { runAutomation } = require('../utils/automationEngine');
-    await runAutomation(lead, req.user._id);
+    if (!finalAssignedTo) {
+      const assignedId = await assignLeadToRepresentative(leadData);
+      leadData.assignedTo = assignedId || null;
+    }
+
+    const lead = await Lead.create(leadData);
+
+    // Enqueue automation task to run in background
+    await enqueueAutomationJob('RUN_AUTOMATION', { leadId: lead._id }, req.user._id);
 
     res.status(201).json(lead);
   } catch (error) {
@@ -75,18 +84,13 @@ const createLead = async (req, res, next) => {
 
 const getLeadById = async (req, res, next) => {
   try {
-    const lead = await Lead.findById(req.params.id)
+    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId })
       .populate('assignedTo', 'name email')
       .populate('notes.addedBy', 'name');
 
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
-    }
-
-    if (req.user.role === 'sales' && (!lead.assignedTo || lead.assignedTo._id.toString() !== req.user._id.toString())) {
-      res.status(403);
-      return next(new Error('Access denied to this lead'));
     }
 
     res.json(lead);
@@ -97,16 +101,20 @@ const getLeadById = async (req, res, next) => {
 
 const updateLead = async (req, res, next) => {
   try {
-    const lead = await Lead.findById(req.params.id);
+    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId });
 
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
     }
 
-    if (req.user.role === 'sales' && (!lead.assignedTo || lead.assignedTo.toString() !== req.user._id.toString())) {
-      res.status(403);
-      return next(new Error('Access denied to update this lead'));
+    // Blueprint Guided Transition Check
+    if (req.body.status !== undefined) {
+      const validation = await validateBlueprintTransition(lead, req.body.status, req.tenantId);
+      if (!validation.isValid) {
+        res.status(400);
+        return next(new Error(validation.message));
+      }
     }
 
     const fieldsToUpdate = ['name', 'company', 'email', 'phone', 'source', 'expectedRevenue'];
@@ -117,7 +125,7 @@ const updateLead = async (req, res, next) => {
       }
     });
 
-    if (req.user.role === 'admin' && req.body.assignedTo !== undefined) {
+    if (req.body.assignedTo !== undefined) {
       lead.assignedTo = req.body.assignedTo || null;
     }
 
@@ -130,8 +138,10 @@ const updateLead = async (req, res, next) => {
     }
 
     const updatedLead = await lead.save();
-    const { runAutomation } = require('../utils/automationEngine');
-    await runAutomation(updatedLead, req.user._id);
+    
+    // Enqueue automation task to run in background
+    await enqueueAutomationJob('RUN_AUTOMATION', { leadId: updatedLead._id }, req.user._id);
+    
     res.json(updatedLead);
   } catch (error) {
     next(error);
@@ -140,14 +150,13 @@ const updateLead = async (req, res, next) => {
 
 const deleteLead = async (req, res, next) => {
   try {
-    const lead = await Lead.findById(req.params.id);
+    const lead = await Lead.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
 
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
     }
 
-    await Lead.deleteOne({ _id: lead._id });
     res.json({ message: 'Lead removed successfully' });
   } catch (error) {
     next(error);
@@ -158,7 +167,7 @@ const assignLead = async (req, res, next) => {
   const { assignedTo } = req.body;
 
   try {
-    const lead = await Lead.findById(req.params.id);
+    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId });
 
     if (!lead) {
       res.status(404);
@@ -166,10 +175,10 @@ const assignLead = async (req, res, next) => {
     }
 
     if (assignedTo) {
-      const user = await User.findById(assignedTo);
+      const user = await User.findOne({ _id: assignedTo, tenantId: req.tenantId });
       if (!user) {
         res.status(400);
-        return next(new Error('Assigned user not found'));
+        return next(new Error('Assigned user not found in this organization'));
       }
     }
 
@@ -185,16 +194,11 @@ const updateLeadStatus = async (req, res, next) => {
   const { status } = req.body;
 
   try {
-    const lead = await Lead.findById(req.params.id);
+    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId });
 
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
-    }
-
-    if (req.user.role === 'sales' && (!lead.assignedTo || lead.assignedTo.toString() !== req.user._id.toString())) {
-      res.status(403);
-      return next(new Error('Access denied to update lead status'));
     }
 
     if (!status) {
@@ -202,10 +206,19 @@ const updateLeadStatus = async (req, res, next) => {
       return next(new Error('Status is required'));
     }
 
+    // Blueprint Guided Transition Check
+    const validation = await validateBlueprintTransition(lead, status, req.tenantId);
+    if (!validation.isValid) {
+      res.status(400);
+      return next(new Error(validation.message));
+    }
+
     lead.status = status;
     const updatedLead = await lead.save();
-    const { runAutomation } = require('../utils/automationEngine');
-    await runAutomation(updatedLead, req.user._id);
+    
+    // Enqueue automation task to run in background
+    await enqueueAutomationJob('RUN_AUTOMATION', { leadId: updatedLead._id }, req.user._id);
+
     res.json(updatedLead);
   } catch (error) {
     next(error);
@@ -216,16 +229,11 @@ const addLeadNote = async (req, res, next) => {
   const { text } = req.body;
 
   try {
-    const lead = await Lead.findById(req.params.id);
+    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId });
 
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
-    }
-
-    if (req.user.role === 'sales' && (!lead.assignedTo || lead.assignedTo.toString() !== req.user._id.toString())) {
-      res.status(403);
-      return next(new Error('Access denied to add notes'));
     }
 
     if (!text || text.trim() === '') {
@@ -269,14 +277,10 @@ const importLeads = async (req, res, next) => {
         continue;
       }
 
-      let finalAssignedTo = null;
-      if (req.user.role === 'sales') {
-        finalAssignedTo = req.user._id;
-      } else if (l.assignedTo) {
-        finalAssignedTo = l.assignedTo;
-      }
-
-      validLeads.push({
+      let finalAssignedTo = l.assignedTo || null;
+      
+      const leadData = {
+        tenantId: req.tenantId,
         name: l.name,
         company: l.company,
         email: l.email,
@@ -287,7 +291,14 @@ const importLeads = async (req, res, next) => {
         assignedTo: finalAssignedTo,
         customFields: l.customFields || {},
         notes: []
-      });
+      };
+
+      if (!finalAssignedTo) {
+        finalAssignedTo = await assignLeadToRepresentative(leadData);
+        leadData.assignedTo = finalAssignedTo;
+      }
+
+      validLeads.push(leadData);
     }
 
     if (validLeads.length === 0) {
@@ -300,9 +311,9 @@ const importLeads = async (req, res, next) => {
 
     const createdLeads = await Lead.insertMany(validLeads);
 
-    const { runAutomation } = require('../utils/automationEngine');
+    // Enqueue automations for all enqueued leads
     for (const createdLead of createdLeads) {
-      await runAutomation(createdLead, req.user._id);
+      await enqueueAutomationJob('RUN_AUTOMATION', { leadId: createdLead._id }, req.user._id);
     }
 
     res.status(201).json({

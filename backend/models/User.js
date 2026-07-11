@@ -36,6 +36,11 @@ const userSchema = new mongoose.Schema(
     lockUntil: {
       type: Date,
       default: null
+    },
+    reportsTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
     }
   },
   {

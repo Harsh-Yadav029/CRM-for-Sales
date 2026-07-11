@@ -36,6 +36,9 @@ app.use(
   })
 );
 
+// Stripe webhook requires raw body payload for cryptographic signature verification
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), require('./controllers/stripeController').handleWebhook);
+
 app.use(express.json());
 
 const apiLimiter = rateLimit({
@@ -70,6 +73,7 @@ app.use('/api/report-builder', require('./routes/reportBuilderRoutes'));
 app.use('/api/forecast', require('./routes/forecastRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/api/audits', require('./routes/auditRoutes'));
+app.use('/api/stripe', require('./routes/stripeRoutes'));
 
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');

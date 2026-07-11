@@ -10,6 +10,7 @@ const {
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 const { checkRole } = require('../middleware/rbacMiddleware');
+const { checkUserLimit } = require('../middleware/subscriptionMiddleware');
 
 router.use(protect);
 
@@ -20,7 +21,7 @@ router.route('/:id/status')
   .put(checkRole(['admin']), updateUserStatus);
 
 router.route('/invites')
-  .post(checkRole(['admin']), createInvite)
+  .post(checkUserLimit, checkRole(['admin']), createInvite)
   .get(checkRole(['admin', 'manager']), getInvites);
 
 router.route('/export-data')

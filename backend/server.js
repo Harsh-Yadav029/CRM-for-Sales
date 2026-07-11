@@ -66,6 +66,10 @@ app.use('/api/assignment-rules', require('./routes/assignmentRuleRoutes'));
 app.use('/api/quotas', require('./routes/quotaRoutes'));
 app.use('/api/blueprints', require('./routes/blueprintRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/report-builder', require('./routes/reportBuilderRoutes'));
+app.use('/api/forecast', require('./routes/forecastRoutes'));
+app.use('/api/ai', require('./routes/aiRoutes'));
+app.use('/api/audits', require('./routes/auditRoutes'));
 
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');

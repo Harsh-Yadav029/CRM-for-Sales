@@ -12,22 +12,23 @@ const {
   importLeads
 } = require('../controllers/leadController');
 const { protect, authorize } = require('../middleware/authMiddleware');
+const audit = require('../middleware/auditMiddleware');
 
 router.use(protect);
 
-router.post('/import', importLeads);
+router.post('/import', audit('Lead'), importLeads);
 
 router.route('/')
   .get(getLeads)
-  .post(createLead);
+  .post(audit('Lead'), createLead);
 
 router.route('/:id')
   .get(getLeadById)
-  .put(updateLead)
-  .delete(authorize('admin'), deleteLead);
+  .put(audit('Lead'), updateLead)
+  .delete(authorize('admin'), audit('Lead'), deleteLead);
 
-router.put('/:id/assign', authorize('admin'), assignLead);
-router.put('/:id/status', updateLeadStatus);
-router.post('/:id/notes', addLeadNote);
+router.put('/:id/assign', authorize('admin'), audit('Lead'), assignLead);
+router.put('/:id/status', audit('Lead'), updateLeadStatus);
+router.post('/:id/notes', audit('Lead'), addLeadNote);
 
 module.exports = router;

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import { Loader2 } from 'lucide-react';
@@ -9,10 +9,18 @@ import { auth, googleProvider } from '../firebase';
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (token) {
+      navigate(`/signup?token=${token}`, { replace: true });
+    }
+  }, [token, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -253,7 +261,7 @@ const Login = () => {
               <>
                 Bootstrap initial admin setup?{' '}
                 <button 
-                  onClick={() => setIsRegister(true)} 
+                  onClick={() => navigate('/signup')} 
                   className="text-primary font-semibold hover:underline"
                 >
                   Create Admin Account

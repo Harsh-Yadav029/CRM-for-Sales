@@ -4,6 +4,7 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
 import QuotaWidget from '../components/QuotaWidget';
+import AIChatDrawer from '../components/AIChatDrawer';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
   const [wizard, setWizard] = useState(true);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const fetchStats = async () => {
     try {
@@ -309,6 +311,17 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Floating Zia AI Chat Trigger Button */}
+      <button
+        onClick={() => setAiOpen(true)}
+        className="fixed bottom-20 md:bottom-6 right-6 h-12 w-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shadow-2xl transition-all hover:scale-110 z-40 border border-amber-600/30"
+        title="Consult Zia AI"
+      >
+        <span className="material-symbols-outlined text-[24px]">smart_toy</span>
+      </button>
+
+      <AIChatDrawer isOpen={aiOpen} onClose={() => setAiOpen(false)} />
     </div>
   );
 };

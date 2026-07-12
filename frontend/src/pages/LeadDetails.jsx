@@ -7,6 +7,7 @@ import Timeline from '../components/Timeline';
 import EmailComposer from '../components/EmailComposer';
 import CallWidget from '../components/CallWidget';
 import MessageComposer from '../components/MessageComposer';
+import AIChatDrawer from '../components/AIChatDrawer';
 
 const STAGES = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'];
 
@@ -32,6 +33,7 @@ const LeadDetails = () => {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showCallModal, setShowCallModal] = useState(false);
   const [showSMSModal, setShowSMSModal] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
 
   const fetchLead = async () => {
     try {
@@ -457,6 +459,17 @@ const LeadDetails = () => {
           }}
         />
       )}
+
+      {/* Floating Zia AI Chat Trigger Button */}
+      <button
+        onClick={() => setAiOpen(true)}
+        className="fixed bottom-20 md:bottom-6 right-6 h-12 w-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shadow-2xl transition-all hover:scale-110 z-40 border border-amber-600/30"
+        title="Consult Zia AI"
+      >
+        <span className="material-symbols-outlined text-[24px]">smart_toy</span>
+      </button>
+
+      <AIChatDrawer isOpen={aiOpen} onClose={() => setAiOpen(false)} leadId={id} />
     </div>
   );
 };

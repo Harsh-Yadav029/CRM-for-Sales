@@ -219,8 +219,78 @@ Return your response strictly as JSON with keys: "action" (string) and "rational
   }
 };
 
+const chatWithAI = async (req, res, next) => {
+  const { message, leadId } = req.body;
+
+  try {
+    let leadContext = '';
+    if (leadId) {
+      const lead = await Lead.findOne({ _id: leadId, tenantId: req.tenantId });
+      if (lead) {
+        leadContext = `Lead Context:
+- Name: ${lead.name}
+- Company: ${lead.company}
+- Email: ${lead.email}
+- Status: ${lead.status}
+- Expected Value: $${lead.expectedRevenue}
+- Logged interactions count: ${lead.notes?.length || 0}
+`;
+      }
+    }
+
+    const prompt = `You are Zia, the AI sales assistant. Answer the sales representative's query below. Use the provided lead profile context if available.
+${leadContext}
+Representative Query: "${message}"
+
+Keep your response clean, professional, and directly actionable. Avoid meta-commentary.`;
+
+    const responseText = await callGemini(prompt);
+    if (responseText) {
+      return res.json({ response: responseText.trim(), mode: 'gemini_generative' });
+    }
+
+    // Heuristic Smart Fallbacks
+    let response = "I am Zia, your AI Sales Assistant. Let me know how I can help you analyze leads, draft messages, or review statuses.";
+    const queryLower = message.toLowerCase();
+    
+    if (leadId) {
+      const lead = await Lead.findOne({ _id: leadId, tenantId: req.tenantId });
+      if (lead) {
+        if (queryLower.includes('summar') || queryLower.includes('info') || queryLower.includes('about')) {
+          response = `Here is a summary for ${lead.name} representing ${lead.company}: The lead is currently in the "${lead.status}" stage, with an estimated deal value of ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(lead.expectedRevenue || 0)}. We have logged ${lead.notes?.length || 0} interactions on their timeline.`;
+        } else if (queryLower.includes('email') || queryLower.includes('write') || queryLower.includes('draft')) {
+          response = `Subject: Quick follow up: Walk the Plan CRM & ${lead.company}
+
+Dear ${lead.name},
+
+I hope you are having a productive week.
+
+I wanted to check in regarding our discussions. We are excited to support ${lead.company} in building your sales pipeline structure. Please let me know if you are free for a brief review call this week.
+
+Best regards,
+Sales Team`;
+        } else if (queryLower.includes('next') || queryLower.includes('action') || queryLower.includes('todo')) {
+          response = `Based on the active status "${lead.status}", we recommend scheduling a follow-up call to review recent timeline feedback and set a clear delivery task.`;
+        }
+      }
+    } else {
+      if (queryLower.includes('forecast') || queryLower.includes('pipeline') || queryLower.includes('revenue')) {
+        response = "Based on our latest analytics report, active pipelines are progressing steadily. We recommend focusing on high-revenue deals currently stuck in the Negotiation stages to close the month strong.";
+      }
+    }
+
+    res.json({
+      response,
+      mode: 'heuristic_fallback'
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   scoreLead,
   draftEmail,
-  getNextAction
+  getNextAction,
+  chatWithAI
 };

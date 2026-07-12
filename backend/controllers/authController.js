@@ -313,100 +313,6 @@ const googleLogin = async (req, res, next) => {
   }
 };
 
-const linkedinLogin = async (req, res, next) => {
-  const { code } = req.body;
-
-  try {
-    if (!code) {
-      res.status(400);
-      return next(new Error('LinkedIn Auth code is required'));
-    }
-
-    let email, name;
-
-    if (code.startsWith('mock_')) {
-      email = 'linkedin-test@company.com';
-      name = 'LinkedIn Test User';
-    } else {
-      const client_id = process.env.LINKEDIN_CLIENT_ID;
-      const client_secret = process.env.LINKEDIN_CLIENT_SECRET;
-      const redirect_uri = process.env.LINKEDIN_REDIRECT_URI || 'http://localhost:5173/login/callback';
-
-      const tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
-      const tokenParams = new URLSearchParams({
-        grant_type: 'authorization_code',
-        code,
-        redirect_uri,
-        client_id,
-        client_secret
-      });
-
-      const tokenRes = await fetch(tokenUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: tokenParams.toString()
-      });
-
-      const tokenData = await tokenRes.json();
-      if (!tokenRes.ok) {
-        throw new Error(tokenData.error_description || 'LinkedIn token exchange failed');
-      }
-
-      const accessToken = tokenData.access_token;
-
-      const profileRes = await fetch('https://api.linkedin.com/v2/userinfo', {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-
-      const profileData = await profileRes.json();
-      if (!profileRes.ok) {
-        throw new Error('Failed to retrieve LinkedIn user details');
-      }
-
-      name = profileData.name || `${profileData.given_name} ${profileData.family_name}`;
-      email = profileData.email;
-    }
-
-    let user = await User.findOne({ email });
-    if (!user) {
-      const emailDomain = email.split('@')[1] || '';
-      let tenantId;
-      let assignedRole = 'rep';
-
-      let matchingTenant = await Tenant.findOne({ domain: emailDomain });
-      if (matchingTenant) {
-        tenantId = matchingTenant._id;
-      } else {
-        const newTenant = await Tenant.create({
-          name: `${emailDomain.split('.')[0].toUpperCase()} Org`,
-          domain: emailDomain
-        });
-        tenantId = newTenant._id;
-        assignedRole = 'admin';
-      }
-
-      user = await User.create({
-        name,
-        email,
-        password: require('crypto').randomBytes(16).toString('hex'),
-        role: assignedRole,
-        tenantId
-      });
-    }
-
-    res.status(200).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      tenantId: user.tenantId,
-      token: generateToken(user._id)
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   registerUser,
   loginUser,
@@ -414,6 +320,5 @@ module.exports = {
   resetPassword,
   getUserProfile,
   getSalespeople,
-  googleLogin,
-  linkedinLogin
+  googleLogin
 };

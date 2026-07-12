@@ -7,8 +7,7 @@ const {
   resetPassword,
   getUserProfile, 
   getSalespeople, 
-  googleLogin, 
-  linkedinLogin 
+  googleLogin
 } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 const { checkRole } = require('../middleware/rbacMiddleware');
@@ -29,7 +28,6 @@ router.post('/login', validate(loginSchema), loginUser);
 router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
 router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
 router.post('/google-login', googleLogin);
-router.post('/linkedin-login', linkedinLogin);
 
 router.get('/profile', protect, getUserProfile);
 // Restrict to admins and managers of the tenant

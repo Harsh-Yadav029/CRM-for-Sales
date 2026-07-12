@@ -4,12 +4,6 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Loader2, Plus, Calendar, DollarSign, ArrowRightLeft, ShieldAlert } from 'lucide-react';
 
-const STAGE_COLUMNS = [
-  { id: 'discovery', title: 'Discovery', color: 'bg-on-surface', statuses: ['New', 'Contacted', 'Demo Scheduled'], defaultDropStatus: 'Contacted' },
-  { id: 'blueprint', title: 'Blueprint', color: 'bg-primary', statuses: ['Proposal Sent', 'Negotiation'], defaultDropStatus: 'Proposal Sent' },
-  { id: 'construction', title: 'Construction', color: 'bg-primary-container', statuses: ['Won', 'Lost'], defaultDropStatus: 'Won' }
-];
-
 const STAGE_WEIGHTS = {
   'New': 0.1,
   'Contacted': 0.2,
@@ -26,6 +20,9 @@ const Deals = () => {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+  
+  const [pipelines, setPipelines] = useState([]);
+  const [activePipelineId, setActivePipelineId] = useState('');
 
   const fetchLeads = async () => {
     try {
@@ -38,9 +35,51 @@ const Deals = () => {
     }
   };
 
+  const loadPipelines = () => {
+    const saved = localStorage.getItem('crm_pipelines_config');
+    const defaults = [
+      {
+        id: 'software',
+        name: 'Software Licensing Pipeline',
+        columns: [
+          { id: 'discovery', title: 'Discovery / Inquiry', color: 'bg-indigo-500', statuses: ['New', 'Contacted'], defaultDropStatus: 'New' },
+          { id: 'proposal', title: 'Proposal & Demo', color: 'bg-amber-500', statuses: ['Demo Scheduled', 'Proposal Sent'], defaultDropStatus: 'Demo Scheduled' },
+          { id: 'closing', title: 'Negotiations & Close', color: 'bg-emerald-500', statuses: ['Negotiation', 'Won', 'Lost'], defaultDropStatus: 'Negotiation' }
+        ]
+      },
+      {
+        id: 'consulting',
+        name: 'Enterprise Consulting Pipeline',
+        columns: [
+          { id: 'discovery', title: 'Client Analysis', color: 'bg-blue-500', statuses: ['New', 'Contacted'], defaultDropStatus: 'Contacted' },
+          { id: 'proposal', title: 'Solution SLA Proposal', color: 'bg-purple-500', statuses: ['Demo Scheduled', 'Proposal Sent', 'Negotiation'], defaultDropStatus: 'Proposal Sent' },
+          { id: 'closing', title: 'Final Contract Close', color: 'bg-emerald-500', statuses: ['Won', 'Lost'], defaultDropStatus: 'Won' }
+        ]
+      }
+    ];
+
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        setPipelines(parsed);
+        if (parsed.length > 0) setActivePipelineId(parsed[0].id);
+      } catch (_) {
+        setPipelines(defaults);
+        setActivePipelineId(defaults[0].id);
+      }
+    } else {
+      setPipelines(defaults);
+      setActivePipelineId(defaults[0].id);
+    }
+  };
+
   useEffect(() => {
     fetchLeads();
+    loadPipelines();
   }, []);
+
+  const activePipeline = pipelines.find(p => p.id === activePipelineId) || pipelines[0];
+  const stageColumns = activePipeline ? activePipeline.columns : [];
 
   const handleDragStart = (e, leadId) => {
     e.dataTransfer.setData('text/plain', leadId);
@@ -55,7 +94,7 @@ const Deals = () => {
     const leadId = e.dataTransfer.getData('text/plain');
     if (!leadId) return;
 
-    const column = STAGE_COLUMNS.find(c => c.id === columnId);
+    const column = stageColumns.find(c => c.id === columnId);
     if (!column) return;
 
     // Check if lead is already in this column
@@ -110,6 +149,25 @@ const Deals = () => {
           <div>
             <span className="text-[10px] font-bold uppercase text-primary tracking-widest block mb-1">Deal Pipeline</span>
             <h2 className="text-xl md:text-2xl uppercase font-black text-on-surface leading-tight">Current Portfolio</h2>
+            
+            {/* Pipeline Selector Switcher */}
+            {pipelines.length > 0 && (
+              <div className="flex items-center gap-2 mt-4 bg-slate-900/40 p-1 rounded-xl border border-slate-800/80 max-w-xs">
+                {pipelines.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => setActivePipelineId(p.id)}
+                    className={`flex-1 text-center py-1.5 px-3 rounded-lg text-[10px] font-bold uppercase transition-all tracking-wider ${
+                      activePipelineId === p.id 
+                        ? 'bg-amber-500 text-slate-950 shadow' 
+                        : 'text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {p.name.split(' ')[0]}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="bg-surface-container-lowest border-2 border-on-surface p-4 block-shadow flex flex-col items-end min-w-[240px]">
             <span className="text-[10px] font-bold uppercase text-on-surface-variant mb-0.5">Total Pipeline Value</span>
@@ -121,7 +179,7 @@ const Deals = () => {
       {/* Kanban Board Area */}
       <main className="flex-1 overflow-x-auto p-4 md:p-6 bg-surface-container-low custom-scroll">
         <div className="flex gap-6 h-full min-w-max pb-4">
-          {STAGE_COLUMNS.map(column => {
+          {stageColumns.map(column => {
             const columnLeads = leads.filter(l => column.statuses.includes(l.status));
             const columnValue = columnLeads.reduce((acc, l) => acc + (l.expectedRevenue || 0), 0);
 
@@ -135,7 +193,7 @@ const Deals = () => {
                 {/* Column Header */}
                 <div className="flex justify-between items-center mb-4 border-b-2 border-on-surface pb-2 shrink-0">
                   <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                    <span className={`w-2 h-2 ${column.color}`}></span>
+                    <span className={`w-2 h-2 rounded-full ${column.color}`}></span>
                     {column.title}
                   </h3>
                   <span className="text-[10px] font-bold bg-surface-container-high px-2 py-0.5 border border-outline-variant text-on-surface-variant uppercase">
@@ -166,16 +224,22 @@ const Deals = () => {
                             <div className="flex items-center gap-1">
                               {column.id !== 'discovery' && (
                                 <button
-                                  onClick={() => moveLead(lead._id, column.id === 'blueprint' ? 'Contacted' : 'Proposal Sent')}
+                                  onClick={() => {
+                                    const prevColIdx = stageColumns.findIndex(c => c.id === column.id) - 1;
+                                    if (prevColIdx >= 0) moveLead(lead._id, stageColumns[prevColIdx].defaultDropStatus);
+                                  }}
                                   title="Move Left"
                                   className="p-0.5 hover:bg-surface-container rounded text-on-surface-variant hover:text-primary transition-all"
                                 >
                                   <span className="material-symbols-outlined text-sm">arrow_back</span>
                                 </button>
                               )}
-                              {column.id !== 'construction' && (
+                              {column.id !== 'closing' && (
                                 <button
-                                  onClick={() => moveLead(lead._id, column.id === 'discovery' ? 'Proposal Sent' : 'Won')}
+                                  onClick={() => {
+                                    const nextColIdx = stageColumns.findIndex(c => c.id === column.id) + 1;
+                                    if (nextColIdx < stageColumns.length) moveLead(lead._id, stageColumns[nextColIdx].defaultDropStatus);
+                                  }}
                                   title="Move Right"
                                   className="p-0.5 hover:bg-surface-container rounded text-on-surface-variant hover:text-primary transition-all"
                                 >

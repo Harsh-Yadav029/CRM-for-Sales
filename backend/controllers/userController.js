@@ -28,17 +28,21 @@ const getUsers = async (req, res, next) => {
 // @route   PUT /api/users/:id/status
 // @access  Private (Admin only)
 const updateUserStatus = async (req, res, next) => {
-  const { isActive } = req.body;
+  const { isActive, role } = req.body;
 
   try {
-    if (req.params.id === req.user._id.toString()) {
+    if (req.params.id === req.user._id.toString() && isActive !== undefined) {
       res.status(400);
       return next(new Error('Cannot alter your own activation status'));
     }
 
+    const updates = {};
+    if (isActive !== undefined) updates.isActive = isActive;
+    if (role !== undefined) updates.role = role;
+
     const user = await User.findOneAndUpdate(
       { _id: req.params.id, tenantId: req.tenantId },
-      { isActive },
+      updates,
       { new: true, runValidators: true }
     ).select('-password');
 

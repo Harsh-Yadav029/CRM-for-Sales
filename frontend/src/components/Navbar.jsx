@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import GlobalSearch from './GlobalSearch';
 
 const Navbar = ({ title }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleShortcut = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleShortcut);
+    return () => window.removeEventListener('keydown', handleShortcut);
+  }, []);
 
   return (
     <header className="w-full h-16 sticky top-0 z-40 bg-surface border-b border-outline-variant flex items-center justify-between px-6 transition-all duration-200">
@@ -28,12 +41,16 @@ const Navbar = ({ title }) => {
       <div className="flex items-center gap-4">
         {/* Quick Search trigger */}
         <button 
-          onClick={() => navigate('/leads')}
-          className="w-9 h-9 flex items-center justify-center rounded-xl bg-surface-container-low text-primary hover:bg-surface-container hover:scale-105 active:scale-95 transition-all"
-          title="Search / Actions"
+          onClick={() => setIsSearchOpen(true)}
+          className="h-9 px-3 flex items-center justify-center gap-2 rounded-xl bg-surface-container-low text-primary hover:bg-surface-container hover:scale-105 active:scale-95 transition-all text-xs font-semibold"
+          title="Search (Ctrl+K)"
         >
           <span className="material-symbols-outlined text-[20px]">search</span>
+          <kbd className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-400 font-mono tracking-tighter">Ctrl+K</kbd>
         </button>
+
+        {/* Global Search Overlay */}
+        <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
         {/* Profile Avatar (Desktop only since it is already visible on Mobile menu/sidebar) */}
         <div className="hidden md:flex items-center gap-2">

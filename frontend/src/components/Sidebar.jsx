@@ -61,6 +61,26 @@ const Sidebar = () => {
                 <span className="material-symbols-outlined text-[18px]">assignment</span>
                 <span>Tasks</span>
               </NavLink>
+              <NavLink to="/accounts" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">store</span>
+                <span>Accounts</span>
+              </NavLink>
+              <NavLink to="/contacts" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">person</span>
+                <span>Contacts</span>
+              </NavLink>
+              <NavLink to="/products" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+                <span>Products</span>
+              </NavLink>
+              <NavLink to="/quotes" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">request_quote</span>
+                <span>Quotes</span>
+              </NavLink>
+              <NavLink to="/invoices" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                <span>Invoices</span>
+              </NavLink>
             </div>
           )}
         </div>

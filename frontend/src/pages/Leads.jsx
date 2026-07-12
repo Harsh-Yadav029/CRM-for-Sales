@@ -4,6 +4,7 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2, Edit2, Eye, X, Loader2 } from 'lucide-react';
 import ImportWizardModal from '../components/ImportWizardModal';
+import { CardSkeleton } from '../components/Skeletons';
 
 const STATUS = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'];
 const SOURCES = ['Website', 'Referral', 'Social Media', 'Cold Call', 'Email Campaign', 'Other'];
@@ -255,7 +256,13 @@ const Leads = () => {
 
       {/* Leads Grid Card Layout */}
       <section className="pb-12">
-        {leads.length === 0 ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        ) : leads.length === 0 ? (
           <div className="text-center py-16 border-2 border-dashed border-outline-variant text-xs text-on-surface-variant italic bg-white uppercase font-bold tracking-wide">
             No leads found matching criteria.
           </div>

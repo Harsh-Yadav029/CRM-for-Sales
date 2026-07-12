@@ -13,6 +13,11 @@ import Deals from './pages/Deals';
 import Tasks from './pages/Tasks';
 import Settings from './pages/Settings';
 import Reports from './pages/Reports';
+import Accounts from './pages/Accounts';
+import Contacts from './pages/Contacts';
+import Products from './pages/Products';
+import Quotes from './pages/Quotes';
+import Invoices from './pages/Invoices';
 import { Loader2 } from 'lucide-react';
 
 const ProtectedLayout = ({ children }) => {
@@ -35,7 +40,12 @@ const ProtectedLayout = ({ children }) => {
     '/deals': 'Deal Pipeline',
     '/tasks': 'Task Manager',
     '/settings': 'System Settings',
-    '/reports': 'Reports & Analytics'
+    '/reports': 'Reports & Analytics',
+    '/accounts': 'Accounts & Companies',
+    '/contacts': 'Contacts Directory',
+    '/products': 'Product Catalog',
+    '/quotes': 'Quotes & Proposals',
+    '/invoices': 'Invoice Ledger'
   };
   let title = titles[location.pathname] || 'Dashboard';
   if (location.pathname.startsWith('/leads/')) title = 'Lead Profile';
@@ -92,6 +102,11 @@ function App() {
           <Route path="/leads/:id" element={<ProtectedLayout><LeadDetails /></ProtectedLayout>} />
           <Route path="/deals" element={<ProtectedLayout><Deals /></ProtectedLayout>} />
           <Route path="/tasks" element={<ProtectedLayout><Tasks /></ProtectedLayout>} />
+          <Route path="/accounts" element={<ProtectedLayout><Accounts /></ProtectedLayout>} />
+          <Route path="/contacts" element={<ProtectedLayout><Contacts /></ProtectedLayout>} />
+          <Route path="/products" element={<ProtectedLayout><Products /></ProtectedLayout>} />
+          <Route path="/quotes" element={<ProtectedLayout><Quotes /></ProtectedLayout>} />
+          <Route path="/invoices" element={<ProtectedLayout><Invoices /></ProtectedLayout>} />
           <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
           <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
           <Route path="*" element={<Navigate to="/" replace />} />

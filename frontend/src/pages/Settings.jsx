@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
+import PipelineSettings from '../components/PipelineSettings';
+import BlueprintViewer from '../components/BlueprintViewer';
+import SecurityLogs from '../components/SecurityLogs';
+import RoleGate from '../components/RoleGate';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -39,8 +43,8 @@ const Settings = () => {
       const workflowResponse = await api.get('/api/workflows');
       setWorkflows(workflowResponse.data);
 
-      if (user?.role === 'admin') {
-        const teamResponse = await api.get('/api/auth/salespeople');
+      if (user?.role === 'admin' || user?.role === 'manager') {
+        const teamResponse = await api.get('/api/users');
         setSalespeople(teamResponse.data);
       }
     } catch (e) {
@@ -54,6 +58,15 @@ const Settings = () => {
     fetchSettingsData();
   }, [user]);
 
+  const handleUpdateTeammateStatus = async (id, isActive, role) => {
+    try {
+      const { data } = await api.put(`/api/users/${id}/status`, { isActive, role });
+      setSalespeople(prev => prev.map(s => s._id === id ? data : s));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to update user status');
+    }
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setRegLoading(true);
@@ -62,7 +75,7 @@ const Settings = () => {
       await api.post('/api/auth/register', regForm);
       setRegMsg('User created successfully');
       setRegForm({ name: '', email: '', password: '', role: 'sales' });
-      const teamResponse = await api.get('/api/auth/salespeople');
+      const teamResponse = await api.get('/api/users');
       setSalespeople(teamResponse.data);
     } catch (err) {
       setRegMsg(err.response?.data?.message || 'Registration failed');
@@ -425,6 +438,14 @@ const Settings = () => {
             </div>
           </div>
 
+          <PipelineSettings />
+
+          <BlueprintViewer />
+
+          <RoleGate allow={['admin']}>
+            <SecurityLogs />
+          </RoleGate>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Register New User Card */}
             <div className="bg-white rounded-xl border border-outline-variant p-5 shadow-sm flex flex-col justify-between">
@@ -523,7 +544,7 @@ const Settings = () => {
               ) : (
                 <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1 custom-scroll">
                   {salespeople.map((s) => (
-                    <div key={s._id} className="flex items-center justify-between p-3 bg-surface-container-low/40 rounded-xl border border-outline-variant/60">
+                    <div key={s._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-surface-container-low/40 rounded-xl border border-outline-variant/60 gap-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase shrink-0">
                           {s.name.slice(0, 2)}
@@ -533,9 +554,34 @@ const Settings = () => {
                           <span className="text-[10px] text-on-surface-variant truncate block">{s.email}</span>
                         </div>
                       </div>
-                      <span className="text-[10px] font-extrabold text-on-surface-variant bg-surface-container px-2.5 py-0.5 rounded-full border border-outline-variant/40 uppercase">
-                        {s.role}
-                      </span>
+
+                      <div className="flex items-center gap-3">
+                        {/* Edit Role Select */}
+                        <select
+                          className="rounded-lg border border-outline-variant bg-surface-container-lowest px-2 py-1 text-[10px] text-on-surface focus:outline-none disabled:opacity-75 font-semibold uppercase"
+                          value={s.role}
+                          disabled={user?.role !== 'admin' || s._id === user?._id}
+                          onChange={(e) => handleUpdateTeammateStatus(s._id, s.isActive, e.target.value)}
+                        >
+                          <option value="rep">Representative</option>
+                          <option value="manager">Manager</option>
+                          <option value="admin">Admin</option>
+                        </select>
+
+                        {/* Active/Inactive checkbox Toggle */}
+                        <label className="flex items-center gap-1 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            className="rounded border-outline-variant bg-surface-container-lowest text-primary h-3.5 w-3.5"
+                            checked={s.isActive !== false}
+                            disabled={user?.role !== 'admin' || s._id === user?._id}
+                            onChange={(e) => handleUpdateTeammateStatus(s._id, e.target.checked, s.role)}
+                          />
+                          <span className="text-[10px] text-on-surface-variant font-bold uppercase">
+                            {s.isActive !== false ? 'Active' : 'Locked'}
+                          </span>
+                        </label>
+                      </div>
                     </div>
                   ))}
                 </div>

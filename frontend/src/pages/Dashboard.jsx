@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Loader2 } from 'lucide-react';
+import QuotaWidget from '../components/QuotaWidget';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -269,37 +270,42 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Tasks Section */}
-        <div className="bg-surface-container-lowest border border-outline-variant p-6">
-          <div className="flex justify-between items-center mb-6 border-b border-outline-variant pb-3">
-            <h4 className="text-base uppercase font-black text-on-surface">Upcoming Tasks</h4>
-            <Link to="/tasks" className="text-primary font-bold text-xs uppercase hover:underline">View All</Link>
-          </div>
-          <div className="space-y-3">
-            {stats?.todaysTasks && stats.todaysTasks.length > 0 ? (
-              stats.todaysTasks.slice(0, 3).map((task) => (
-                <div
-                  key={task._id}
-                  onClick={() => navigate('/tasks')}
-                  className="p-4 border border-outline-variant hover:border-on-surface flex items-center justify-between group cursor-pointer transition-all bg-white"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 border border-outline-variant bg-surface-container-low flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-lg">call</span>
+        {/* Quota & Tasks Sidebar */}
+        <div className="space-y-6">
+          <QuotaWidget />
+
+          {/* Tasks Section */}
+          <div className="bg-surface-container-lowest border border-outline-variant p-6">
+            <div className="flex justify-between items-center mb-6 border-b border-outline-variant pb-3">
+              <h4 className="text-base uppercase font-black text-on-surface">Upcoming Tasks</h4>
+              <Link to="/tasks" className="text-primary font-bold text-xs uppercase hover:underline">View All</Link>
+            </div>
+            <div className="space-y-3">
+              {stats?.todaysTasks && stats.todaysTasks.length > 0 ? (
+                stats.todaysTasks.slice(0, 3).map((task) => (
+                  <div
+                    key={task._id}
+                    onClick={() => navigate('/tasks')}
+                    className="p-4 border border-outline-variant hover:border-on-surface flex items-center justify-between group cursor-pointer transition-all bg-white"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 border border-outline-variant bg-surface-container-low flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined text-lg">call</span>
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-xs text-on-surface group-hover:text-primary transition-colors truncate max-w-[140px]">{task.title}</h3>
+                        <p className="text-[10px] text-on-surface-variant font-medium">Due: {new Date(task.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-xs text-on-surface group-hover:text-primary transition-colors truncate max-w-[140px]">{task.title}</h3>
-                      <p className="text-[10px] text-on-surface-variant font-medium">Due: {new Date(task.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
-                    </div>
+                    <span className="material-symbols-outlined text-outline group-hover:text-primary transition-all">check_circle</span>
                   </div>
-                  <span className="material-symbols-outlined text-outline group-hover:text-primary transition-all">check_circle</span>
+                ))
+              ) : (
+                <div className="p-6 border border-outline-variant text-center text-xs text-on-surface-variant italic bg-white">
+                  No tasks scheduled for today.
                 </div>
-              ))
-            ) : (
-              <div className="p-6 border border-outline-variant text-center text-xs text-on-surface-variant italic bg-white">
-                No tasks scheduled for today.
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

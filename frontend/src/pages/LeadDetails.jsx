@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, X, Send, PhoneCall, PhoneOff } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
+import Timeline from '../components/Timeline';
+import EmailComposer from '../components/EmailComposer';
+import CallWidget from '../components/CallWidget';
+import MessageComposer from '../components/MessageComposer';
 
 const STAGES = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'];
 
@@ -25,17 +29,9 @@ const LeadDetails = () => {
   const [activeTab, setActiveTab] = useState('details'); // 'details' or 'history'
   const [copied, setCopied] = useState(false);
 
-  // Phase 1 Email Composer State
   const [showEmailModal, setShowEmailModal] = useState(false);
-  const [emailForm, setEmailForm] = useState({ subject: '', body: '' });
-  const [emailLoading, setEmailLoading] = useState(false);
-
-  // Phase 1 VoIP Call State
   const [showCallModal, setShowCallModal] = useState(false);
-  const [callStatus, setCallStatus] = useState('ringing'); // 'ringing', 'connected', 'ended'
-  const [callTimer, setCallTimer] = useState(0);
-  const [callNotes, setCallNotes] = useState('');
-  const timerRef = useRef(null);
+  const [showSMSModal, setShowSMSModal] = useState(false);
 
   const fetchLead = async () => {
     try {
@@ -69,21 +65,6 @@ const LeadDetails = () => {
     fetchCustomFields();
   }, [id]);
 
-  // Call simulation timers
-  useEffect(() => {
-    if (callStatus === 'connected') {
-      timerRef.current = setInterval(() => {
-        setCallTimer((prev) => prev + 1);
-      }, 1000);
-    } else {
-      if (timerRef.current) clearInterval(timerRef.current);
-    }
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [callStatus]);
-
   const updateStatus = async (status) => {
     try {
       await api.put(`/api/leads/${id}/status`, { status });
@@ -109,59 +90,6 @@ const LeadDetails = () => {
       setLead(data);
     } catch (e) {
       alert('Error adding note');
-    }
-  };
-
-  // Phase 1 Action: Email Composer Send
-  const handleSendEmail = async (e) => {
-    e.preventDefault();
-    if (!emailForm.subject.trim() || !emailForm.body.trim()) return;
-    setEmailLoading(true);
-    try {
-      const { data } = await api.post('/api/communication/email', {
-        leadId: lead._id,
-        subject: emailForm.subject,
-        body: emailForm.body
-      });
-      setShowEmailModal(false);
-      setEmailForm({ subject: '', body: '' });
-      setLead(data.lead);
-      setActiveTab('history');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Error dispatching email');
-    } finally {
-      setEmailLoading(false);
-    }
-  };
-
-  // Phase 1 Action: VoIP Calling Initiator
-  const startCall = () => {
-    setCallTimer(0);
-    setCallNotes('');
-    setCallStatus('ringing');
-    setShowCallModal(true);
-    
-    // Simulate auto-connecting after 2 seconds
-    setTimeout(() => {
-      setCallStatus('connected');
-    }, 2000);
-  };
-
-  const endCall = async () => {
-    setCallStatus('ended');
-    try {
-      const { data } = await api.post('/api/communication/call', {
-        leadId: lead._id,
-        duration: callTimer,
-        status: 'completed',
-        notes: callNotes.trim() || `Outbound VoIP call session to ${lead.phone}`
-      });
-      setLead(data.lead);
-      setActiveTab('history');
-    } catch (err) {
-      alert('Error logging call details');
-    } finally {
-      setShowCallModal(false);
     }
   };
 
@@ -206,6 +134,7 @@ const LeadDetails = () => {
         type: 'email',
         title: n.subject || 'Email Sent',
         desc: n.text,
+        status: n.status,
         user: n.addedBy?.name || 'System',
         date: new Date(n.createdAt),
         icon: 'mail'
@@ -214,10 +143,21 @@ const LeadDetails = () => {
       return {
         type: 'call',
         title: 'Outbound Call Logged',
-        desc: `${n.text} (${formatDuration(n.duration)} duration, Status: ${n.status})`,
+        desc: n.text,
+        duration: n.duration,
+        status: n.status,
         user: n.addedBy?.name || 'System',
         date: new Date(n.createdAt),
         icon: 'call'
+      };
+    } else if (n.text.includes('[Inbound SMS]') || n.text.includes('[Outbound SMS]')) {
+      return {
+        type: 'sms',
+        title: n.text.includes('[Inbound SMS]') ? 'Inbound SMS Received' : 'Outbound SMS Sent',
+        desc: n.text.replace(/\[Inbound SMS\]\s*|\[Outbound SMS\]\s*/g, ''),
+        user: n.addedBy?.name || 'System',
+        date: new Date(n.createdAt),
+        icon: 'chat'
       };
     } else {
       return {
@@ -241,13 +181,6 @@ const LeadDetails = () => {
   }));
 
   const sortedTimeline = [...notesTimeline, ...tasksTimeline].sort((a, b) => b.date - a.date);
-
-  const getTimelineBulletBg = (type) => {
-    if (type === 'call') return 'bg-secondary';
-    if (type === 'email') return 'bg-tertiary';
-    if (type === 'task') return 'bg-outline';
-    return 'bg-primary';
-  };
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
@@ -291,7 +224,7 @@ const LeadDetails = () => {
           
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={startCall}
+              onClick={() => setShowCallModal(true)}
               className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl font-bold text-xs shadow-sm transition-all"
             >
               <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>call</span>
@@ -305,7 +238,7 @@ const LeadDetails = () => {
               Send Email
             </button>
             <button
-              onClick={() => alert(`Initiating communication with ${lead.name}`)}
+              onClick={() => setShowSMSModal(true)}
               className="flex items-center gap-1.5 px-4 py-2 border border-outline-variant hover:bg-surface-container-low text-primary rounded-xl font-bold text-xs transition-all"
             >
               <span className="material-symbols-outlined text-sm">chat</span>
@@ -486,152 +419,43 @@ const LeadDetails = () => {
                 </div>
               </div>
             ) : (
-              /* History Timeline tab content */
-              <div className="space-y-6">
-                {sortedTimeline.length === 0 ? (
-                  <p className="text-xs text-on-surface-variant/70 italic text-center py-6">No historical actions logged for this lead.</p>
-                ) : (
-                  <div className="relative pl-6 border-l-2 border-outline-variant space-y-6">
-                    {sortedTimeline.map((item, idx) => (
-                      <div key={idx} className="relative">
-                        {/* Bullet indicator */}
-                        <div className={`absolute -left-[31px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white flex items-center justify-center text-white ${getTimelineBulletBg(item.type)}`}></div>
-                        
-                        <div className="bg-surface-container-low/30 p-3.5 rounded-xl border border-outline-variant/60">
-                          <div className="flex justify-between items-start">
-                            <span className="font-bold text-xs text-on-surface flex items-center gap-1.5">
-                              <span className="material-symbols-outlined text-xs">{item.icon}</span>
-                              {item.title}
-                            </span>
-                            <span className="text-[10px] text-on-surface-variant font-medium">
-                              {item.date.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          </div>
-                          <p className="text-xs text-on-surface-variant mt-1.5 leading-relaxed">{item.desc}</p>
-                          <span className="text-[9px] font-bold text-on-surface-variant/60 uppercase block mt-2">Action by: {item.user}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <Timeline timeline={sortedTimeline} />
             )}
           </div>
         </div>
       </div>
 
-      {/* Outgoing Email Composer Modal */}
       {showEmailModal && (
-        <div 
-          className="fixed inset-0 bg-on-background/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
-          onClick={() => setShowEmailModal(false)}
-        >
-          <div 
-            className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-outline-variant" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low">
-              <h3 className="font-bold text-sm md:text-base text-on-surface">Send Email to {lead.name}</h3>
-              <button 
-                onClick={() => setShowEmailModal(false)} 
-                className="text-on-surface-variant hover:text-on-surface"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleSendEmail} className="p-6 space-y-4">
-              <div>
-                <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Subject</label>
-                <input 
-                  value={emailForm.subject} 
-                  onChange={(e) => setEmailForm({ ...emailForm, subject: e.target.value })} 
-                  required 
-                  placeholder="E.g., NexaCore Core License Proposal"
-                  className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Email Body</label>
-                <textarea 
-                  value={emailForm.body} 
-                  onChange={(e) => setEmailForm({ ...emailForm, body: e.target.value })} 
-                  required 
-                  rows={6}
-                  placeholder="Type your email content here..."
-                  className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface outline-none resize-none"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/60">
-                <button 
-                  type="button" 
-                  onClick={() => setShowEmailModal(false)} 
-                  className="px-4 py-2 border border-outline-variant rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container-low"
-                >
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={emailLoading}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all disabled:opacity-60"
-                >
-                  {emailLoading ? <Loader2 className="animate-spin" size={13} /> : <Send size={13} />}
-                  Send Email
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <EmailComposer
+          lead={lead}
+          onClose={() => setShowEmailModal(false)}
+          onSuccess={(updatedLead) => {
+            setLead(updatedLead);
+            setActiveTab('history');
+          }}
+        />
       )}
 
-      {/* VoIP Call Simulator Modal */}
       {showCallModal && (
-        <div className="fixed inset-0 bg-on-background/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden border border-outline-variant p-6 text-center space-y-6">
-            <div className="flex flex-col items-center space-y-3">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-lg uppercase shadow-sm">
-                {lead.name.slice(0, 2)}
-              </div>
-              <div>
-                <h3 className="font-bold text-base text-on-surface">{lead.name}</h3>
-                <p className="text-xs text-on-surface-variant mt-0.5">{lead.phone}</p>
-              </div>
-            </div>
+        <CallWidget
+          lead={lead}
+          onClose={() => setShowCallModal(false)}
+          onSuccess={(updatedLead) => {
+            setLead(updatedLead);
+            setActiveTab('history');
+          }}
+        />
+      )}
 
-            <div className="py-4 bg-surface-container-low/40 rounded-xl border border-outline-variant/60 flex flex-col items-center justify-center space-y-2">
-              <span className={`text-[10px] font-extrabold uppercase tracking-wider ${callStatus === 'connected' ? 'text-secondary' : 'text-primary'}`}>
-                {callStatus === 'ringing' ? 'Ringing Simulator...' : 'Call Active'}
-              </span>
-              <span className="text-2xl font-extrabold text-on-surface font-mono">
-                {formatDuration(callTimer)}
-              </span>
-            </div>
-
-            {callStatus === 'connected' && (
-              <div className="text-left space-y-2">
-                <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider">Call Notes</label>
-                <textarea 
-                  value={callNotes}
-                  onChange={(e) => setCallNotes(e.target.value)}
-                  placeholder="Type important items discussed during the call..."
-                  rows={3}
-                  className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface outline-none resize-none"
-                />
-              </div>
-            )}
-
-            <div className="flex justify-center pt-2">
-              <button 
-                onClick={endCall}
-                className="w-14 h-14 bg-error hover:brightness-110 text-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-all"
-              >
-                <PhoneOff size={24} />
-              </button>
-            </div>
-          </div>
-        </div>
+      {showSMSModal && (
+        <MessageComposer
+          lead={lead}
+          onClose={() => setShowSMSModal(false)}
+          onSuccess={(updatedLead) => {
+            setLead(updatedLead);
+            setActiveTab('history');
+          }}
+        />
       )}
     </div>
   );

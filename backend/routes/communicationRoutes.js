@@ -3,6 +3,7 @@ const router = express.Router();
 const { 
   sendEmail, 
   logCall, 
+  sendSMS,
   getTwilioToken,
   nylasChallenge,
   nylasWebhook,
@@ -20,6 +21,7 @@ router.use(protect);
 
 router.post('/email', sendEmail);
 router.post('/call', logCall);
+router.post('/sms', sendSMS);
 router.get('/twilio-token', getTwilioToken);
 
 module.exports = router;

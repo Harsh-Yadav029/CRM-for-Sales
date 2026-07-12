@@ -249,9 +249,47 @@ const twilioWebhook = async (req, res, next) => {
   }
 };
 
+const sendSMS = async (req, res, next) => {
+  const { leadId, message } = req.body;
+
+  try {
+    const lead = await Lead.findById(leadId);
+    if (!lead) {
+      res.status(404);
+      return next(new Error('Lead not found'));
+    }
+
+    if (req.user.role === 'rep' && (!lead.assignedTo || lead.assignedTo.toString() !== req.user._id.toString())) {
+      res.status(403);
+      return next(new Error('Access denied'));
+    }
+
+    lead.notes.push({
+      type: 'note',
+      text: `[Outbound SMS] ${message}`,
+      status: 'completed',
+      addedBy: req.user._id
+    });
+
+    await lead.save();
+
+    const updatedLead = await Lead.findById(leadId)
+      .populate('assignedTo', 'name email')
+      .populate('notes.addedBy', 'name');
+
+    res.status(201).json({
+      message: 'SMS dispatched successfully (Simulated)',
+      lead: updatedLead
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   sendEmail,
   logCall,
+  sendSMS,
   getTwilioToken,
   nylasChallenge,
   nylasWebhook,

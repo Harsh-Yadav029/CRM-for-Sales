@@ -19,6 +19,8 @@ import Products from './pages/Products';
 import Quotes from './pages/Quotes';
 import Invoices from './pages/Invoices';
 import { Loader2 } from 'lucide-react';
+import BottomNav from './components/BottomNav';
+import RealtimeNotificationToast from './components/RealtimeNotificationToast';
 
 const ProtectedLayout = ({ children }) => {
   const { user, loading } = useAuth();
@@ -62,29 +64,11 @@ const ProtectedLayout = ({ children }) => {
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
 
+      {/* Realtime push alert system */}
+      <RealtimeNotificationToast />
+
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 py-2 bg-surface border-t border-outline-variant shadow-md">
-        <NavLink to="/" end className={({ isActive }) => `flex flex-col items-center justify-center px-4 py-1 transition-all ${isActive ? 'bg-secondary-container text-on-secondary-container rounded-full scale-95 font-semibold' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
-          <span className="font-label-md text-xs">Dashboard</span>
-        </NavLink>
-        <NavLink to="/leads" className={({ isActive }) => `flex flex-col items-center justify-center px-4 py-1 transition-all ${isActive ? 'bg-secondary-container text-on-secondary-container rounded-full scale-95 font-semibold' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined">group</span>
-          <span className="font-label-md text-xs">Leads</span>
-        </NavLink>
-        <NavLink to="/deals" className={({ isActive }) => `flex flex-col items-center justify-center px-4 py-1 transition-all ${isActive ? 'bg-secondary-container text-on-secondary-container rounded-full scale-95 font-semibold' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined">handshake</span>
-          <span className="font-label-md text-xs">Deals</span>
-        </NavLink>
-        <NavLink to="/reports" className={({ isActive }) => `flex flex-col items-center justify-center px-4 py-1 transition-all ${isActive ? 'bg-secondary-container text-on-secondary-container rounded-full scale-95 font-semibold' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined">bar_chart</span>
-          <span className="font-label-md text-xs">Reports</span>
-        </NavLink>
-        <NavLink to="/settings" className={({ isActive }) => `flex flex-col items-center justify-center px-4 py-1 transition-all ${isActive ? 'bg-secondary-container text-on-secondary-container rounded-full scale-95 font-semibold' : 'text-on-surface-variant'}`}>
-          <span className="material-symbols-outlined">settings</span>
-          <span className="font-label-md text-xs">Settings</span>
-        </NavLink>
-      </nav>
+      <BottomNav />
     </div>
   );
 };

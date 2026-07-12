@@ -91,6 +91,18 @@ const Sidebar = () => {
             <span className="material-symbols-outlined text-[18px]">settings</span>
             <span>Settings</span>
           </NavLink>
+          {user?.role === 'admin' && (
+            <>
+              <NavLink to="/developer-portal" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">terminal</span>
+                <span>Developer Portal</span>
+              </NavLink>
+              <NavLink to="/billing" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">credit_card</span>
+                <span>Billing & Plans</span>
+              </NavLink>
+            </>
+          )}
         </div>
       </nav>
 

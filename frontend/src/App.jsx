@@ -64,7 +64,7 @@ const ProtectedLayout = ({ children }) => {
       </div>
       
       <div className="flex-1 md:ml-60 flex flex-col min-h-screen pb-20 md:pb-0">
-        <Navbar title={title} />
+        {location.pathname !== '/deals' && <Navbar title={title} />}
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
 

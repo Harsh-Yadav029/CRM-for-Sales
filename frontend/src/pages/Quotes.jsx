@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Search, Plus, Trash2, Edit2, X, Loader2, FileText, Calendar, PlusCircle, Printer, CheckSquare } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, X, Loader2, FileText, Calendar, PlusCircle, Printer } from 'lucide-react';
 import RoleGate from '../components/RoleGate';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
+import Table from '../components/ui/Table';
+import Badge from '../components/ui/Badge';
+import EmptyState from '../components/ui/EmptyState';
 
 const Quotes = () => {
   const [quotes, setQuotes] = useState([]);
@@ -103,7 +110,6 @@ const Quotes = () => {
       const updated = [...prev.items];
       updated[idx][field] = val;
 
-      // Auto-populate price if product changes
       if (field === 'productId') {
         const matchingProduct = products.find(p => p._id === val);
         if (matchingProduct) {
@@ -145,7 +151,6 @@ const Quotes = () => {
     }
   };
 
-  // Calculate local total for form previews
   const calculateFormTotal = () => {
     return form.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   };
@@ -158,70 +163,72 @@ const Quotes = () => {
     }).format(v);
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 bg-paper font-sans">
       {/* Title & Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-on-surface tracking-tight">Quotes & Proposals</h2>
-          <p className="text-xs text-on-surface-variant">Generate pricing estimates and business proposals</p>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Estimates & Bids</span>
+          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Quotes & Proposals</h2>
+          <p className="text-xs text-slate-500 mt-1">Generate pricing estimates and business proposals</p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center justify-center gap-2 rounded-xl bg-gold hover:brightness-105 text-[#111111] px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10"
-        >
-          <Plus size={16} />
+        <Button onClick={handleOpenCreate} icon={Plus}>
           New Quotation
-        </button>
+        </Button>
       </div>
 
       {/* List Grid View */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-primary" size={32} />
+          <Loader2 className="animate-spin text-gold" size={28} />
         </div>
       ) : quotes.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl border border-dashed border-outline-variant/50 bg-white/10">
-          <FileText className="mx-auto h-10 w-10 text-slate-600" />
-          <h3 className="mt-4 text-sm font-bold text-on-surface">No Quotes Generated</h3>
-          <p className="mt-2 text-xs text-on-surface-variant">Create client quotes by adding service line items</p>
-        </div>
+        <EmptyState
+          title="No quotes generated yet"
+          description="Create client quotes by adding service line items."
+          action={
+            <Button onClick={handleOpenCreate} icon={Plus}>
+              Create First Quote
+            </Button>
+          }
+        />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {quotes.map((q) => (
-            <div
+            <Card
               key={q._id}
-              className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm hover:border-outline/80 transition-all flex flex-col justify-between"
+              variant="flat"
+              className="p-6 bg-white hover:border-gold/30 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <h3 className="text-sm font-bold text-on-surface leading-snug">{q.title}</h3>
-                    <p className="text-[10px] text-on-surface-variant font-semibold mt-1">
+                    <h3 className="text-sm font-display font-black text-ink uppercase tracking-tight leading-snug">{q.title}</h3>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">
                       Account: {q.companyId?.name || 'Linked Account'}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <button
                       onClick={() => {
                         setPreviewQuote(q);
                         setShowPreviewModal(true);
                       }}
-                      className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-slate-850"
+                      className="p-1.5 text-slate-400 hover:text-ink rounded hover:bg-gold-soft transition-all"
                       title="Preview Quote"
                     >
                       <Printer size={13} />
                     </button>
                     <button
                       onClick={() => handleOpenEdit(q)}
-                      className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-slate-850"
+                      className="p-1.5 text-slate-400 hover:text-ink rounded hover:bg-gold-soft transition-all"
                     >
                       <Edit2 size={13} />
                     </button>
                     <RoleGate allow={['admin', 'manager']}>
                       <button
                         onClick={() => handleDelete(q._id)}
-                        className="p-1.5 text-on-surface-variant hover:text-red-600 rounded-lg hover:bg-slate-850"
+                        className="p-1.5 text-slate-400 hover:text-danger rounded hover:bg-red-50 transition-all"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -229,134 +236,113 @@ const Quotes = () => {
                   </div>
                 </div>
 
-                {/* Line items preview count */}
-                <div className="mt-3 flex gap-2">
-                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
-                    q.status === 'accepted' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                    q.status === 'declined' ? 'bg-red-500/10 text-red-600 border border-red-500/20' :
-                    q.status === 'sent' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
-                    'bg-surface-container-high text-on-surface-variant border border-outline-variant'
-                  }`}>
+                <div className="mt-3 flex gap-2 select-none">
+                  <Badge variant={
+                    q.status === 'accepted' ? 'success' :
+                    q.status === 'declined' ? 'danger' :
+                    q.status === 'sent' ? 'gold' : 'neutral'
+                  }>
                     {q.status}
-                  </span>
-                  <span className="text-[10px] text-on-surface-variant flex items-center gap-1 font-medium">
-                    <Calendar className="h-3 w-3" />
+                  </Badge>
+                  <span className="text-[10px] text-slate-500 flex items-center gap-1 font-bold font-mono uppercase tracking-wider">
+                    <Calendar size={11} />
                     Valid till: {new Date(q.validUntil).toLocaleDateString()}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-5 border-t border-outline-variant/40/60 pt-3 flex items-center justify-between">
-                <span className="text-[11px] text-on-surface-variant">
-                  {q.items?.length || 0} line items configured
+              <div className="mt-5 border-t border-line pt-3 flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-slate-500">
+                <span>
+                  {q.items?.length || 0} line items
                 </span>
-                <span className="text-sm font-extrabold text-primary">
+                <span className="text-sm text-ink">
                   {fmt(q.total || 0)}
                 </span>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}
 
       {/* Create / Edit Overlay Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm overflow-y-auto" onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-4 backdrop-blur-xs overflow-y-auto" onClick={() => setShowModal(false)}>
           <div
-            className="w-full max-w-2xl rounded-2xl border border-outline-variant/50 bg-white shadow-card my-8 overflow-hidden"
+            className="w-full max-w-2xl rounded-modal border border-line bg-white shadow-modal my-8 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-outline-variant/40 bg-white/50 px-6 py-4">
-              <h3 className="text-sm md:text-base font-bold text-on-surface">
+            <div className="flex items-center justify-between border-b border-line bg-[#FAF9F6] px-6 py-4">
+              <h3 className="text-base font-display font-black text-ink uppercase tracking-tight">
                 {editing ? 'Modify Quotation Details' : 'Configure New Quotation'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-ink">
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scroll">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scroll font-sans">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Proposal / Quote Title *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Enterprise License Deal"
-                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Proposal Validity Date *</label>
-                  <input
-                    type="date"
-                    required
-                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    value={form.validUntil}
-                    onChange={(e) => setForm({ ...form, validUntil: e.target.value })}
-                  />
-                </div>
+                <Input
+                  label="Proposal / Quote Title *"
+                  id="quoteTitle"
+                  placeholder="e.g. Enterprise License Deal"
+                  required
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+                <Input
+                  label="Proposal Validity Date *"
+                  id="quoteValid"
+                  type="date"
+                  required
+                  value={form.validUntil}
+                  onChange={(e) => setForm({ ...form, validUntil: e.target.value })}
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Select Account (Company) *</label>
-                  <select
-                    required
-                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none"
-                    value={form.companyId}
-                    onChange={(e) => setForm({ ...form, companyId: e.target.value })}
-                  >
-                    <option value="">Choose organization...</option>
-                    {companies.map((c) => (
-                      <option key={c._id} value={c._id}>{c.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Primary Contact (Optional)</label>
-                  <select
-                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none"
-                    value={form.contactId}
-                    onChange={(e) => setForm({ ...form, contactId: e.target.value })}
-                  >
-                    <option value="">Choose contact...</option>
-                    {contacts.filter(c => c.companyId?._id === form.companyId || c.companyId === form.companyId).map((c) => (
-                      <option key={c._id} value={c._id}>{c.firstName} {c.lastName}</option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  label="Select Account (Company) *"
+                  id="quoteCompany"
+                  required
+                  placeholder="Choose organization..."
+                  value={form.companyId}
+                  onChange={(e) => setForm({ ...form, companyId: e.target.value })}
+                  options={companies.map(c => ({ value: c._id, label: c.name }))}
+                />
+                <Select
+                  label="Primary Contact (Optional)"
+                  id="quoteContact"
+                  placeholder="Choose contact..."
+                  value={form.contactId}
+                  onChange={(e) => setForm({ ...form, contactId: e.target.value })}
+                  options={contacts.filter(c => c.companyId?._id === form.companyId || c.companyId === form.companyId).map(c => ({ value: c._id, label: `${c.firstName} ${c.lastName}` }))}
+                />
               </div>
 
-              {/* Status Select */}
-              <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Quote Status</label>
-                <select
-                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none"
-                  value={form.status}
-                  onChange={(e) => setForm({ ...form, status: e.target.value })}
-                >
-                  <option value="draft">Draft</option>
-                  <option value="sent">Sent</option>
-                  <option value="accepted">Accepted</option>
-                  <option value="declined">Declined</option>
-                </select>
-              </div>
+              <Select
+                label="Quote Status"
+                id="quoteStatus"
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+                options={[
+                  { value: 'draft', label: 'Draft' },
+                  { value: 'sent', label: 'Sent' },
+                  { value: 'accepted', label: 'Accepted' },
+                  { value: 'declined', label: 'Declined' }
+                ]}
+              />
 
               {/* Line Items Builder Section */}
-              <div className="space-y-3 border-t border-outline-variant/40 pt-4">
+              <div className="space-y-3 border-t border-line pt-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider">Line Items Configuration</h4>
+                  <h4 className="text-xs font-display font-black text-ink uppercase tracking-wider">Line Items Configuration</h4>
                   <button
                     type="button"
                     onClick={handleAddItemRow}
-                    className="flex items-center gap-1 text-[10px] font-bold text-primary hover:text-primary"
+                    className="flex items-center gap-1 text-[10px] font-bold text-gold hover:underline uppercase tracking-wider font-mono"
                   >
-                    <PlusCircle size={14} />
+                    <PlusCircle size={13} />
                     Add Product Line
                   </button>
                 </div>
@@ -364,50 +350,44 @@ const Quotes = () => {
                 <div className="space-y-3">
                   {form.items.map((item, idx) => (
                     <div key={idx} className="flex gap-3 items-end">
-                      <div className="flex-1">
-                        <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Product SKU</label>
-                        <select
+                      <div className="flex-grow">
+                        <Select
+                          label="Product SKU"
+                          id={`prod_${idx}`}
                           required
-                          className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-2 py-2 text-xs text-on-surface focus:outline-none focus:border-amber-500"
+                          placeholder="Select product..."
                           value={item.productId}
                           onChange={(e) => handleItemChange(idx, 'productId', e.target.value)}
-                        >
-                          <option value="">Select product SKU...</option>
-                          {products.map((p) => (
-                            <option key={p._id} value={p._id}>{p.name} ({fmt(p.price)})</option>
-                          ))}
-                        </select>
+                          options={products.map(p => ({ value: p._id, label: `${p.name} (${fmt(p.price)})` }))}
+                        />
                       </div>
-
                       <div className="w-20">
-                        <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Qty</label>
-                        <input
+                        <Input
+                          label="Qty"
+                          id={`qty_${idx}`}
                           type="number"
                           required
                           min={1}
-                          className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-2 py-2 text-xs text-on-surface placeholder-slate-600 focus:border-amber-500 focus:outline-none"
                           value={item.quantity}
                           onChange={(e) => handleItemChange(idx, 'quantity', Number(e.target.value))}
                         />
                       </div>
-
                       <div className="w-28">
-                        <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Unit Price</label>
-                        <input
+                        <Input
+                          label="Unit Price"
+                          id={`price_${idx}`}
                           type="number"
                           required
                           min={0}
-                          className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-2 py-2 text-xs text-on-surface placeholder-slate-600 focus:border-amber-500 focus:outline-none"
                           value={item.price}
                           onChange={(e) => handleItemChange(idx, 'price', Number(e.target.value))}
                         />
                       </div>
-
                       <button
                         type="button"
                         disabled={form.items.length === 1}
                         onClick={() => handleRemoveItemRow(idx)}
-                        className="p-2 border border-outline-variant/50 text-on-surface-variant hover:text-red-600 rounded-lg disabled:opacity-30"
+                        className="p-3 border border-line text-slate-400 hover:text-danger rounded-input disabled:opacity-30 h-[38px] flex items-center justify-center shrink-0"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -416,134 +396,130 @@ const Quotes = () => {
                 </div>
               </div>
 
-              {/* Running summary totals */}
-              <div className="flex justify-between items-center bg-surface-container p-4 rounded-xl border border-outline-variant/50/80 mt-6">
-                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Estimated Total</span>
-                <span className="text-base font-extrabold text-primary">{fmt(calculateFormTotal())}</span>
+              <div className="flex justify-between items-center bg-[#FAF9F6] p-4 rounded-card border border-line mt-6 font-mono text-xs font-bold uppercase tracking-wider text-slate-500">
+                <span>Estimated Total</span>
+                <span className="text-sm text-ink">{fmt(calculateFormTotal())}</span>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/40">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-outline-variant/40 px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-high"
-                >
+              <div className="flex justify-end gap-3 pt-4 border-t border-line">
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-lg bg-gold px-4 py-2 text-xs font-bold text-[#111111] hover:brightness-105"
-                >
+                </Button>
+                <Button type="submit">
                   Save Proposal
-                </button>
+                </Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Quote Printable / PDF preview Modal Overlay */}
+      {/* Quote Printable document view Overlay */}
       {showPreviewModal && previewQuote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-container/70 p-4 backdrop-blur-sm overflow-y-auto" onClick={() => setShowPreviewModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-4 backdrop-blur-xs overflow-y-auto" onClick={() => setShowPreviewModal(false)}>
           <div
-            className="w-full max-w-2xl bg-white text-slate-900 rounded-2xl shadow-card p-8 overflow-hidden relative print:p-0 my-8 print:my-0"
+            className="w-full max-w-2xl bg-white border border-line text-ink rounded-modal shadow-modal p-8 overflow-hidden relative print:p-0 my-8 print:my-0"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Control buttons */}
+            {/* Controls */}
             <div className="absolute right-6 top-6 flex items-center gap-2 print:hidden">
               <button
                 onClick={() => window.print()}
-                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-all border border-slate-200"
+                className="flex items-center gap-1.5 px-3 py-2 bg-[#FAF9F6] hover:bg-gold-soft text-ink rounded-btn text-xs font-bold transition-all border border-line"
               >
                 <Printer size={13} />
                 Print / Save PDF
               </button>
               <button
                 onClick={() => setShowPreviewModal(false)}
-                className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg"
+                className="p-2 bg-[#FAF9F6] hover:bg-gold-soft border border-line text-ink rounded-btn"
               >
-                <X size={15} />
+                <X size={14} />
               </button>
             </div>
 
-            {/* Document Header */}
-            <div className="flex justify-between items-start border-b border-slate-200 pb-6 mt-6 print:mt-0">
+            {/* Document Treatment Header */}
+            <div className="flex justify-between items-start border-b border-line pb-6 mt-6 print:mt-0 font-sans">
               <div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-primary uppercase">QUOTATION PROPOSAL</h1>
-                <p className="text-xs text-on-surface-variant mt-1 font-mono">Reference ID: #{previewQuote._id.slice(-8).toUpperCase()}</p>
+                <h1 className="text-xl font-display font-black tracking-tight text-ink uppercase">QUOTATION PROPOSAL</h1>
+                <p className="text-[10px] text-slate-500 mt-1 font-mono font-bold">REFERENCE ID: #{previewQuote._id.slice(-8).toUpperCase()}</p>
               </div>
-              <div className="text-right text-xs space-y-1">
-                <h3 className="font-bold text-slate-800">Walk the Plan CRM</h3>
-                <p className="text-on-surface-variant">Corporate Sales Division</p>
-                <p className="text-on-surface-variant">Date: {new Date(previewQuote.createdAt).toLocaleDateString()}</p>
+              <div className="text-right text-[11px] space-y-1 font-mono font-bold text-slate-500 uppercase tracking-wide">
+                <h3 className="text-ink font-display font-black text-xs">Walk the Plan CRM</h3>
+                <p>Corporate Sales Division</p>
+                <p>Date: {new Date(previewQuote.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
 
             {/* Customer Details */}
-            <div className="grid grid-cols-2 gap-8 my-6 text-xs">
+            <div className="grid grid-cols-2 gap-8 my-6 text-xs font-sans">
               <div>
-                <h4 className="font-bold text-on-surface-variant uppercase tracking-wider mb-2">Prepared For:</h4>
-                <p className="font-bold text-slate-800">{previewQuote.companyId?.name}</p>
-                {previewQuote.companyId?.phone && <p className="text-on-surface-variant mt-0.5">{previewQuote.companyId.phone}</p>}
-                {previewQuote.companyId?.address && <p className="text-on-surface-variant mt-0.5">{previewQuote.companyId.address}</p>}
+                <h4 className="font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono text-[9px]">Prepared For:</h4>
+                <p className="font-bold text-ink">{previewQuote.companyId?.name}</p>
+                {previewQuote.companyId?.phone && <p className="text-slate-500 mt-0.5">{previewQuote.companyId.phone}</p>}
+                {previewQuote.companyId?.address && <p className="text-slate-500 mt-0.5">{previewQuote.companyId.address}</p>}
               </div>
 
               <div>
-                <h4 className="font-bold text-on-surface-variant uppercase tracking-wider mb-2">Quotation Status:</h4>
-                <div className="space-y-1 text-on-surface-variant">
-                  <p>Proposal Title: <span className="font-semibold text-slate-800">{previewQuote.title}</span></p>
-                  <p>Validity Period: <span className="font-semibold text-slate-800">{new Date(previewQuote.validUntil).toLocaleDateString()}</span></p>
-                  <p>Current Status: <span className="font-bold uppercase text-amber-600">{previewQuote.status}</span></p>
+                <h4 className="font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono text-[9px]">Quotation Details:</h4>
+                <div className="space-y-1 text-slate-500 font-medium">
+                  <p>Title: <span className="font-bold text-ink">{previewQuote.title}</span></p>
+                  <p>Validity: <span className="font-mono font-bold text-ink">{new Date(previewQuote.validUntil).toLocaleDateString()}</span></p>
+                  <p>Status: <span className="font-bold uppercase text-gold">{previewQuote.status}</span></p>
                 </div>
               </div>
             </div>
 
             {/* Line Items Table */}
-            <table className="w-full text-xs text-left border-collapse my-6">
+            <table className="w-full text-xs text-left border-collapse my-6 font-sans">
               <thead>
-                <tr className="border-b border-slate-200 bg-slate-50 text-on-surface-variant uppercase font-bold text-[10px]">
+                <tr className="border-b border-line bg-[#FAF9F6] text-slate-500 uppercase font-mono font-bold text-[9px]">
                   <th className="py-2.5 px-3">Product Name</th>
                   <th className="py-2.5 px-3 text-right">Qty</th>
                   <th className="py-2.5 px-3 text-right">Unit Price</th>
                   <th className="py-2.5 px-3 text-right">Subtotal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-line">
                 {previewQuote.items?.map((item, idx) => (
-                  <tr key={idx} className="text-slate-700">
+                  <tr key={idx} className="text-ink">
                     <td className="py-3 px-3">
                       <p className="font-bold">{item.productId?.name || 'Product Item'}</p>
-                      {item.productId?.sku && <p className="text-[10px] text-on-surface-variant font-mono mt-0.5">SKU: {item.productId.sku}</p>}
+                      {item.productId?.sku && <p className="text-[10px] text-slate-550 font-mono mt-0.5">SKU: {item.productId.sku}</p>}
                     </td>
-                    <td className="py-3 px-3 text-right font-semibold">{item.quantity}</td>
-                    <td className="py-3 px-3 text-right">{fmt(item.price)}</td>
-                    <td className="py-3 px-3 text-right font-bold text-slate-900">{fmt(item.price * item.quantity)}</td>
+                    <td className="py-3 px-3 text-right font-mono font-bold text-slate-600">{item.quantity}</td>
+                    <td className="py-3 px-3 text-right font-mono">{fmt(item.price)}</td>
+                    <td className="py-3 px-3 text-right font-mono font-bold text-ink">{fmt(item.price * item.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* Financial Summary */}
-            <div className="flex justify-end border-t border-slate-200 pt-6">
-              <div className="w-64 space-y-2 text-xs">
-                <div className="flex justify-between text-on-surface-variant font-semibold">
+            {/* Financial Summary with Thin Gold Rule */}
+            <div className="flex justify-end pt-6">
+              <div className="w-64 space-y-2 text-xs font-sans">
+                <div className="flex justify-between text-slate-500 font-bold uppercase tracking-wider font-mono text-[10px]">
                   <span>Gross Estimation:</span>
                   <span>{fmt(previewQuote.total)}</span>
                 </div>
-                <div className="flex justify-between text-on-surface-variant font-semibold">
+                <div className="flex justify-between text-slate-500 font-bold uppercase tracking-wider font-mono text-[10px]">
                   <span>Tax (0% GST):</span>
                   <span>{fmt(0)}</span>
                 </div>
-                <div className="flex justify-between border-t border-slate-200 pt-2 text-sm font-extrabold text-[#111111] bg-slate-50 p-2 rounded">
-                  <span>Final Quote Total:</span>
-                  <span>{fmt(previewQuote.total)}</span>
+                
+                {/* Thin gold rule above total */}
+                <div className="w-full h-px bg-gold my-2"></div>
+                
+                <div className="flex justify-between pt-2 text-xs font-bold uppercase tracking-wider font-mono text-ink bg-[#FAF9F6] p-2.5 rounded-btn border border-line">
+                  <span>Quote Total:</span>
+                  <span className="font-extrabold">{fmt(previewQuote.total)}</span>
                 </div>
               </div>
             </div>
 
-            {/* Terms and Signoff */}
-            <div className="border-t border-slate-200 pt-6 mt-8 text-[10px] text-on-surface-variant leading-relaxed">
-              <h4 className="font-bold text-slate-600 uppercase tracking-wider mb-1">Terms & Conditions</h4>
+            {/* Terms */}
+            <div className="border-t border-line pt-6 mt-8 text-[9px] text-slate-500 font-mono font-bold uppercase tracking-wider leading-relaxed">
+              <h4 className="text-slate-600 font-display font-black text-[10px] mb-1">Terms & Conditions</h4>
               <p>1. This pricing quotation proposal is valid strictly until the date shown above.</p>
               <p>2. Subject to active client license activation agreements and services scope sheets.</p>
             </div>
@@ -555,3 +531,4 @@ const Quotes = () => {
 };
 
 export default Quotes;
+export { Quotes };

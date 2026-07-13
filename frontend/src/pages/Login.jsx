@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
 
 const Login = () => {
   const { login } = useAuth();
@@ -78,186 +80,177 @@ const Login = () => {
   };
 
   return (
-    <div className="bg-[#f8f9fa] text-on-background min-h-screen flex flex-col items-center justify-center relative overflow-hidden p-4">
-      {/* Subtle warm gradient accents */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-15%] w-[600px] h-[600px] rounded-full bg-gold/10 blur-[140px]"></div>
-        <div className="absolute bottom-[-20%] left-[-15%] w-[500px] h-[500px] rounded-full bg-tertiary-container/20 blur-[120px]"></div>
-      </div>
-
-      {/* Main Container */}
-      <main className="relative z-10 w-full max-w-[440px] flex flex-col items-center">
-        {/* Branding Section */}
-        <header className="mb-8 flex flex-col items-center text-center">
-          <div className="w-16 h-16 bg-[#111111] rounded-2xl flex items-center justify-center mb-4 shadow-card overflow-hidden">
-            <img src="/logo.png" alt="Walk The Plan Logo" className="w-12 h-12 object-contain" />
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-paper font-sans">
+      {/* Left Column: Authentic Login Form */}
+      <div className="lg:col-span-5 flex flex-col justify-between p-8 md:p-12 bg-white border-r border-line">
+        {/* Top Branding logo */}
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-md">
+            <img src="/1.png" alt="Walk The Plan Logo" className="w-full h-full object-cover" />
           </div>
-          <h1 className="text-2xl font-extrabold text-on-surface tracking-tight" style={{ lineHeight: '32px' }}>Walk The Plan CRM</h1>
-          <p className="text-sm text-on-surface-variant mt-1 font-medium">Empowering high-velocity sales teams</p>
-        </header>
+          <span className="font-display text-ink uppercase font-black text-sm tracking-wide">Walk The Plan</span>
+        </div>
 
-        {/* Login Card — Level 1 surface */}
-        <section className="w-full bg-white border border-outline-variant/50 rounded-2xl shadow-card p-8 mb-6">
-          <h2 className="text-lg font-bold text-on-surface mb-6">
-            {isRegister ? 'Setup System Admin' : 'Sign In'}
-          </h2>
+        {/* Center Panel: Sign In Content */}
+        <div className="my-auto py-8 max-w-sm w-full mx-auto space-y-6">
+          <div>
+            <h1 className="text-2xl font-display font-black text-ink tracking-tight uppercase">
+              {isRegister ? 'Setup System Admin' : 'Sign In'}
+            </h1>
+            <p className="text-xs text-slate-500 mt-1.5 font-medium">
+              Plan Every Deal. Win Every Customer.
+            </p>
+          </div>
 
           {error && (
-            <div className="mb-5 p-3.5 bg-error-container border border-error/20 text-on-error-container rounded-lg text-xs font-bold leading-normal">
+            <div className="p-3 bg-red-50 border border-red-200 text-danger rounded-btn text-xs font-bold leading-normal">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {isRegister && (
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-on-surface-variant block ml-1 uppercase tracking-wide font-label" htmlFor="name">
-                  Full Name
-                </label>
-                <div className="relative flex items-center rounded-lg border border-outline-variant focus-within:border-primary transition-all duration-200">
-                  <span className="material-symbols-outlined absolute left-3.5 text-outline text-lg">person</span>
-                  <input 
-                    className="w-full pl-11 pr-4 py-3 bg-transparent border-none rounded-lg text-sm focus:ring-0 focus:outline-none placeholder:text-outline text-on-surface" 
-                    id="name" 
-                    placeholder="John Doe" 
-                    type="text"
-                    value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    required
-                  />
-                </div>
-              </div>
+              <Input
+                label="Full Name"
+                id="name"
+                placeholder="John Doe"
+                required
+                value={form.name}
+                onChange={e => setForm({ ...form, name: e.target.value })}
+              />
             )}
 
-            {/* Email Input */}
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-bold text-on-surface-variant block ml-1 uppercase tracking-wide font-label" htmlFor="email">
-                Email Address
-              </label>
-              <div className="relative flex items-center rounded-lg border border-outline-variant focus-within:border-primary transition-all duration-200">
-                <span className="material-symbols-outlined absolute left-3.5 text-outline text-lg">mail</span>
-                <input 
-                  className="w-full pl-11 pr-4 py-3 bg-transparent border-none rounded-lg text-sm focus:ring-0 focus:outline-none placeholder:text-outline text-on-surface" 
-                  id="email" 
-                  placeholder="name@company.com" 
-                  type="email"
-                  value={form.email}
-                  onChange={e => setForm({ ...form, email: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
+            <Input
+              label="Email Address"
+              id="email"
+              type="email"
+              placeholder="name@company.com"
+              required
+              value={form.email}
+              onChange={e => setForm({ ...form, email: e.target.value })}
+            />
 
-            {/* Password Input */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center px-1">
-                <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wide font-label" htmlFor="password">
-                  Password
-                </label>
-                {!isRegister && (
-                  <button 
-                    type="button" 
-                    onClick={() => alert('Please contact your administrator to reset credentials.')} 
-                    className="text-[11px] font-bold text-primary hover:underline"
+            <div className="space-y-1">
+              <Input
+                label="Password"
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                required
+                value={form.password}
+                onChange={e => setForm({ ...form, password: e.target.value })}
+              />
+              {!isRegister && (
+                <div className="flex justify-end px-1">
+                  <button
+                    type="button"
+                    onClick={() => alert('Please contact your administrator to reset credentials.')}
+                    className="text-[10px] font-bold text-gold hover:underline uppercase tracking-wider"
                   >
                     Forgot Password?
                   </button>
-                )}
-              </div>
-              <div className="relative flex items-center rounded-lg border border-outline-variant focus-within:border-primary transition-all duration-200">
-                <span className="material-symbols-outlined absolute left-3.5 text-outline text-lg">lock</span>
-                <input 
-                  className="w-full pl-11 pr-4 py-3 bg-transparent border-none rounded-lg text-sm focus:ring-0 focus:outline-none placeholder:text-outline text-on-surface" 
-                  id="password" 
-                  placeholder="••••••••" 
-                  type="password"
-                  value={form.password}
-                  onChange={e => setForm({ ...form, password: e.target.value })}
-                  required
-                />
-              </div>
+                </div>
+              )}
             </div>
 
-            {/* Gold CTA Button */}
-            <button 
-              className="btn-primary w-full bg-gold text-[#111111] py-3 rounded-lg font-bold hover:brightness-105 transition-all duration-300 flex items-center justify-center gap-2 text-sm disabled:opacity-75 shadow-sm" 
+            <Button
               type="submit"
               disabled={loading}
+              className="w-full justify-center"
             >
               {loading ? (
                 <>
-                  <Loader2 className="animate-spin" size={16} />
+                  <Loader2 className="animate-spin" size={14} />
                   <span>Signing In...</span>
                 </>
               ) : (
                 <>
-                  <span>{isRegister ? 'Setup Admin' : 'Sign In'}</span>
-                  <span className="material-symbols-outlined text-lg">arrow_forward</span>
+                  <span>{isRegister ? 'Setup Admin' : 'Continue'}</span>
+                  <ArrowRight size={14} />
                 </>
               )}
-            </button>
+            </Button>
           </form>
 
-          {/* Social Provider Divider */}
-          <div className="relative my-6 text-center">
-            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-outline-variant/60"></div></div>
-            <span className="relative px-4 bg-white text-[10px] text-on-surface-variant font-bold uppercase tracking-wider font-label">Or continue with</span>
+          {/* Divider */}
+          <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-line"></div>
+            <span className="flex-shrink mx-4 text-[10px] text-slate-450 uppercase font-mono tracking-widest select-none">Or continue with</span>
+            <div className="flex-grow border-t border-line"></div>
           </div>
 
-          {/* Social Login */}
-          <div className="flex flex-col gap-3">
-            <button 
-              type="button"
-              onClick={handleGoogleLogin}
-              className="w-full flex items-center justify-center gap-2 py-3 border border-outline-variant rounded-lg text-xs font-bold text-on-surface hover:bg-surface-container-low hover:shadow-sm transition-all duration-200"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
-              </svg>
-              Google Workspace Account
-            </button>
-          </div>
-        </section>
+          {/* Social Provider */}
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-2 py-3 border border-line bg-white rounded-btn text-xs font-bold text-ink hover:bg-gold-soft hover:border-gold/30 transition-all duration-200"
+          >
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"></path>
+            </svg>
+            Google Workspace Account
+          </button>
+        </div>
 
-        {/* Footer Help */}
-        <footer className="text-center space-y-3">
-          <p className="text-xs text-on-surface-variant font-medium">
+        {/* Footer Actions */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6 border-t border-line text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">
+          <p>
             {isRegister ? (
-              <>
-                Already configured?{' '}
-                <button 
-                  onClick={() => setIsRegister(false)} 
-                  className="text-primary font-semibold hover:underline"
-                >
-                  Sign In instead
-                </button>
-              </>
+              <button onClick={() => setIsRegister(false)} className="text-gold hover:underline">
+                Sign In Instead
+              </button>
             ) : (
-              <>
-                Bootstrap initial admin setup?{' '}
-                <button 
-                  onClick={() => navigate('/signup')} 
-                  className="text-primary font-semibold hover:underline"
-                >
-                  Create Admin Account
-                </button>
-              </>
+              <button onClick={() => navigate('/signup')} className="text-gold hover:underline">
+                Create Admin Account
+              </button>
             )}
           </p>
-          <div className="flex items-center justify-center gap-4 text-on-surface-variant/60">
-            <a className="text-[11px] font-semibold hover:text-primary transition-colors" href="#">Privacy Policy</a>
-            <span className="w-1 h-1 bg-outline-variant rounded-full"></span>
-            <a className="text-[11px] font-semibold hover:text-primary transition-colors" href="#">Support</a>
-            <span className="w-1 h-1 bg-outline-variant rounded-full"></span>
-            <a className="text-[11px] font-semibold hover:text-primary transition-colors" href="#">Contact Sales</a>
+          <div className="flex gap-4">
+            <a href="#" className="hover:text-gold">Privacy</a>
+            <a href="#" className="hover:text-gold">Support</a>
           </div>
-        </footer>
-      </main>
+        </div>
+      </div>
+
+      {/* Right Column: Premium Blueprint Illustration / Graphic Panel */}
+      <div className="hidden lg:col-span-7 bg-ink relative overflow-hidden flex flex-col justify-center p-16 select-none">
+        {/* Blueprint/Schematic background grid */}
+        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#E7E2D8_1px,transparent_1px),linear-gradient(to_bottom,#E7E2D8_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+        
+        {/* Gold blueprint paths crossing */}
+        <div className="absolute top-1/3 left-0 w-full h-px border-t border-dashed border-gold/15"></div>
+        <div className="absolute top-2/3 left-0 w-full h-px border-t border-dashed border-gold/15"></div>
+        <div className="absolute left-1/3 top-0 w-px h-full border-l border-dashed border-gold/15"></div>
+        
+        {/* Abstract content container */}
+        <div className="relative z-10 max-w-lg space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/25 rounded-full text-gold text-[10px] font-mono tracking-widest uppercase">
+            <span>Enterprise System Blueprint</span>
+          </div>
+          
+          <h2 className="text-4xl font-display font-black text-white uppercase leading-tight tracking-wide">
+            Plan every deal.<br />
+            Win every customer.
+          </h2>
+          
+          <p className="text-sm text-white/50 leading-relaxed max-w-md font-sans">
+            A premium structured CRM designed for architectural firms, custom building estimators, and complex enterprise pipeline closure paths.
+          </p>
+        </div>
+
+        {/* Dynamic Logo line graphics bottom-right */}
+        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 border border-gold/5 rounded-full flex items-center justify-center">
+          <div className="w-80 h-80 border border-gold/5 rounded-full flex items-center justify-center">
+            <div className="w-64 h-64 border border-gold/10 rounded-full"></div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
 export default Login;
+export { Login };

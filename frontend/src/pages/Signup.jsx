@@ -179,7 +179,7 @@ const Signup = () => {
       </div>
 
       {/* Right Column: Blueprint Graphic Panel */}
-      <div className="hidden lg:col-span-7 bg-ink relative overflow-hidden flex flex-col justify-center p-16 select-none">
+      <div className="hidden lg:flex lg:col-span-7 bg-ink relative overflow-hidden flex flex-col justify-center p-16 select-none">
         <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#E7E2D8_1px,transparent_1px),linear-gradient(to_bottom,#E7E2D8_1px,transparent_1px)] bg-[size:40px_40px]"></div>
         
         <div className="absolute top-1/3 left-0 w-full h-px border-t border-dashed border-gold/15"></div>

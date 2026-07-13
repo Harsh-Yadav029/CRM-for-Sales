@@ -182,6 +182,9 @@ const nylasWebhook = async (req, res, next) => {
             await lead.save();
           }
         }
+      } else if (event.type?.startsWith('event.') || event.object === 'event') {
+        const { handleInboundCalendarWebhook } = require('../services/nylasCalendarSync');
+        await handleInboundCalendarWebhook(event);
       }
     }
 

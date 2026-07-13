@@ -29,6 +29,7 @@ const LeadDetails = () => {
   
   const [lead, setLead] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [leadEvents, setLeadEvents] = useState([]);
   const [noteText, setNoteText] = useState('');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -49,6 +50,14 @@ const LeadDetails = () => {
     }
   };
 
+  const fetchLeadEvents = async () => {
+    try {
+      const { data } = await api.get('/api/events');
+      const related = data.filter(e => e.relatedTo && e.relatedTo.recordId === id);
+      setLeadEvents(related);
+    } catch (_) {}
+  };
+
   const fetchTasks = async () => {
     try {
       const { data } = await api.get('/api/tasks');
@@ -67,6 +76,7 @@ const LeadDetails = () => {
   useEffect(() => {
     fetchLead();
     fetchTasks();
+    fetchLeadEvents();
     fetchCustomFields();
   }, [id]);
 
@@ -178,7 +188,16 @@ const LeadDetails = () => {
     icon: 'assignment'
   }));
 
-  const sortedTimeline = [...notesTimeline, ...tasksTimeline].sort((a, b) => b.date - a.date);
+  const eventsTimeline = leadEvents.map((e) => ({
+    type: 'meeting',
+    title: e.title,
+    desc: `${e.description || ''} (Time: ${new Date(e.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`,
+    user: e.assignedTo?.name || 'You',
+    date: new Date(e.startTime),
+    icon: 'calendar'
+  }));
+
+  const sortedTimeline = [...notesTimeline, ...tasksTimeline, ...eventsTimeline].sort((a, b) => b.date - a.date);
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
@@ -310,6 +329,25 @@ const LeadDetails = () => {
                 <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Assigned Executive</span>
                 <span className="text-xs font-bold text-ink mt-0.5">{lead.assignedTo?.name || 'Unassigned'}</span>
               </div>
+            </div>
+          </Card>
+
+          {/* Upcoming Scheduled Stops Mini-Widget */}
+          <Card variant="flat" className="p-6 bg-white space-y-4">
+            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Upcoming Stops</h3>
+            <div className="space-y-3">
+              {leadEvents.filter(e => new Date(e.startTime) > new Date()).length === 0 ? (
+                <p className="text-[10px] text-slate-400 italic">No upcoming stops scheduled.</p>
+              ) : (
+                leadEvents.filter(e => new Date(e.startTime) > new Date()).map(evt => (
+                  <div key={evt._id} className="p-2.5 bg-[#FAF9F6] border border-line rounded-card flex flex-col gap-1">
+                    <span className="text-xs font-bold text-ink truncate block">{evt.title}</span>
+                    <span className="text-[9px] text-slate-500 font-mono font-bold uppercase block">
+                      {new Date(evt.startTime).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </Card>
 

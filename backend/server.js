@@ -75,6 +75,7 @@ app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/api/audits', require('./routes/auditRoutes'));
 app.use('/api/apikeys', require('./routes/apiKeyRoutes'));
 app.use('/api/stripe', require('./routes/stripeRoutes'));
+app.use('/api/events', require('./routes/eventRoutes'));
 
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');

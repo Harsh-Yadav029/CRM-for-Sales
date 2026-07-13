@@ -20,6 +20,7 @@ import Invoices from './pages/Invoices';
 import DeveloperPortal from './pages/DeveloperPortal';
 import Billing from './pages/Billing';
 import BillingCallback from './pages/BillingCallback';
+import Calendar from './pages/Calendar';
 import { Loader2 } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import RealtimeNotificationToast from './components/RealtimeNotificationToast';
@@ -51,7 +52,8 @@ const ProtectedLayout = ({ children }) => {
     '/quotes': 'Quotes & Proposals',
     '/invoices': 'Invoice Ledger',
     '/developer-portal': 'Developer Portal',
-    '/billing': 'Subscription Billing'
+    '/billing': 'Subscription Billing',
+    '/calendar': 'My Calendar'
   };
   let title = titles[location.pathname] || 'Dashboard';
   if (location.pathname.startsWith('/leads/')) title = 'Lead Profile';
@@ -97,6 +99,7 @@ function App() {
           <Route path="/developer-portal" element={<ProtectedLayout><DeveloperPortal /></ProtectedLayout>} />
           <Route path="/billing" element={<ProtectedLayout><Billing /></ProtectedLayout>} />
           <Route path="/billing/callback" element={<BillingCallback />} />
+          <Route path="/calendar" element={<ProtectedLayout><Calendar /></ProtectedLayout>} />
           <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
           <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
           <Route path="*" element={<Navigate to="/" replace />} />

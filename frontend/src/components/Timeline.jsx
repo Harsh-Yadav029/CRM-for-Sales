@@ -1,5 +1,4 @@
-import React from 'react';
-import { Mail, Phone, MessageSquare, CheckSquare, FileText, Play } from 'lucide-react';
+import { Mail, Phone, MessageSquare, CheckSquare, FileText, Play, Calendar } from 'lucide-react';
 
 const formatDuration = (s) => {
   const min = Math.floor(s / 60);
@@ -14,6 +13,7 @@ const TimelineItem = ({ item }) => {
       case 'call': return <Phone size={12} />;
       case 'sms': return <MessageSquare size={12} />;
       case 'task': return <CheckSquare size={12} />;
+      case 'meeting': return <Calendar size={12} />;
       default: return <FileText size={12} />;
     }
   };

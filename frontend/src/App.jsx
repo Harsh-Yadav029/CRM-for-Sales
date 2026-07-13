@@ -20,6 +20,7 @@ import Invoices from './pages/Invoices';
 import DeveloperPortal from './pages/DeveloperPortal';
 import Billing from './pages/Billing';
 import BillingCallback from './pages/BillingCallback';
+import Calendar from './pages/Calendar';
 import { Loader2 } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import RealtimeNotificationToast from './components/RealtimeNotificationToast';
@@ -51,7 +52,8 @@ const ProtectedLayout = ({ children }) => {
     '/quotes': 'Quotes & Proposals',
     '/invoices': 'Invoice Ledger',
     '/developer-portal': 'Developer Portal',
-    '/billing': 'Subscription Billing'
+    '/billing': 'Subscription Billing',
+    '/calendar': 'Calendar & Meetings'
   };
   let title = titles[location.pathname] || 'Dashboard';
   if (location.pathname.startsWith('/leads/')) title = 'Lead Profile';
@@ -64,7 +66,7 @@ const ProtectedLayout = ({ children }) => {
       </div>
       
       <div className="flex-1 md:ml-60 flex flex-col min-h-screen pb-20 md:pb-0">
-        <Navbar title={title} />
+        {location.pathname !== '/deals' && <Navbar title={title} />}
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
 
@@ -99,6 +101,7 @@ function App() {
           <Route path="/billing/callback" element={<BillingCallback />} />
           <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
           <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
+          <Route path="/calendar" element={<ProtectedLayout><Calendar /></ProtectedLayout>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

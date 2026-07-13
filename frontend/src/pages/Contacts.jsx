@@ -3,6 +3,11 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2, Edit2, X, Loader2, User, Mail, Phone, Briefcase, Building } from 'lucide-react';
 import RoleGate from '../components/RoleGate';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
+import EmptyState from '../components/ui/EmptyState';
 
 const Contacts = () => {
   const { user } = useAuth();
@@ -118,32 +123,26 @@ const Contacts = () => {
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
       {/* Title & Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-on-surface tracking-tight">Contacts Directory</h2>
-          <p className="text-xs text-on-surface-variant">Keep track of key executives and account representatives</p>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Contacts Directory</span>
+          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Client Representatives</h2>
+          <p className="text-xs text-slate-500 mt-1">Keep track of key executives and account representatives</p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center justify-center gap-2 rounded-xl bg-gold hover:brightness-105 text-[#111111] px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10"
-        >
-          <Plus size={16} />
+        <Button onClick={handleOpenCreate} icon={Plus}>
           Create Contact
-        </button>
+        </Button>
       </div>
 
       {/* Search Input bar */}
       <div className="relative">
-        <span className="absolute left-3.5 top-3.5 text-on-surface-variant">
-          <Search size={16} />
-        </span>
-        <input
-          type="text"
+        <Input
+          id="contactSearch"
           placeholder="Filter contacts by name or email..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-outline-variant/50 bg-surface-container-low text-xs text-on-surface placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+          icon={Search}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -152,37 +151,43 @@ const Contacts = () => {
       {/* Grid List View */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-primary" size={32} />
+          <Loader2 className="animate-spin text-gold" size={28} />
         </div>
       ) : contacts.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl border border-dashed border-outline-variant/50 bg-white/10">
-          <User className="mx-auto h-10 w-10 text-slate-600" />
-          <h3 className="mt-4 text-sm font-bold text-on-surface">No Contacts Found</h3>
-          <p className="mt-2 text-xs text-on-surface-variant">Add client representatives to link them to business deals</p>
-        </div>
+        <EmptyState
+          title="No contacts on this path yet"
+          description="Add client representatives to link them to business deals."
+          action={
+            <Button onClick={handleOpenCreate} icon={Plus}>
+              Create First Contact
+            </Button>
+          }
+        />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {contacts.map((cont) => (
-            <div
+            <Card
               key={cont._id}
-              className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm hover:border-outline/80 transition-all flex flex-col justify-between"
+              variant="flat"
+              className="p-6 bg-white hover:border-gold/30 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex justify-between items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-primary border border-amber-500/20">
-                    <User className="h-5 w-5" />
+                  {/* Keep avatar circle */}
+                  <div className="w-10 h-10 rounded-full border border-line bg-gold-soft text-gold flex items-center justify-center font-bold text-xs shrink-0 select-none">
+                    {cont.firstName.charAt(0).toUpperCase()}{cont.lastName.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEdit(cont)}
-                      className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-slate-850"
+                      className="p-1.5 text-slate-400 hover:text-ink rounded-lg hover:bg-gold-soft transition-all"
                     >
                       <Edit2 size={13} />
                     </button>
                     <RoleGate allow={['admin', 'manager']}>
                       <button
                         onClick={() => handleDelete(cont._id)}
-                        className="p-1.5 text-on-surface-variant hover:text-red-600 rounded-lg hover:bg-slate-850"
+                        className="p-1.5 text-slate-400 hover:text-danger rounded-lg hover:bg-red-50 transition-all"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -190,164 +195,137 @@ const Contacts = () => {
                   </div>
                 </div>
 
-                <h3 className="mt-4 text-sm font-bold text-on-surface leading-snug">{cont.firstName} {cont.lastName}</h3>
-                <p className="text-[10px] text-primary font-semibold mt-1 uppercase tracking-wider">{cont.title || 'Representative'}</p>
+                <h3 className="mt-4 text-sm font-display font-black text-ink uppercase tracking-tight leading-snug">
+                  {cont.firstName} {cont.lastName}
+                </h3>
+                <p className="text-[10px] text-gold font-bold font-mono uppercase tracking-wider mt-1">{cont.title || 'Representative'}</p>
 
-                {/* Sub details stack */}
-                <div className="mt-4 space-y-2 border-t border-outline-variant/40/60 pt-3 text-[11px] text-on-surface">
+                {/* Sub details stack - NO icons row, clean stacked texts */}
+                <div className="mt-4 space-y-2.5 border-t border-line pt-3.5 text-xs">
                   {cont.companyId && (
-                    <div className="flex items-center gap-2">
-                      <Building className="h-3.5 w-3.5 text-on-surface-variant shrink-0" />
-                      <span className="font-semibold text-on-surface-variant truncate">
-                        {cont.companyId?.name || 'Linked Account'}
-                      </span>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider font-mono">Company</span>
+                      <span className="font-semibold text-ink mt-0.5 truncate">{cont.companyId?.name || 'Linked Account'}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-3.5 w-3.5 text-on-surface-variant shrink-0" />
-                    <span className="truncate">{cont.email}</span>
+                  <div className="flex flex-col">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider font-mono">Email</span>
+                    <span className="font-medium text-slate-600 mt-0.5 truncate">{cont.email}</span>
                   </div>
                   {cont.phone && (
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-3.5 w-3.5 text-on-surface-variant shrink-0" />
-                      <span>{cont.phone}</span>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider font-mono">Phone</span>
+                      <span className="font-medium text-slate-600 mt-0.5">{cont.phone}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-5 border-t border-outline-variant/40/60 pt-3 flex items-center justify-between text-[10px] text-on-surface-variant font-medium">
-                <span className="flex items-center gap-1">
-                  <Briefcase className="h-3 w-3 text-on-surface-variant" />
-                  Rep: {cont.assignedTo?.name || 'Unassigned'}
+              <div className="mt-5 border-t border-line pt-3 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono">
+                <span className="flex items-center gap-1.5">
+                  <Briefcase size={12} className="text-slate-400" />
+                  <span>Rep: {cont.assignedTo?.name || 'Unassigned'}</span>
                 </span>
-                <span>{new Date(cont.createdAt).toLocaleDateString()}</span>
+                <span>{new Date(cont.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}
 
       {/* Create / Edit Overlay Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-4 backdrop-blur-xs" onClick={() => setShowModal(false)}>
           <div
-            className="w-full max-w-md rounded-2xl border border-outline-variant/50 bg-white shadow-card overflow-hidden"
+            className="w-full max-w-md rounded-modal border border-line bg-white shadow-modal overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-outline-variant/40 bg-white/50 px-6 py-4">
-              <h3 className="text-sm md:text-base font-bold text-on-surface">
+            <div className="flex items-center justify-between border-b border-line bg-[#FAF9F6] px-6 py-4">
+              <h3 className="text-base font-display font-black text-ink uppercase tracking-tight">
                 {editing ? 'Modify Contact Profile' : 'Add New Contact'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-ink">
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 font-sans">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">First Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Jane"
-                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    value={form.firstName}
-                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Last Name *</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Doe"
-                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    value={form.lastName}
-                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Job Title</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Chief Purchasing Officer"
-                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                />
-              </div>
-
-              <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Email Address *</label>
-                <input
-                  type="email"
+                <Input
+                  label="First Name *"
+                  id="formFirstName"
+                  placeholder="Jane"
                   required
-                  placeholder="jane.doe@company.com"
-                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  value={form.firstName}
+                  onChange={(e) => setForm({ ...form, firstName: e.target.value })}
+                />
+                <Input
+                  label="Last Name *"
+                  id="formLastName"
+                  placeholder="Doe"
+                  required
+                  value={form.lastName}
+                  onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                 />
               </div>
 
-              <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Phone Number</label>
-                <input
-                  type="text"
-                  placeholder="e.g. +91 98765 43210"
-                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-              </div>
+              <Input
+                label="Job Title"
+                id="formTitle"
+                placeholder="e.g. Chief Purchasing Officer"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+              />
 
-              <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Associated Company</label>
-                <select
-                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  value={form.companyId}
-                  onChange={(e) => setForm({ ...form, companyId: e.target.value })}
-                >
-                  <option value="">None (Individual Contact)</option>
-                  {companies.map((c) => (
-                    <option key={c._id} value={c._id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
+              <Input
+                label="Email Address *"
+                id="formEmail"
+                type="email"
+                placeholder="jane.doe@company.com"
+                required
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+
+              <Input
+                label="Phone Number"
+                id="formPhone"
+                placeholder="e.g. +91 98765 43210"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+
+              <Select
+                label="Associated Company"
+                id="formCompany"
+                value={form.companyId}
+                onChange={(e) => setForm({ ...form, companyId: e.target.value })}
+                options={[
+                  { value: '', label: 'None (Individual Contact)' },
+                  ...companies.map(c => ({ value: c._id, label: c.name }))
+                ]}
+              />
 
               {(user?.role === 'admin' || user?.role === 'manager') && (
-                <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Assign Teammate</label>
-                  <select
-                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
-                    value={form.assignedTo}
-                    onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
-                  >
-                    <option value="">Unassigned</option>
-                    {salespeople.map((sp) => (
-                      <option key={sp._id} value={sp._id}>{sp.name} ({sp.role})</option>
-                    ))}
-                  </select>
-                </div>
+                <Select
+                  label="Assign Teammate"
+                  id="formAssigned"
+                  value={form.assignedTo}
+                  onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
+                  options={[
+                    { value: '', label: 'Unassigned' },
+                    ...salespeople.map(sp => ({ value: sp._id, label: sp.name }))
+                  ]}
+                />
               )}
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/40">
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-outline-variant/40 px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-high"
-                >
+              <div className="flex justify-end gap-3 pt-4 border-t border-line">
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="rounded-lg bg-gold px-4 py-2 text-xs font-bold text-[#111111] hover:brightness-105"
-                >
+                </Button>
+                <Button type="submit">
                   Save Contact
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -358,3 +336,4 @@ const Contacts = () => {
 };
 
 export default Contacts;
+export { Contacts };

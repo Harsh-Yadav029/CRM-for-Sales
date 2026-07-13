@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, Plus, Calendar, CheckSquare, Square, X, Trash2 } from 'lucide-react';
+import { Loader2, Plus, Calendar, CheckSquare, Square, X, Trash2, Clock } from 'lucide-react';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Select from '../components/ui/Select';
+import EmptyState from '../components/ui/EmptyState';
 
 const Tasks = () => {
   const { user } = useAuth();
@@ -10,7 +15,13 @@ const Tasks = () => {
   const [salespeople, setSalespeople] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({ title: '', dueDate: '', assignedTo: '', leadId: '' });
+  
+  const [form, setForm] = useState({ 
+    title: '', 
+    dueDate: new Date().toISOString().split('T')[0], 
+    assignedTo: '', 
+    leadId: '' 
+  });
 
   const fetchTasks = async () => {
     try {
@@ -58,7 +69,12 @@ const Tasks = () => {
       if (form.leadId) body.leadId = form.leadId;
       await api.post('/api/tasks', body);
       setShowModal(false);
-      setForm({ title: '', dueDate: '', assignedTo: '', leadId: '' });
+      setForm({ 
+        title: '', 
+        dueDate: new Date().toISOString().split('T')[0], 
+        assignedTo: '', 
+        leadId: '' 
+      });
       fetchTasks();
     } catch (e) {
       alert(e.response?.data?.message || 'Error creating task');
@@ -68,169 +84,222 @@ const Tasks = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-primary" size={28} />
+        <Loader2 className="animate-spin text-gold" size={28} />
       </div>
     );
   }
 
-  const pending = tasks.filter(t => !t.completed);
-  const completed = tasks.filter(t => t.completed);
+  // Grouping logic: Today, This Week, Later
+  const getTaskGroup = (dueDateStr, completed) => {
+    if (completed) return 'completed';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(dueDateStr);
+    dueDate.setHours(0, 0, 0, 0);
 
-  const TaskCard = ({ t }) => (
-    <div className="flex items-center justify-between p-4 bg-white border border-outline-variant rounded-xl hover:shadow-sm transition-shadow group">
+    const diffTime = dueDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 0) return 'today';
+    if (diffDays <= 7) return 'week';
+    return 'later';
+  };
+
+  const grouped = {
+    today: tasks.filter(t => getTaskGroup(t.dueDate, t.completed) === 'today'),
+    week: tasks.filter(t => getTaskGroup(t.dueDate, t.completed) === 'week'),
+    later: tasks.filter(t => getTaskGroup(t.dueDate, t.completed) === 'later'),
+    completed: tasks.filter(t => t.completed)
+  };
+
+  const TaskItemRow = ({ t }) => (
+    <Card
+      variant="flat"
+      className="p-4 bg-white flex items-center justify-between hover:border-gold/30 transition-all group"
+    >
       <div className="flex items-center gap-3 flex-1 min-w-0">
-        <button onClick={() => toggleComplete(t)} className="shrink-0 text-primary">
+        <button onClick={() => toggleComplete(t)} className="shrink-0 text-gold hover:opacity-80 transition-opacity">
           {t.completed ? (
-            <span className="material-symbols-outlined font-bold text-secondary" style={{ fontVariationSettings: "'FILL' 1" }}>check_box</span>
+            <CheckSquare size={18} className="fill-gold-soft text-gold" />
           ) : (
-            <span className="material-symbols-outlined text-outline hover:text-primary">check_box_outline_blank</span>
+            <Square size={18} className="text-slate-400" />
           )}
         </button>
         <div className="min-w-0">
-          <span className={`text-xs font-bold block truncate ${t.completed ? 'line-through text-on-surface-variant/60 font-semibold' : 'text-on-surface'}`}>
+          <span className={`text-xs font-bold block truncate ${t.completed ? 'line-through text-slate-400 font-semibold' : 'text-ink'}`}>
             {t.title}
           </span>
-          <span className="text-[10px] text-on-surface-variant font-medium">
+          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono mt-0.5">
             Owner: {t.assignedTo?.name || 'You'} {t.leadId?.name ? ` • Associated Lead: ${t.leadId.name}` : ''}
           </span>
         </div>
       </div>
-      <div className="flex items-center gap-3 shrink-0 ml-3">
-        <span className="text-[10px] text-on-surface-variant font-bold flex items-center gap-1 bg-surface-container px-2 py-0.5 rounded-lg border border-outline-variant/35">
+      <div className="flex items-center gap-3 shrink-0 ml-3 select-none">
+        <span className="text-[10px] text-slate-500 font-bold flex items-center gap-1 bg-[#FAF9F6] border border-line px-2 py-0.5 rounded-btn font-mono">
           <Calendar size={11} />
           {new Date(t.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
         </span>
         <button 
           onClick={() => deleteTask(t._id)} 
-          className="p-1 hover:bg-error-container text-on-surface-variant hover:text-error rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
+          className="p-1 hover:bg-red-50 text-slate-450 hover:text-danger rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200"
         >
-          <span className="material-symbols-outlined text-sm">delete</span>
+          <Trash2 size={13} />
         </button>
       </div>
-    </div>
+    </Card>
   );
 
   return (
-    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
+    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base md:text-lg font-bold text-on-surface">Tasks</h2>
-          <p className="text-xs text-on-surface-variant mt-0.5">{pending.length} pending • {completed.length} completed</p>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Schedule & Execution</span>
+          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Workspace Stops</h2>
+          <p className="text-xs text-slate-500 mt-1">{tasks.filter(t => !t.completed).length} pending stops remaining</p>
         </div>
-        <button 
-          onClick={() => setShowModal(true)} 
-          className="flex items-center gap-1.5 bg-primary hover:brightness-110 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md"
-        >
-          <Plus size={14} /> New Task
-        </button>
+        <Button onClick={() => setShowModal(true)} icon={Plus}>
+          New Task
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Pending tasks */}
-        <div className="space-y-3">
-          <h3 className="text-xs font-extrabold text-on-surface-variant uppercase tracking-wider px-1">Pending ({pending.length})</h3>
-          {pending.length === 0 ? (
-            <div className="text-center py-10 text-xs text-on-surface-variant bg-white rounded-xl border border-outline-variant italic">
-              All tasks cleared!
-            </div>
-          ) : (
-            pending.map(t => <TaskCard key={t._id} t={t} />)
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Grouped Pending Tasks */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* Today's Tasks */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider flex items-center gap-1.5 px-1">
+              <Clock size={13} className="text-gold" />
+              <span>Today's Actions</span>
+            </h3>
+            {grouped.today.length === 0 ? (
+              <div className="text-center py-8 text-xs text-slate-400 bg-white border border-line rounded-card italic">
+                All cleared for today!
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {grouped.today.map(t => <TaskItemRow key={t._id} t={t} />)}
+              </div>
+            )}
+          </div>
+
+          {/* This Week */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider flex items-center gap-1.5 px-1">
+              <Calendar size={13} className="text-gold" />
+              <span>This Week</span>
+            </h3>
+            {grouped.week.length === 0 ? (
+              <div className="text-center py-8 text-xs text-slate-400 bg-white border border-line rounded-card italic">
+                No stops scheduled this week.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {grouped.week.map(t => <TaskItemRow key={t._id} t={t} />)}
+              </div>
+            )}
+          </div>
+
+          {/* Later */}
+          <div className="space-y-3">
+            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider flex items-center gap-1.5 px-1">
+              <Calendar size={13} className="text-slate-400" />
+              <span>Later / Backlog</span>
+            </h3>
+            {grouped.later.length === 0 ? (
+              <div className="text-center py-8 text-xs text-slate-400 bg-white border border-line rounded-card italic">
+                No long-term backlog stops.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {grouped.later.map(t => <TaskItemRow key={t._id} t={t} />)}
+              </div>
+            )}
+          </div>
         </div>
-        
-        {/* Completed tasks */}
-        <div className="space-y-3">
-          <h3 className="text-xs font-extrabold text-on-surface-variant uppercase tracking-wider px-1">Completed ({completed.length})</h3>
-          {completed.length === 0 ? (
-            <div className="text-center py-10 text-xs text-on-surface-variant bg-white rounded-xl border border-outline-variant italic">
+
+        {/* Right Column: Completed Tasks */}
+        <div className="lg:col-span-4 space-y-3">
+          <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider flex items-center gap-1.5 px-1">
+            <CheckSquare size={13} className="text-emerald-500" />
+            <span>Completed Stops</span>
+          </h3>
+          {grouped.completed.length === 0 ? (
+            <div className="text-center py-10 text-xs text-slate-400 bg-white border border-line rounded-card italic">
               No tasks completed yet.
             </div>
           ) : (
-            completed.map(t => <TaskCard key={t._id} t={t} />)
+            <div className="space-y-2 max-h-[70vh] overflow-y-auto pr-1.5 custom-scroll">
+              {grouped.completed.map(t => <TaskItemRow key={t._id} t={t} />)}
+            </div>
           )}
         </div>
       </div>
 
-      {/* New Task Modal */}
+      {/* New Task Overlay Modal */}
       {showModal && (
-        <div 
-          className="fixed inset-0 bg-on-background/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
-          onClick={() => setShowModal(false)}
-        >
-          <div 
-            className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-outline-variant" 
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-4 backdrop-blur-xs" onClick={() => setShowModal(false)}>
+          <div
+            className="w-full max-w-md rounded-modal border border-line bg-white shadow-modal overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low">
-              <h3 className="font-bold text-sm md:text-base text-on-surface">Schedule New Task</h3>
-              <button onClick={() => setShowModal(false)} className="text-on-surface-variant hover:text-on-surface">
+            <div className="flex items-center justify-between border-b border-line bg-[#FAF9F6] px-6 py-4">
+              <h3 className="text-base font-display font-black text-ink uppercase tracking-tight">Schedule New Stop</h3>
+              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-ink">
                 <X size={18} />
               </button>
             </div>
-            
-            <form onSubmit={handleCreate} className="p-6 space-y-4">
-              <div>
-                <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Task Title</label>
-                <input 
-                  value={form.title} 
-                  onChange={(e) => setForm({ ...form, title: e.target.value })} 
-                  required 
-                  placeholder="E.g., Follow up with Alex"
-                  className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Due Date</label>
-                <input 
-                  type="date" 
-                  value={form.dueDate} 
-                  onChange={(e) => setForm({ ...form, dueDate: e.target.value })} 
-                  required 
-                  className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Link to Lead Profile</label>
-                <select 
-                  value={form.leadId} 
-                  onChange={(e) => setForm({ ...form, leadId: e.target.value })} 
-                  className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
-                >
-                  <option value="">None / General</option>
-                  {leads.map(l => <option key={l._id} value={l._id}>{l.name} ({l.company})</option>)}
-                </select>
-              </div>
+
+            <form onSubmit={handleCreate} className="p-6 space-y-4 font-sans">
+              <Input
+                label="Task Title"
+                id="taskTitle"
+                placeholder="E.g., Follow up with Alex"
+                required
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+              />
+
+              <Input
+                label="Due Date"
+                id="taskDue"
+                type="date"
+                required
+                value={form.dueDate}
+                onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+              />
+
+              <Select
+                label="Link to Lead Profile"
+                id="taskLead"
+                value={form.leadId}
+                onChange={(e) => setForm({ ...form, leadId: e.target.value })}
+                options={[
+                  { value: '', label: 'None / General' },
+                  ...leads.map(l => ({ value: l._id, label: `${l.name} (${l.company})` }))
+                ]}
+              />
 
               {user?.role === 'admin' && (
-                <div>
-                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Assign Executive</label>
-                  <select 
-                    value={form.assignedTo} 
-                    onChange={(e) => setForm({ ...form, assignedTo: e.target.value })} 
-                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
-                  >
-                    <option value="">Myself</option>
-                    {salespeople.map(s => <option key={s._id} value={s._id}>{s.name}</option>)}
-                  </select>
-                </div>
+                <Select
+                  label="Assign Executive"
+                  id="taskAssign"
+                  value={form.assignedTo}
+                  onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
+                  options={[
+                    { value: '', label: 'Myself' },
+                    ...salespeople.map(s => ({ value: s._id, label: s.name }))
+                  ]}
+                />
               )}
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/60">
-                <button 
-                  type="button" 
-                  onClick={() => setShowModal(false)} 
-                  className="px-4 py-2 border border-outline-variant rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container-low"
-                >
+              <div className="flex justify-end gap-3 pt-4 border-t border-line">
+                <Button variant="secondary" onClick={() => setShowModal(false)}>
                   Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
-                >
+                </Button>
+                <Button type="submit">
                   Schedule Task
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -241,3 +310,4 @@ const Tasks = () => {
 };
 
 export default Tasks;
+export { Tasks };

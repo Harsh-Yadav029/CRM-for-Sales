@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getApiKeys, createApiKey, revokeApiKey } = require('../controllers/apiKeyController');
 const { protect } = require('../middleware/authMiddleware');
-const { checkRole } = require('../middleware/roleMiddleware');
+const { checkRole } = require('../middleware/rbacMiddleware');
 
 router.use(protect);
 router.use(checkRole(['admin']));

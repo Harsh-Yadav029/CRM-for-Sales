@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@twilio/voice-sdk": "^2.18.3",
     "axios": "^1.6.8",
     "chrono-node": "^2.10.0",
     "express-session": "^1.19.0",

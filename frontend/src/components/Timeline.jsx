@@ -61,18 +61,25 @@ const TimelineItem = ({ item }) => {
         </div>
 
         {item.type === 'call' && (item.duration > 0 || item.recordingUrl) && (
-          <div className="mt-3 flex items-center gap-3 rounded-btn bg-[#FAF9F6] p-2 border border-line max-w-sm">
-            <button className="flex h-7 w-7 items-center justify-center rounded-full bg-gold text-ink hover:bg-gold/90 transition-all">
-              <Play size={10} className="fill-current" />
-            </button>
-            <div className="flex-1">
-              <div className="h-1.5 rounded bg-line w-full overflow-hidden">
-                <div className="h-full bg-gold w-1/3"></div>
-              </div>
+          <div className="mt-3 flex flex-col gap-2 rounded-btn bg-[#FAF9F6] p-3 border border-line max-w-sm">
+            <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase font-mono">
+              <span>VoIP Call Recording</span>
+              <span>{formatDuration(item.duration || 120)}</span>
             </div>
-            <span className="text-[10px] font-mono text-slate-500">
-              {formatDuration(item.duration || 120)}
-            </span>
+            {item.recordingUrl ? (
+              <audio src={item.recordingUrl} controls className="w-full h-8 mt-1 outline-none" />
+            ) : (
+              <div className="flex items-center gap-3">
+                <button className="flex h-7 w-7 items-center justify-center rounded-full bg-gold text-ink hover:bg-gold/90 transition-all">
+                  <Play size={10} className="fill-current" />
+                </button>
+                <div className="flex-1">
+                  <div className="h-1.5 rounded bg-line w-full overflow-hidden">
+                    <div className="h-full bg-gold w-1/3"></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

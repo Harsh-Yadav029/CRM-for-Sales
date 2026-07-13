@@ -115,6 +115,28 @@ const eventSchema = new mongoose.Schema(
       enum: ['scheduled', 'completed', 'cancelled'],
       default: 'scheduled'
     },
+    twilioCallSid: {
+      type: String,
+      default: ''
+    },
+    recordingUrl: {
+      type: String,
+      default: ''
+    },
+    recordingDuration: {
+      type: Number,
+      default: 0
+    },
+    disposition: {
+      type: String,
+      enum: ['interested', 'no_answer', 'call_back_later', 'not_interested', 'wrong_number', 'other'],
+      required: false
+    },
+    direction: {
+      type: String,
+      enum: ['inbound', 'outbound'],
+      required: false
+    },
     externalSync: {
       provider: {
         type: String,

@@ -256,7 +256,21 @@ const Tasks = () => {
                   {activity.relatedTo.module}: {activity.relatedTo.recordId.name || activity.relatedTo.recordId.company || 'Record'}
                 </span>
               )}
+              {activity.activityType === 'call' && activity.disposition && (
+                <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border leading-none font-mono ${
+                  activity.disposition === 'interested' ? 'bg-[#4FBFA6]/10 text-[#4FBFA6] border-[#4FBFA6]/20' :
+                  (activity.disposition === 'not_interested' || activity.disposition === 'wrong_number') ? 'bg-[#E2705C]/10 text-[#E2705C] border-[#E2705C]/20' :
+                  'bg-slate-100 text-slate-600 border-line'
+                }`}>
+                  {activity.disposition.replace('_', ' ')}
+                </span>
+              )}
             </div>
+            {activity.activityType === 'call' && activity.recordingUrl && (
+              <div className="mt-2 max-w-xs">
+                <audio src={activity.recordingUrl} controls className="w-full h-8 outline-none" />
+              </div>
+            )}
           </div>
         </div>
 

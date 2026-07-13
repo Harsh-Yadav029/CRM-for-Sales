@@ -281,21 +281,25 @@ const LeadDetails = () => {
   });
 
   const openActivitiesTimeline = recordActivities.open.map((a) => ({
-    type: a.activityType === 'task' ? 'task' : 'meeting',
+    type: a.activityType === 'task' ? 'task' : (a.activityType === 'meeting' ? 'meeting' : 'call'),
     title: a.activityType === 'task' ? 'Task Scheduled' : `${a.activityType.toUpperCase()}: ${a.title}`,
-    desc: a.title,
+    desc: a.description || a.title,
     user: a.assignedTo?.name || 'You',
     date: new Date(a.date),
-    icon: a.activityType === 'task' ? 'assignment' : 'calendar'
+    icon: a.activityType === 'task' ? 'assignment' : (a.activityType === 'meeting' ? 'calendar' : 'phone'),
+    duration: a.recordingDuration,
+    recordingUrl: a.recordingUrl
   }));
 
   const closedActivitiesTimeline = recordActivities.closed.map((a) => ({
-    type: a.activityType === 'task' ? 'task' : 'meeting',
+    type: a.activityType === 'task' ? 'task' : (a.activityType === 'meeting' ? 'meeting' : 'call'),
     title: a.activityType === 'task' ? 'Task Completed' : `${a.activityType.toUpperCase()}: ${a.title}`,
-    desc: a.title,
+    desc: a.description || a.title,
     user: a.assignedTo?.name || 'You',
     date: new Date(a.date),
-    icon: a.activityType === 'task' ? 'assignment' : 'calendar'
+    icon: a.activityType === 'task' ? 'assignment' : (a.activityType === 'meeting' ? 'calendar' : 'phone'),
+    duration: a.recordingDuration,
+    recordingUrl: a.recordingUrl
   }));
 
   const sortedTimeline = [...notesTimeline, ...openActivitiesTimeline, ...closedActivitiesTimeline].sort((a, b) => b.date - a.date);

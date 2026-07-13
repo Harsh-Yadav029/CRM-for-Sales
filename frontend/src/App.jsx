@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, NavLink } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { VoiceProvider } from './context/VoiceContext';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
@@ -83,30 +84,32 @@ const ProtectedLayout = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
-          <Route path="/leads" element={<ProtectedLayout><Leads /></ProtectedLayout>} />
-          <Route path="/leads/:id" element={<ProtectedLayout><LeadDetails /></ProtectedLayout>} />
-          <Route path="/deals" element={<ProtectedLayout><Deals /></ProtectedLayout>} />
-          <Route path="/tasks" element={<ProtectedLayout><Tasks /></ProtectedLayout>} />
-          <Route path="/activities" element={<ProtectedLayout><Tasks /></ProtectedLayout>} />
-          <Route path="/accounts" element={<ProtectedLayout><Accounts /></ProtectedLayout>} />
-          <Route path="/contacts" element={<ProtectedLayout><Contacts /></ProtectedLayout>} />
-          <Route path="/products" element={<ProtectedLayout><Products /></ProtectedLayout>} />
-          <Route path="/quotes" element={<ProtectedLayout><Quotes /></ProtectedLayout>} />
-          <Route path="/invoices" element={<ProtectedLayout><Invoices /></ProtectedLayout>} />
-          <Route path="/developer-portal" element={<ProtectedLayout><DeveloperPortal /></ProtectedLayout>} />
-          <Route path="/billing" element={<ProtectedLayout><Billing /></ProtectedLayout>} />
-          <Route path="/billing/callback" element={<BillingCallback />} />
-          <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
-          <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
-          <Route path="/calendar" element={<ProtectedLayout><Calendar /></ProtectedLayout>} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
+      <VoiceProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
+            <Route path="/leads" element={<ProtectedLayout><Leads /></ProtectedLayout>} />
+            <Route path="/leads/:id" element={<ProtectedLayout><LeadDetails /></ProtectedLayout>} />
+            <Route path="/deals" element={<ProtectedLayout><Deals /></ProtectedLayout>} />
+            <Route path="/tasks" element={<ProtectedLayout><Tasks /></ProtectedLayout>} />
+            <Route path="/activities" element={<ProtectedLayout><Tasks /></ProtectedLayout>} />
+            <Route path="/accounts" element={<ProtectedLayout><Accounts /></ProtectedLayout>} />
+            <Route path="/contacts" element={<ProtectedLayout><Contacts /></ProtectedLayout>} />
+            <Route path="/products" element={<ProtectedLayout><Products /></ProtectedLayout>} />
+            <Route path="/quotes" element={<ProtectedLayout><Quotes /></ProtectedLayout>} />
+            <Route path="/invoices" element={<ProtectedLayout><Invoices /></ProtectedLayout>} />
+            <Route path="/developer-portal" element={<ProtectedLayout><DeveloperPortal /></ProtectedLayout>} />
+            <Route path="/billing" element={<ProtectedLayout><Billing /></ProtectedLayout>} />
+            <Route path="/billing/callback" element={<BillingCallback />} />
+            <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
+            <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
+            <Route path="/calendar" element={<ProtectedLayout><Calendar /></ProtectedLayout>} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </VoiceProvider>
     </AuthProvider>
   );
 }

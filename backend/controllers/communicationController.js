@@ -131,7 +131,7 @@ const nylasWebhook = async (req, res, next) => {
     // Verify Nylas Signature
     const isNylasValid = verifyNylasSignature(
       signature,
-      req.body,
+      req.rawBody || req.body,
       process.env.NYLAS_CLIENT_SECRET
     );
 

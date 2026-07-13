@@ -10,7 +10,7 @@ const participantValidator = z.object({
 const recurrenceValidator = z.object({
   frequency: z.enum(['none', 'daily', 'weekly', 'monthly']).default('none'),
   interval: z.number().min(1).optional().default(1),
-  endDate: z.string().datetime().or(z.date()).optional()
+  endDate: z.string().transform((val) => new Date(val)).or(z.date()).optional()
 });
 
 const reminderValidator = z.object({

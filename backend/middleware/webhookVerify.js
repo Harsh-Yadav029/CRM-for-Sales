@@ -28,11 +28,12 @@ const isDuplicateEvent = async (eventId, provider) => {
  * @param {string} clientSecret 
  * @returns {boolean} True if signature is valid or if running in non-production mode
  */
-const verifyNylasSignature = (signature, body, clientSecret) => {
+const verifyNylasSignature = (signature, rawBodyOrBody, clientSecret) => {
   if (!signature) return false;
+  const payload = Buffer.isBuffer(rawBodyOrBody) ? rawBodyOrBody : JSON.stringify(rawBodyOrBody);
   const calculatedSignature = crypto
     .createHmac('sha256', clientSecret || 'mock_secret')
-    .update(JSON.stringify(body))
+    .update(payload)
     .digest('hex');
 
   if (signature === calculatedSignature) {

@@ -42,7 +42,7 @@ const Navbar = ({ title }) => {
         
         {/* Desktop Title */}
         <h1 className="hidden md:block text-base font-display font-black text-ink uppercase tracking-tight">
-          {title || 'Sales Dashboard'}
+          {title || 'Home'}
         </h1>
       </div>
 

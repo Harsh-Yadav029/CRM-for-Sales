@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Loader2, Plus, Trash2, Layout, Sliders, RefreshCw, BarChart4, PieChart as PieIcon, LineChart, Table as TableIcon } from 'lucide-react';
+import { Loader2, Plus, Trash2, Layout, Sliders, RefreshCw, BarChart4, PieChart as PieIcon, LineChart, Table as TableIcon, AlertTriangle } from 'lucide-react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart as ReLineChart, Line, AreaChart, Area } from 'recharts';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -112,6 +112,22 @@ const Reports = () => {
     return (
       <div className="flex justify-center py-16 min-h-[60vh] items-center">
         <Loader2 className="animate-spin text-gold" size={28} />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return (
+      <div className="p-6 md:p-8 text-center py-24 bg-paper min-h-[60vh] flex flex-col items-center justify-center">
+        <AlertTriangle className="mx-auto h-12 w-12 text-amber-500 mb-4 animate-bounce" />
+        <h3 className="text-base font-bold text-ink uppercase tracking-wider font-display">Analytics Sync Failed</h3>
+        <p className="text-xs text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
+          We encountered an issue retrieving real-time data reports from the server. Please verify your connection or try again.
+        </p>
+        <Button onClick={fetchReports} className="mt-6 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <RefreshCw size={12} />
+          Retry Sync
+        </Button>
       </div>
     );
   }
@@ -241,130 +257,146 @@ const Reports = () => {
                   <div className="h-64 flex items-center justify-center pt-2 font-mono">
                     {/* Widget TYPE: SOURCE */}
                     {widget.type === 'source' && (
-                      <ResponsiveContainer width="100%" height="100%">
-                        {widget.chartType === 'pie' ? (
-                          <PieChart>
-                            <Pie
-                              data={data.sources}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={60}
-                              outerRadius={80}
-                              paddingAngle={3}
-                              dataKey="value"
-                            >
-                              {data.sources.map((entry, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                              ))}
-                            </Pie>
-                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
-                            <Legend iconType="circle" />
-                          </PieChart>
-                        ) : widget.chartType === 'line' ? (
-                          <ReLineChart data={data.sources}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
-                            <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
-                            <YAxis stroke="#6B7280" fontSize={9} />
-                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
-                            <Line type="monotone" dataKey="value" stroke="#E3A62F" strokeWidth={2} />
-                          </ReLineChart>
-                        ) : (
-                          <BarChart data={data.sources}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
-                            <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
-                            <YAxis stroke="#6B7280" fontSize={9} />
-                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
-                            <Bar dataKey="value" fill="#E3A62F" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        )}
-                      </ResponsiveContainer>
+                      !data.sources || data.sources.length === 0 ? (
+                        <div className="text-slate-400 italic text-[11px] text-center font-sans px-4">No lead source data available. Add leads with sources to populate.</div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          {widget.chartType === 'pie' ? (
+                            <PieChart>
+                              <Pie
+                                data={data.sources}
+                                cx="50%"
+                                cy="50%"
+                                innerRadius={60}
+                                outerRadius={80}
+                                paddingAngle={3}
+                                dataKey="value"
+                              >
+                                {data.sources.map((entry, index) => (
+                                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                ))}
+                              </Pie>
+                              <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
+                              <Legend iconType="circle" />
+                            </PieChart>
+                          ) : widget.chartType === 'line' ? (
+                            <ReLineChart data={data.sources}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
+                              <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
+                              <YAxis stroke="#6B7280" fontSize={9} />
+                              <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
+                              <Line type="monotone" dataKey="value" stroke="#E3A62F" strokeWidth={2} />
+                            </ReLineChart>
+                          ) : (
+                            <BarChart data={data.sources}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
+                              <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
+                              <YAxis stroke="#6B7280" fontSize={9} />
+                              <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
+                              <Bar dataKey="value" fill="#E3A62F" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          )}
+                        </ResponsiveContainer>
+                      )
                     )}
 
                     {/* Widget TYPE: REVENUE */}
                     {widget.type === 'revenue' && (
-                      <ResponsiveContainer width="100%" height="100%">
-                        {widget.chartType === 'line' ? (
-                          <ReLineChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
-                            <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
-                            <YAxis stroke="#6B7280" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
-                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
-                            <Legend />
-                            <Line type="monotone" dataKey="revenue" name="Expected" stroke="#E3A62F" strokeWidth={2} />
-                            <Line type="monotone" dataKey="won" name="Won" stroke="#121212" strokeWidth={2} />
-                          </ReLineChart>
-                        ) : widget.chartType === 'area' ? (
-                          <AreaChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
-                            <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
-                            <YAxis stroke="#6B7280" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
-                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
-                            <Legend />
-                            <Area type="monotone" dataKey="revenue" name="Expected" fillOpacity={0.15} fill="#E3A62F" stroke="#E3A62F" />
-                            <Area type="monotone" dataKey="won" name="Won" fillOpacity={0.15} fill="#121212" stroke="#121212" />
-                          </AreaChart>
-                        ) : (
-                          <BarChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
-                            <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
-                            <YAxis stroke="#6B7280" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
-                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
-                            <Legend />
-                            <Bar dataKey="revenue" name="Expected" fill="#E3A62F" radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="won" name="Won" fill="#121212" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        )}
-                      </ResponsiveContainer>
+                      !data.stages || data.stages.length === 0 ? (
+                        <div className="text-slate-400 italic text-[11px] text-center font-sans px-4">No revenue projections available. Add expected revenue to leads to populate.</div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          {widget.chartType === 'line' ? (
+                            <ReLineChart data={data.stages}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
+                              <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
+                              <YAxis stroke="#6B7280" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
+                              <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
+                              <Legend />
+                              <Line type="monotone" dataKey="revenue" name="Expected" stroke="#E3A62F" strokeWidth={2} />
+                              <Line type="monotone" dataKey="won" name="Won" stroke="#121212" strokeWidth={2} />
+                            </ReLineChart>
+                          ) : widget.chartType === 'area' ? (
+                            <AreaChart data={data.stages}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
+                              <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
+                              <YAxis stroke="#6B7280" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
+                              <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
+                              <Legend />
+                              <Area type="monotone" dataKey="revenue" name="Expected" fillOpacity={0.15} fill="#E3A62F" stroke="#E3A62F" />
+                              <Area type="monotone" dataKey="won" name="Won" fillOpacity={0.15} fill="#121212" stroke="#121212" />
+                            </AreaChart>
+                          ) : (
+                            <BarChart data={data.stages}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
+                              <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
+                              <YAxis stroke="#6B7280" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
+                              <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
+                              <Legend />
+                              <Bar dataKey="revenue" name="Expected" fill="#E3A62F" radius={[4, 4, 0, 0]} />
+                              <Bar dataKey="won" name="Won" fill="#121212" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          )}
+                        </ResponsiveContainer>
+                      )
                     )}
 
                     {/* Widget TYPE: COUNTS */}
                     {widget.type === 'counts' && (
-                      <ResponsiveContainer width="100%" height="100%">
-                        {widget.chartType === 'line' ? (
-                          <ReLineChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
-                            <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
-                            <YAxis stroke="#6B7280" fontSize={9} />
-                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
-                            <Line type="monotone" dataKey="count" name="Leads" stroke="#E3A62F" strokeWidth={2} />
-                          </ReLineChart>
-                        ) : (
-                          <BarChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
-                            <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
-                            <YAxis stroke="#6B7280" fontSize={9} />
-                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
-                            <Bar dataKey="count" name="Leads" fill="#E3A62F" radius={[4, 4, 0, 0]} />
-                          </BarChart>
-                        )}
-                      </ResponsiveContainer>
+                      !data.stages || data.stages.length === 0 ? (
+                        <div className="text-slate-400 italic text-[11px] text-center font-sans px-4">No lead count data available. Add leads to populate.</div>
+                      ) : (
+                        <ResponsiveContainer width="100%" height="100%">
+                          {widget.chartType === 'line' ? (
+                            <ReLineChart data={data.stages}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
+                              <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
+                              <YAxis stroke="#6B7280" fontSize={9} />
+                              <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
+                              <Line type="monotone" dataKey="count" name="Leads" stroke="#E3A62F" strokeWidth={2} />
+                            </ReLineChart>
+                          ) : (
+                            <BarChart data={data.stages}>
+                              <CartesianGrid strokeDasharray="3 3" stroke="#E7E2D8" />
+                              <XAxis dataKey="name" stroke="#6B7280" fontSize={9} />
+                              <YAxis stroke="#6B7280" fontSize={9} />
+                              <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#E7E2D8', borderRadius: '10px' }} />
+                              <Bar dataKey="count" name="Leads" fill="#E3A62F" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          )}
+                        </ResponsiveContainer>
+                      )
                     )}
 
                     {/* Widget TYPE: LEADERBOARD Table */}
                     {widget.type === 'leaderboard' && (
-                      <div className="w-full h-full overflow-y-auto pr-1">
-                        <table className="w-full text-left text-[11px] font-sans">
-                          <thead>
-                            <tr className="border-b border-line bg-[#FAF9F6] text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                              <th className="py-2.5 px-3">Sales Exec</th>
-                              <th className="py-2.5 px-3">Win Pct</th>
-                              <th className="py-2.5 px-3 text-right">Won (₹)</th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-line text-ink">
-                            {data.executives.map((exec, idx) => {
-                              const pct = exec.leads ? Math.round((exec.won / exec.leads) * 100) : 0;
-                              return (
-                                <tr key={idx} className="hover:bg-gold-soft/20">
-                                  <td className="py-2.5 px-3 font-semibold truncate max-w-[100px]">{exec.name}</td>
-                                  <td className="py-2.5 px-3 font-mono font-bold text-gold">{pct}%</td>
-                                  <td className="py-2.5 px-3 text-right font-mono font-bold text-ink">{fmt(exec.revenue)}</td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
-                      </div>
+                      !data.executives || data.executives.length === 0 ? (
+                        <div className="text-slate-400 italic text-[11px] text-center font-sans px-4">No performance data available. Assign leads to salespeople to populate.</div>
+                      ) : (
+                        <div className="w-full h-full overflow-y-auto pr-1">
+                          <table className="w-full text-left text-[11px] font-sans">
+                            <thead>
+                              <tr className="border-b border-line bg-[#FAF9F6] text-slate-500 font-bold uppercase tracking-wider text-[10px]">
+                                <th className="py-2.5 px-3">Sales Exec</th>
+                                <th className="py-2.5 px-3">Win Pct</th>
+                                <th className="py-2.5 px-3 text-right">Won (₹)</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-line text-ink">
+                              {data.executives.map((exec, idx) => {
+                                const pct = exec.leads ? Math.round((exec.won / exec.leads) * 100) : 0;
+                                return (
+                                  <tr key={idx} className="hover:bg-gold-soft/20">
+                                    <td className="py-2.5 px-3 font-semibold truncate max-w-[100px]">{exec.name}</td>
+                                    <td className="py-2.5 px-3 font-mono font-bold text-gold">{pct}%</td>
+                                    <td className="py-2.5 px-3 text-right font-mono font-bold text-ink">{fmt(exec.revenue)}</td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )
                     )}
                   </div>
                 </Card>

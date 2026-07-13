@@ -14,8 +14,8 @@ const BottomNav = () => {
   return (
     <nav className="fixed bottom-0 inset-x-0 h-16 bg-white border-t border-outline-variant/60 flex items-center justify-around z-40 md:hidden p-1 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
       <NavLink to="/" end className={({ isActive }) => linkClass(isActive)}>
-        <span className="material-symbols-outlined text-[20px]">dashboard</span>
-        <span>Dashboard</span>
+        <span className="material-symbols-outlined text-[20px]">home</span>
+        <span>Home</span>
       </NavLink>
       <NavLink to="/leads" className={({ isActive }) => linkClass(isActive)}>
         <span className="material-symbols-outlined text-[20px]">group</span>

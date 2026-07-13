@@ -40,7 +40,7 @@ const ProtectedLayout = ({ children }) => {
   if (!user) return <Navigate to="/login" replace />;
 
   const titles = {
-    '/': 'Sales Dashboard',
+    '/': 'Home',
     '/leads': 'Lead Management',
     '/deals': 'Deal Pipeline',
     '/tasks': 'Task Manager',
@@ -55,7 +55,7 @@ const ProtectedLayout = ({ children }) => {
     '/billing': 'Subscription Billing',
     '/calendar': 'Calendar & Meetings'
   };
-  let title = titles[location.pathname] || 'Dashboard';
+  let title = titles[location.pathname] || 'Home';
   if (location.pathname.startsWith('/leads/')) title = 'Lead Profile';
 
   return (

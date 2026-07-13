@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
-  LayoutDashboard,
+  Home,
   Users,
   Briefcase,
   CheckSquare,
@@ -62,41 +62,57 @@ const Sidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-1.5 custom-scroll">
-        <NavLink to="/" end className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Dashboard">
-          <LayoutDashboard size={16} className="shrink-0" />
-          {!collapsed && <span>Dashboard</span>}
-        </NavLink>
+      <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-6 custom-scroll">
+        {/* Core Performance Section */}
+        <div className="space-y-1.5">
+          {!collapsed && (
+            <span className="px-4 text-[9px] font-extrabold uppercase tracking-widest text-white/35 block mb-2 font-mono">
+              Core Performance
+            </span>
+          )}
+          <NavLink to="/" end className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Home">
+            <Home size={16} className="shrink-0" />
+            {!collapsed && <span>Home</span>}
+          </NavLink>
 
-        <NavLink to="/leads" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Leads">
-          <Users size={16} className="shrink-0" />
-          {!collapsed && <span>Leads</span>}
-        </NavLink>
+          <NavLink to="/deals" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Opportunities">
+            <Briefcase size={16} className="shrink-0" />
+            {!collapsed && <span>Opportunities</span>}
+          </NavLink>
 
-        <NavLink to="/deals" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Opportunities">
-          <Briefcase size={16} className="shrink-0" />
-          {!collapsed && <span>Opportunities</span>}
-        </NavLink>
+          <NavLink to="/reports" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Reports">
+            <BarChart3 size={16} className="shrink-0" />
+            {!collapsed && <span>Reports</span>}
+          </NavLink>
+        </div>
 
-        <NavLink to="/tasks" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Tasks">
-          <CheckSquare size={16} className="shrink-0" />
-          {!collapsed && <span>Tasks</span>}
-        </NavLink>
+        {/* Sales Operations Section */}
+        <div className="space-y-1.5">
+          {!collapsed && (
+            <span className="px-4 text-[9px] font-extrabold uppercase tracking-widest text-white/35 block mb-2 font-mono">
+              Sales Operations
+            </span>
+          )}
+          <NavLink to="/leads" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Leads">
+            <Users size={16} className="shrink-0" />
+            {!collapsed && <span>Leads</span>}
+          </NavLink>
 
-        <NavLink to="/reports" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Reports">
-          <BarChart3 size={16} className="shrink-0" />
-          {!collapsed && <span>Reports</span>}
-        </NavLink>
+          <NavLink to="/tasks" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Tasks">
+            <CheckSquare size={16} className="shrink-0" />
+            {!collapsed && <span>Tasks</span>}
+          </NavLink>
 
-        <NavLink to="/calendar" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Calendar">
-          <Calendar size={16} className="shrink-0" />
-          {!collapsed && <span>Calendar</span>}
-        </NavLink>
+          <NavLink to="/calendar" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Calendar">
+            <Calendar size={16} className="shrink-0" />
+            {!collapsed && <span>Calendar</span>}
+          </NavLink>
 
-        <NavLink to="/settings" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Settings">
-          <Settings size={16} className="shrink-0" />
-          {!collapsed && <span>Settings</span>}
-        </NavLink>
+          <NavLink to="/settings" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Settings">
+            <Settings size={16} className="shrink-0" />
+            {!collapsed && <span>Settings</span>}
+          </NavLink>
+        </div>
       </nav>
 
       {/* Lower Actions Section */}

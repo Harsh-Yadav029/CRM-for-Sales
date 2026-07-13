@@ -7,12 +7,12 @@ const BottomNav = () => {
   if (!user) return null;
 
   const linkClass = (isActive) =>
-    `flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 gap-0.5 font-label ${
-      isActive ? 'text-gold-dark font-extrabold' : 'text-on-surface-variant hover:text-on-surface'
+    `flex flex-col items-center justify-center flex-1 py-2 text-[10px] font-bold uppercase tracking-wider transition-all duration-200 gap-0.5 ${
+      isActive ? 'text-amber-500 font-extrabold' : 'text-slate-400 hover:text-slate-200'
     }`;
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 h-16 bg-white border-t border-outline-variant/60 flex items-center justify-around z-40 md:hidden p-1 shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+    <nav className="fixed bottom-0 inset-x-0 h-16 bg-slate-900 border-t border-slate-800 flex items-center justify-around z-40 md:hidden p-1 backdrop-blur-md bg-opacity-95 shadow-lg">
       <NavLink to="/" end className={({ isActive }) => linkClass(isActive)}>
         <span className="material-symbols-outlined text-[20px]">dashboard</span>
         <span>Dashboard</span>

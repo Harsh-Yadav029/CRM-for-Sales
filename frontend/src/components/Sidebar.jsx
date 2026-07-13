@@ -1,146 +1,132 @@
 import React, { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {
-  LayoutDashboard,
-  Users,
-  Briefcase,
-  CheckSquare,
-  BarChart3,
-  Settings,
-  HelpCircle,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
-  TrendingUp,
-  Plus,
-  Calendar
-} from 'lucide-react';
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
-  const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
+  const [crmOpen, setCrmOpen] = useState(true);
 
   const linkClass = (isActive) =>
-    `flex items-center gap-3 px-4 py-3 rounded-lg text-xs font-bold transition-all duration-200 relative select-none uppercase tracking-wider font-sans ${
+    `flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
       isActive
-        ? 'bg-white/10 text-white font-extrabold'
-        : 'text-white/50 hover:text-white/95 hover:bg-white/5'
-    } ${collapsed ? 'justify-center px-0' : ''}`;
-
-  const activeBar = (isActive) =>
-    isActive ? 'before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-[3px] before:h-5 before:bg-gold before:rounded-r-full' : '';
+        ? 'bg-surface-container text-primary font-bold shadow-sm'
+        : 'text-on-surface-variant hover:bg-surface-container-low hover:text-primary'
+    }`;
 
   return (
-    <aside
-      className={`bg-ink fixed inset-y-0 left-0 flex flex-col z-20 transition-all duration-300 ${
-        collapsed ? 'w-20' : 'w-60'
-      } border-r border-white/5 shadow-md`}
-    >
+    <aside className="w-60 bg-surface-container-lowest border-r border-outline-variant fixed inset-y-0 left-0 flex flex-col z-20">
       {/* Brand Header */}
-      <div className="h-20 flex items-center justify-between px-5 border-b border-white/5 shrink-0">
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-9 h-9 rounded-lg overflow-hidden flex items-center justify-center shadow-md shrink-0">
-            <img src="/1.png" alt="Walk The Plan Logo" className="w-full h-full object-cover" />
-          </div>
-          {!collapsed && (
-            <div className="flex flex-col">
-              <span className="text-xs font-display text-white tracking-wide uppercase font-black">Walk The Plan</span>
-              <span className="text-[9px] font-bold text-white/30 tracking-wider font-label uppercase">Sales CRM</span>
+      <div className="h-16 flex items-center gap-2.5 px-5 border-b border-outline-variant shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-white border border-outline-variant flex items-center justify-center overflow-hidden">
+          <img src="/logo.png" alt="Walk The Plan Logo" className="w-6 h-6 object-contain" />
+        </div>
+        <span className="text-sm font-extrabold text-primary tracking-tight">Walk The Plan CRM</span>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-4 custom-scroll">
+        <div className="space-y-1">
+          <div className="px-3 py-1 text-[10px] uppercase tracking-wider font-extrabold text-on-surface-variant/50">Core</div>
+          <NavLink to="/" end className={({ isActive }) => linkClass(isActive)}>
+            <span className="material-symbols-outlined text-[18px]">dashboard</span>
+            <span>Dashboard</span>
+          </NavLink>
+          <NavLink to="/leads" className={({ isActive }) => linkClass(isActive)}>
+            <span className="material-symbols-outlined text-[18px]">group</span>
+            <span>Leads</span>
+          </NavLink>
+          <NavLink to="/deals" className={({ isActive }) => linkClass(isActive)}>
+            <span className="material-symbols-outlined text-[18px]">handshake</span>
+            <span>Deals</span>
+          </NavLink>
+          <NavLink to="/reports" className={({ isActive }) => linkClass(isActive)}>
+            <span className="material-symbols-outlined text-[18px]">bar_chart</span>
+            <span>Reports</span>
+          </NavLink>
+        </div>
+
+        <div>
+          <button 
+            onClick={() => setCrmOpen(!crmOpen)} 
+            className="w-full flex items-center justify-between px-3 py-1 text-[10px] uppercase tracking-wider font-extrabold text-on-surface-variant/50 hover:text-primary transition-colors"
+          >
+            <span>Workspace</span>
+            <span className="material-symbols-outlined text-xs">
+              {crmOpen ? 'expand_less' : 'expand_more'}
+            </span>
+          </button>
+          {crmOpen && (
+            <div className="mt-1 space-y-1">
+              <NavLink to="/tasks" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">assignment</span>
+                <span>Tasks</span>
+              </NavLink>
+              <NavLink to="/accounts" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">store</span>
+                <span>Accounts</span>
+              </NavLink>
+              <NavLink to="/contacts" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">person</span>
+                <span>Contacts</span>
+              </NavLink>
+              <NavLink to="/products" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+                <span>Products</span>
+              </NavLink>
+              <NavLink to="/quotes" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">request_quote</span>
+                <span>Quotes</span>
+              </NavLink>
+              <NavLink to="/invoices" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                <span>Invoices</span>
+              </NavLink>
             </div>
           )}
         </div>
 
-        {/* Collapse Button */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="text-white/40 hover:text-white p-1 hover:bg-white/5 rounded-lg hidden md:block"
-        >
-          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-        </button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-1.5 custom-scroll">
-        <NavLink to="/" end className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Dashboard">
-          <LayoutDashboard size={16} className="shrink-0" />
-          {!collapsed && <span>Dashboard</span>}
-        </NavLink>
-
-        <NavLink to="/leads" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Leads">
-          <Users size={16} className="shrink-0" />
-          {!collapsed && <span>Leads</span>}
-        </NavLink>
-
-        <NavLink to="/deals" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Opportunities">
-          <Briefcase size={16} className="shrink-0" />
-          {!collapsed && <span>Opportunities</span>}
-        </NavLink>
-
-        <NavLink to="/tasks" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Tasks">
-          <CheckSquare size={16} className="shrink-0" />
-          {!collapsed && <span>Tasks</span>}
-        </NavLink>
-
-        <NavLink to="/reports" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Reports">
-          <BarChart3 size={16} className="shrink-0" />
-          {!collapsed && <span>Reports</span>}
-        </NavLink>
-
-        <NavLink to="/calendar" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Calendar">
-          <Calendar size={16} className="shrink-0" />
-          {!collapsed && <span>Calendar</span>}
-        </NavLink>
-
-        <NavLink to="/settings" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Settings">
-          <Settings size={16} className="shrink-0" />
-          {!collapsed && <span>Settings</span>}
-        </NavLink>
+        <div>
+          <div className="px-3 py-1 text-[10px] uppercase tracking-wider font-extrabold text-on-surface-variant/50">System</div>
+          <NavLink to="/settings" className={({ isActive }) => linkClass(isActive)}>
+            <span className="material-symbols-outlined text-[18px]">settings</span>
+            <span>Settings</span>
+          </NavLink>
+          {user?.role === 'admin' && (
+            <>
+              <NavLink to="/developer-portal" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">terminal</span>
+                <span>Developer Portal</span>
+              </NavLink>
+              <NavLink to="/billing" className={({ isActive }) => linkClass(isActive)}>
+                <span className="material-symbols-outlined text-[18px]">credit_card</span>
+                <span>Billing & Plans</span>
+              </NavLink>
+            </>
+          )}
+        </div>
       </nav>
 
-      {/* Lower Actions Section */}
-      <div className="p-4 border-t border-white/5 shrink-0 flex flex-col gap-4">
-        {/* + New Lead Button */}
-        <button
-          onClick={() => navigate('/leads')}
-          className={`w-full bg-gold hover:bg-gold/90 text-ink py-3.5 rounded-btn font-bold flex items-center justify-center gap-2 text-xs transition-all duration-200 ${
-            collapsed ? 'px-0' : ''
-          }`}
-          title="New Lead"
-        >
-          <Plus size={14} className="shrink-0" />
-          {!collapsed && <span className="uppercase tracking-wider">New Lead</span>}
-        </button>
-
-        {/* Footer Actions */}
-        <div className="flex flex-col gap-1">
-          <button
-            onClick={() => alert('Opening Help Center...')}
-            className={`flex items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-wider font-bold text-white/50 hover:text-white transition-all duration-200 ${
-              collapsed ? 'justify-center px-0' : ''
-            }`}
-            title="Help Center"
-          >
-            <HelpCircle size={16} className="shrink-0" />
-            {!collapsed && <span>Help Center</span>}
-          </button>
-
-          <button
-            onClick={logout}
-            className={`flex items-center gap-3 px-3 py-2 text-[10px] uppercase tracking-wider font-bold text-red-400 hover:text-red-300 transition-all duration-200 ${
-              collapsed ? 'justify-center px-0' : ''
-            }`}
-            title="Sign Out"
-          >
-            <LogOut size={16} className="shrink-0" />
-            {!collapsed && <span>Sign Out</span>}
-          </button>
+      {/* User Footer Profile */}
+      <div className="p-3 border-t border-outline-variant shrink-0 bg-surface-container-low/30">
+        <div className="flex items-center gap-3 px-2 mb-3">
+          <div className="w-8 h-8 rounded-full bg-primary-container text-white flex items-center justify-center font-bold text-xs">
+            {user?.name?.charAt(0).toUpperCase() || 'U'}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold text-on-surface truncate">{user?.name}</p>
+            <p className="text-[10px] text-on-surface-variant capitalize font-medium">{user?.role}</p>
+          </div>
         </div>
+        <button 
+          onClick={logout} 
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-error border border-error/20 hover:bg-error-container hover:border-error-container transition-all"
+        >
+          <span className="material-symbols-outlined text-xs">logout</span>
+          <span>Sign Out</span>
+        </button>
       </div>
     </aside>
   );
 };
 
 export default Sidebar;
-export { Sidebar };

@@ -80,7 +80,7 @@ const AIChatDrawer = ({ isOpen, onClose, leadId }) => {
               className={`rounded-2xl p-3 text-xs leading-relaxed ${
                 msg.sender === 'user'
                   ? 'bg-gold text-[#111111] font-medium'
-                  : 'bg-surface-container text-on-surface border border-outline-variant/40'
+                  : 'bg-surface-container text-slate-200 border border-outline-variant/40'
               }`}
             >
               <p className="whitespace-pre-wrap">{msg.text}</p>

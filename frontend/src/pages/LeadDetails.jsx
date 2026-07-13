@@ -2,24 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, ArrowLeft, Mail, Phone, MessageSquare, Plus, Trash2, Clock, Calendar, CheckSquare, Sparkles } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import Timeline from '../components/Timeline';
 import EmailComposer from '../components/EmailComposer';
 import CallWidget from '../components/CallWidget';
 import MessageComposer from '../components/MessageComposer';
 import AIChatDrawer from '../components/AIChatDrawer';
-import Card from '../components/ui/Card';
-import Button from '../components/ui/Button';
-import Badge from '../components/ui/Badge';
-import Input from '../components/ui/Input';
 
 const STAGES = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'];
 
 const stageColor = (s, active, currentStatus) => {
-  if (currentStatus === 'Lost' && s === 'Lost') return 'bg-danger text-white border-danger';
-  if (s === 'Won') return active ? 'bg-[#FAF9F6] border-gold text-[#705d00] font-bold' : 'border-line text-slate-500 hover:bg-gold-soft';
-  if (s === 'Lost') return active ? 'bg-danger text-white border-danger' : 'border-line text-slate-500 hover:bg-gold-soft';
-  return active ? 'bg-ink text-white border-ink' : 'border-line text-slate-500 hover:bg-gold-soft';
+  if (currentStatus === 'Lost' && s === 'Lost') return 'bg-error text-white border-error';
+  if (s === 'Won') return active ? 'bg-secondary text-white border-secondary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low';
+  if (s === 'Lost') return active ? 'bg-error text-white border-error' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low';
+  return active ? 'bg-primary text-white border-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low';
 };
 
 const LeadDetails = () => {
@@ -29,9 +25,9 @@ const LeadDetails = () => {
   
   const [lead, setLead] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [events, setEvents] = useState([]);
   const [noteText, setNoteText] = useState('');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('details'); // 'details' or 'history'
   const [copied, setCopied] = useState(false);
 
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -57,13 +53,6 @@ const LeadDetails = () => {
     } catch (_) {}
   };
 
-  const fetchEvents = async () => {
-    try {
-      const { data } = await api.get('/api/events');
-      setEvents(data.filter(e => e.relatedTo?.recordId === id));
-    } catch (_) {}
-  };
-
   const [customFieldDefinitions, setCustomFieldDefinitions] = useState([]);
   const fetchCustomFields = async () => {
     try {
@@ -75,7 +64,6 @@ const LeadDetails = () => {
   useEffect(() => {
     fetchLead();
     fetchTasks();
-    fetchEvents();
     fetchCustomFields();
   }, [id]);
 
@@ -110,16 +98,16 @@ const LeadDetails = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-gold" size={28} />
+        <Loader2 className="animate-spin text-primary" size={28} />
       </div>
     );
   }
 
   if (!lead) {
     return (
-      <div className="p-6 text-center text-slate-500 font-medium font-sans">
+      <div className="p-6 text-center text-on-surface-variant font-medium">
         Lead not found.{' '}
-        <Link to="/leads" className="text-gold hover:underline font-bold">
+        <Link to="/leads" className="text-primary hover:underline font-bold">
           Back to Leads
         </Link>
       </div>
@@ -127,7 +115,6 @@ const LeadDetails = () => {
   }
 
   const stageIdx = STAGES.indexOf(lead.status);
-  
   const fmt = (v) =>
     new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -135,6 +122,14 @@ const LeadDetails = () => {
       maximumFractionDigits: 0
     }).format(v);
 
+  // Formatted duration helper
+  const formatDuration = (s) => {
+    const min = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+  };
+
+  // Parse rich activity timeline entries
   const notesTimeline = (lead.notes || []).map((n) => {
     if (n.type === 'email') {
       return {
@@ -187,203 +182,248 @@ const LeadDetails = () => {
     icon: 'assignment'
   }));
 
-  const eventsTimeline = events.map((e) => ({
-    type: 'meeting',
-    title: `${e.type.toUpperCase()}: ${e.title}`,
-    desc: `${e.description || ''}\nTime: ${new Date(e.startTime).toLocaleString('en-IN', { timeStyle: 'short', dateStyle: 'medium' })}\nLocation: ${e.location || 'N/A'}`,
-    user: e.assignedTo?.name || 'System',
-    date: new Date(e.startTime),
-    icon: 'calendar'
-  }));
-
-  const sortedTimeline = [...notesTimeline, ...tasksTimeline, ...eventsTimeline].sort((a, b) => b.date - a.date);
+  const sortedTimeline = [...notesTimeline, ...tasksTimeline].sort((a, b) => b.date - a.date);
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
+    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
       {/* Top action header */}
       <div className="flex items-center gap-3">
         <button
           onClick={() => navigate('/leads')}
-          className="p-2 text-slate-400 hover:text-ink hover:bg-gold-soft rounded-lg transition-all"
+          className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all"
         >
-          <ArrowLeft size={16} />
+          <span className="material-symbols-outlined">arrow_back</span>
         </button>
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Opportunity Profile</span>
-          <h1 className="text-3xl font-display font-black text-ink uppercase tracking-tight leading-none mt-1">
-            {lead.name}
-          </h1>
-          <p className="text-xs text-slate-500 font-medium mt-1">{lead.company}</p>
+          <h2 className="text-base md:text-lg font-bold text-on-surface leading-tight">{lead.name}</h2>
+          <p className="text-xs text-on-surface-variant">{lead.company}</p>
         </div>
       </div>
 
-      {/* Action triggers */}
-      <div className="flex flex-wrap gap-2.5">
-        <Button onClick={() => setShowCallModal(true)} icon={Phone}>
-          Call Client
-        </Button>
-        <Button variant="secondary" onClick={() => setShowEmailModal(true)} icon={Mail}>
-          Send Email
-        </Button>
-        <Button variant="secondary" onClick={() => setShowSMSModal(true)} icon={MessageSquare}>
-          Message
-        </Button>
+      {/* Profile Header Details Section */}
+      <div className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border border-primary/20 bg-surface-container flex items-center justify-center text-primary font-bold text-lg uppercase shrink-0">
+                {lead.name.slice(0, 2)}
+              </div>
+              <div className="absolute bottom-0.5 right-0.5 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+            </div>
+            <div>
+              <h2 className="text-lg md:text-xl font-bold text-on-surface leading-tight">{lead.name}</h2>
+              <p className="text-xs md:text-sm text-on-surface-variant mt-0.5">{lead.company} • {lead.source}</p>
+              <div className="flex gap-2 mt-2">
+                <span className="bg-secondary-container text-on-secondary-container px-3 py-0.5 rounded-full font-bold text-[10px]">
+                  High Priority
+                </span>
+                <span className="bg-surface-container-high text-on-surface-variant px-3 py-0.5 rounded-full font-bold text-[10px]">
+                  {lead.status} Stage
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setShowCallModal(true)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl font-bold text-xs shadow-sm transition-all"
+            >
+              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>call</span>
+              Call Client
+            </button>
+            <button
+              onClick={() => setShowEmailModal(true)}
+              className="flex items-center gap-1.5 px-4 py-2 border border-outline-variant hover:bg-surface-container-low text-primary rounded-xl font-bold text-xs transition-all"
+            >
+              <span className="material-symbols-outlined text-sm">mail</span>
+              Send Email
+            </button>
+            <button
+              onClick={() => setShowSMSModal(true)}
+              className="flex items-center gap-1.5 px-4 py-2 border border-outline-variant hover:bg-surface-container-low text-primary rounded-xl font-bold text-xs transition-all"
+            >
+              <span className="material-symbols-outlined text-sm">chat</span>
+              Message
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Pipeline Progression Stops */}
-      <Card variant="flat" className="p-6 bg-white">
-        <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider mb-4">Pipeline Stage progression</h3>
-        <div className="flex items-center gap-2 flex-wrap select-none">
+      {/* Pipeline Stage buttons trail */}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+        <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">Pipeline Stage progression</h3>
+        <div className="flex items-center gap-2 flex-wrap">
           {STAGES.map((s, i) => (
             <button
               key={s}
               onClick={() => updateStatus(s)}
-              className={`px-4 py-2 rounded-full border text-[10px] uppercase font-bold tracking-wide transition-all shadow-sm ${stageColor(s, i <= stageIdx || lead.status === s, lead.status)}`}
+              className={`px-4 py-2 rounded-full border text-xs font-bold transition-all shadow-sm ${stageColor(s, i <= stageIdx || lead.status === s, lead.status)}`}
             >
               {s}
             </button>
           ))}
         </div>
-      </Card>
+      </div>
 
-      {/* Main details split layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Timeline & Notes */}
-        <div className="lg:col-span-8 space-y-6">
-          {/* Timeline */}
-          <Card variant="raised" className="p-6 bg-white">
-            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider mb-6 pb-2 border-b border-line">Activity Timeline ({sortedTimeline.length})</h3>
-            <Timeline timeline={sortedTimeline} />
-          </Card>
-
-          {/* Add Internal Notes */}
-          <Card variant="raised" className="p-6 bg-white">
-            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider mb-4">Internal Notes</h3>
-            <form onSubmit={addNote} className="flex gap-2">
-              <input
-                value={noteText}
-                onChange={(e) => setNoteText(e.target.value)}
-                placeholder="Log note text..."
-                className="flex-1 border border-line rounded-input py-2.5 px-4 text-xs bg-white text-ink outline-none focus:border-gold transition-all"
-              />
-              <Button type="submit">
-                Add Note
-              </Button>
-            </form>
-
-            {/* Notes List */}
-            <div className="mt-6 space-y-4 max-h-80 overflow-y-auto pr-1.5 custom-scroll">
-              {(!lead.notes || lead.notes.length === 0) ? (
-                <p className="text-xs text-slate-400 italic text-center py-4">No internal notes logged.</p>
-              ) : (
-                lead.notes.filter(n => !n.type || n.type === 'note').slice().reverse().map((note, idx) => (
-                  <div key={idx} className="p-4 bg-[#FAF9F6] border border-line rounded-card">
-                    <p className="text-xs text-ink font-medium leading-relaxed">{note.text}</p>
-                    <div className="flex justify-between items-center mt-3 pt-2 border-t border-line text-[9px] font-bold text-slate-400 uppercase font-mono">
-                      <span>By: {note.addedBy?.name || 'System'}</span>
-                      <span>{new Date(note.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
-                    </div>
-                  </div>
-                ))
-              )}
+      {/* Main details content layout */}
+      <div className="w-full flex flex-col lg:flex-row items-start gap-6">
+        {/* Sidebar details */}
+        <aside className="w-full lg:w-1/3 flex flex-col gap-4">
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+            <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Deal Value</h3>
+            <div className="text-2xl font-extrabold text-on-surface">{fmt(lead.expectedRevenue)}</div>
+            <p className="text-[10px] text-on-surface-variant mt-1">Expected Revenue Projection</p>
+          </div>
+          
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm space-y-3">
+            <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Company Info</h3>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+                <span className="material-symbols-outlined">corporate_fare</span>
+              </div>
+              <div className="min-w-0">
+                <div className="text-xs font-bold text-on-surface truncate">{lead.company}</div>
+                <div className="text-[10px] text-on-surface-variant truncate">Cloud Infrastructure Client</div>
+              </div>
             </div>
-          </Card>
-        </div>
+            <div className="space-y-1.5 pt-2 border-t border-outline-variant/60">
+              <div className="flex justify-between text-xs font-medium">
+                <span className="text-on-surface-variant">Client Source</span>
+                <span className="text-on-surface">{lead.source}</span>
+              </div>
+              <div className="flex justify-between text-xs font-medium">
+                <span className="text-on-surface-variant">Owner</span>
+                <span className="text-on-surface">{lead.assignedTo?.name || 'Unassigned'}</span>
+              </div>
+            </div>
+          </div>
 
-        {/* Right Column: Values & Metadata */}
-        <div className="lg:col-span-4 space-y-6">
-          {/* Deal Value */}
-          <Card variant="raised" className="p-6 bg-white">
-            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">Expected Revenue</h3>
-            <div className="text-3xl font-bold font-mono text-ink tracking-tight mt-1">{fmt(lead.expectedRevenue)}</div>
-            <p className="text-[9px] font-bold text-slate-400 uppercase font-mono mt-1">Value Projection</p>
-          </Card>
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+            <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-3">Engagement Score</h3>
+            <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+              <div className="h-full bg-secondary w-[85%] rounded-full"></div>
+            </div>
+            <div className="flex justify-between mt-2">
+              <span className="text-[10px] font-bold text-secondary">Excellent Status</span>
+              <span className="text-[10px] text-on-surface-variant font-medium">85% Activity</span>
+            </div>
+          </div>
+        </aside>
 
-          {/* Upcoming Events Mini-Widget */}
-          <Card variant="raised" className="p-6 bg-white space-y-4">
-            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Upcoming Stops</h3>
-            {events.filter(e => new Date(e.startTime) >= new Date() && e.status !== 'cancelled').length === 0 ? (
-              <p className="text-[10px] text-slate-400 italic">No upcoming stops scheduled.</p>
-            ) : (
-              <div className="space-y-3">
-                {events.filter(e => new Date(e.startTime) >= new Date() && e.status !== 'cancelled').map(e => (
-                  <div key={e._id} className="p-3 bg-gold-soft/30 border border-line rounded-card space-y-1">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-ink uppercase tracking-tight">{e.title}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white text-gold font-bold font-mono border border-line">{e.type}</span>
+        {/* Tabbed view details */}
+        <div className="w-full lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+          {/* Tab buttons */}
+          <div className="flex border-b border-outline-variant bg-surface-container-low/30">
+            <button
+              onClick={() => setActiveTab('details')}
+              className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'details' ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-on-surface-variant hover:bg-surface-container-low'}`}
+            >
+              Details
+            </button>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'history' ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-on-surface-variant hover:bg-surface-container-low'}`}
+            >
+              History Timeline ({sortedTimeline.length})
+            </button>
+          </div>
+
+          {/* Details Content tab */}
+          <div className="p-5">
+            {activeTab === 'details' ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">Professional Email</label>
+                    <div className="text-xs md:text-sm font-semibold text-on-surface flex items-center gap-1.5">
+                      <span className="truncate">{lead.email}</span>
+                      <button 
+                        onClick={handleCopyEmail}
+                        className="p-1 hover:bg-surface-container rounded text-outline hover:text-primary transition-all"
+                        title="Copy to Clipboard"
+                      >
+                        <span className="material-symbols-outlined text-sm">{copied ? 'done' : 'content_copy'}</span>
+                      </button>
                     </div>
-                    <p className="text-[10px] text-slate-500 font-bold font-mono uppercase mt-0.5">
-                      {new Date(e.startTime).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} • {new Date(e.startTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
-                    </p>
                   </div>
-                ))}
-              </div>
-            )}
-          </Card>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">Direct Phone</label>
+                    <div className="text-xs md:text-sm font-semibold text-on-surface">{lead.phone}</div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">Lead Source</label>
+                    <div className="text-xs md:text-sm font-semibold text-on-surface">{lead.source}</div>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">Timezone</label>
+                    <div className="text-xs md:text-sm font-semibold text-on-surface">IST (UTC+5:30)</div>
+                  </div>
+                </div>
 
-          {/* Customer Company Info */}
-          <Card variant="raised" className="p-6 bg-white space-y-4">
-            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Customer Information</h3>
-            <div className="space-y-3">
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Company</span>
-                <span className="text-xs font-bold text-ink mt-0.5">{lead.company}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Email Address</span>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <span className="text-xs font-bold text-ink truncate max-w-[180px]">{lead.email}</span>
-                  <button onClick={handleCopyEmail} className="text-gold hover:text-gold/80 text-[10px] font-bold uppercase font-mono ml-1">
-                    {copied ? 'Copied' : 'Copy'}
-                  </button>
+                {customFieldDefinitions.length > 0 && (
+                  <>
+                    <hr className="border-outline-variant/60" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {customFieldDefinitions.map((field) => {
+                        const val = lead.customFields?.[field.fieldName];
+                        return (
+                          <div key={field._id}>
+                            <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">
+                              {field.fieldName}
+                            </label>
+                            <div className="text-xs md:text-sm font-semibold text-on-surface">
+                              {val !== undefined && val !== null ? String(val) : '—'}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+
+                <hr className="border-outline-variant/60" />
+
+                {/* Add Internal Notes section */}
+                <div className="space-y-3">
+                  <label className="block text-[10px] font-extrabold text-outline uppercase tracking-wider">Internal Notes</label>
+                  <form onSubmit={addNote} className="flex gap-2">
+                    <input
+                      value={noteText}
+                      onChange={(e) => setNoteText(e.target.value)}
+                      placeholder="Add a new note to this profile..."
+                      className="flex-1 border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-low text-on-surface outline-none focus:border-primary transition-all"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                    >
+                      Add Note
+                    </button>
+                  </form>
+
+                  {/* Notes log */}
+                  <div className="space-y-3 max-h-60 overflow-y-auto pr-1 custom-scroll">
+                    {(!lead.notes || lead.notes.length === 0) ? (
+                      <p className="text-xs text-on-surface-variant/70 italic text-center py-4">No internal notes added yet.</p>
+                    ) : (
+                      lead.notes.filter(n => !n.type || n.type === 'note').slice().reverse().map((note, idx) => (
+                        <div key={idx} className="p-3 bg-surface-container-low/40 rounded-xl border border-outline-variant/60">
+                          <p className="text-xs text-on-surface font-medium leading-relaxed">{note.text}</p>
+                          <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-outline-variant/30 text-[9px] font-bold text-on-surface-variant uppercase">
+                            <span>By: {note.addedBy?.name || 'System'}</span>
+                            <span>{new Date(note.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Phone Number</span>
-                <span className="text-xs font-bold text-ink mt-0.5">{lead.phone}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Acquisition Source</span>
-                <span className="text-xs font-bold text-ink mt-0.5">{lead.source}</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Assigned Executive</span>
-                <span className="text-xs font-bold text-ink mt-0.5">{lead.assignedTo?.name || 'Unassigned'}</span>
-              </div>
-            </div>
-          </Card>
-
-          {/* Custom Lead Parameters */}
-          {customFieldDefinitions.length > 0 && (
-            <Card variant="flat" className="p-6 bg-white space-y-4">
-              <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Custom Parameters</h3>
-              <div className="space-y-3">
-                {customFieldDefinitions.map((field) => {
-                  const val = lead.customFields?.[field.fieldName];
-                  return (
-                    <div key={field._id} className="flex flex-col">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">{field.fieldName}</span>
-                      <span className="text-xs font-bold text-ink mt-0.5">
-                        {val !== undefined && val !== null ? String(val) : '—'}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
-          )}
-
-          {/* Engagement Score */}
-          <Card variant="flat" className="p-6 bg-white space-y-3">
-            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider">Engagement Level</h3>
-            <div className="w-full h-2 bg-line rounded-full overflow-hidden">
-              <div className="h-full bg-gold w-[85%] rounded-full"></div>
-            </div>
-            <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 font-mono">
-              <span>Excellent Standing</span>
-              <span>85% Score</span>
-            </div>
-          </Card>
+            ) : (
+              <Timeline timeline={sortedTimeline} />
+            )}
+          </div>
         </div>
       </div>
 
@@ -393,6 +433,7 @@ const LeadDetails = () => {
           onClose={() => setShowEmailModal(false)}
           onSuccess={(updatedLead) => {
             setLead(updatedLead);
+            setActiveTab('history');
           }}
         />
       )}
@@ -403,6 +444,7 @@ const LeadDetails = () => {
           onClose={() => setShowCallModal(false)}
           onSuccess={(updatedLead) => {
             setLead(updatedLead);
+            setActiveTab('history');
           }}
         />
       )}
@@ -413,6 +455,7 @@ const LeadDetails = () => {
           onClose={() => setShowSMSModal(false)}
           onSuccess={(updatedLead) => {
             setLead(updatedLead);
+            setActiveTab('history');
           }}
         />
       )}
@@ -420,10 +463,10 @@ const LeadDetails = () => {
       {/* Floating Zia AI Chat Trigger Button */}
       <button
         onClick={() => setAiOpen(true)}
-        className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-gold hover:bg-gold/90 text-ink flex items-center justify-center shadow-card-hover transition-all hover:scale-110 z-40 border border-gold/30"
+        className="fixed bottom-20 md:bottom-6 right-6 h-12 w-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shadow-2xl transition-all hover:scale-110 z-40 border border-amber-600/30"
         title="Consult Zia AI"
       >
-        <Bot size={22} className="stroke-[2.5]" />
+        <span className="material-symbols-outlined text-[24px]">smart_toy</span>
       </button>
 
       <AIChatDrawer isOpen={aiOpen} onClose={() => setAiOpen(false)} leadId={id} />
@@ -432,4 +475,3 @@ const LeadDetails = () => {
 };
 
 export default LeadDetails;
-export { LeadDetails };

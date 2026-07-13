@@ -2,29 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Search, Plus, Trash2, Edit2, Shield, Settings, Import, Filter, X, Loader2, ArrowRight } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, Eye, X, Loader2 } from 'lucide-react';
 import ImportWizardModal from '../components/ImportWizardModal';
 import { CardSkeleton } from '../components/Skeletons';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import Input from '../components/ui/Input';
-import Select from '../components/ui/Select';
-import Badge from '../components/ui/Badge';
-import EmptyState from '../components/ui/EmptyState';
 
 const STATUS = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'];
 const SOURCES = ['Website', 'Referral', 'Social Media', 'Cold Call', 'Email Campaign', 'Other'];
 
-const statusColorVariant = (s) =>
+const statusColor = (s) =>
   ({
-    New: 'neutral',
-    Contacted: 'neutral',
-    'Demo Scheduled': 'gold',
-    'Proposal Sent': 'warning',
-    Negotiation: 'warning',
-    Won: 'success',
-    Lost: 'danger'
-  }[s] || 'neutral');
+    New: 'bg-primary-container/10 text-primary border border-primary-container/20',
+    Contacted: 'bg-surface-container-high text-on-surface border border-outline-variant',
+    'Demo Scheduled': 'bg-surface-container-highest text-primary font-bold border border-primary/20',
+    'Proposal Sent': 'bg-tertiary-container/30 text-tertiary border border-tertiary-fixed-dim',
+    Negotiation: 'bg-secondary-container/20 text-secondary border border-secondary-fixed-dim',
+    Won: 'bg-secondary-container text-on-secondary-container font-semibold',
+    Lost: 'bg-error-container text-on-error-container font-semibold'
+  }[s] || 'bg-surface-container-low text-on-surface-variant border border-outline-variant');
 
 const calculateScore = (status) => {
   const scores = {
@@ -115,6 +109,8 @@ const Leads = () => {
 
   const openEdit = (l) => {
     setEditing(l);
+    
+    // Map existing custom fields
     const leadCustomFields = {};
     if (l.customFields) {
       Object.keys(l.customFields).forEach((key) => {
@@ -164,10 +160,33 @@ const Leads = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="animate-spin text-gold" size={28} />
+        <Loader2 className="animate-spin text-primary" size={28} />
       </div>
     );
   }
+
+  // Stats calculation
+  const totalLeadsCount = leads.length;
+  const qualifiedLeadsCount = leads.filter((l) => l.status === 'Won' || l.status === 'Negotiation' || l.status === 'Proposal Sent').length;
+  const conversionRate = totalLeadsCount ? Math.round((leads.filter((l) => l.status === 'Won').length / totalLeadsCount) * 100) : 0;
+
+  const fmt = (v) =>
+    new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(v);
+
+  const getIndustryIcon = (company = '') => {
+    const c = company.toLowerCase();
+    if (c.includes('tech') || c.includes('api') || c.includes('software') || c.includes('saas') || c.includes('data')) {
+      return 'precision_manufacturing';
+    }
+    if (c.includes('heights') || c.includes('landscape') || c.includes('loft') || c.includes('plaza') || c.includes('tower') || c.includes('hill') || c.includes('park')) {
+      return 'landscape';
+    }
+    return 'apartment';
+  };
 
   const getPriorityTier = (score) => {
     if (score >= 85) return 'Tier 1 Priority';
@@ -176,261 +195,296 @@ const Leads = () => {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
+      {/* Dashboard Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Pipeline Management</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1.5">Leads Inventory</h2>
-          <p className="text-xs text-slate-500 mt-1 leading-relaxed max-w-xl">
+          <span className="text-xs font-bold uppercase tracking-widest text-primary">Pipeline Management</span>
+          <h2 className="text-xl md:text-2xl font-black text-on-surface mt-1 uppercase tracking-tight">Leads Inventory</h2>
+          <p className="text-xs text-on-surface-variant max-w-2xl mt-1 leading-relaxed">
             Track and manage high-potential architectural partnerships and construction site projects.
           </p>
         </div>
-        <Button onClick={openCreate} icon={Plus}>
+        <button
+          onClick={openCreate}
+          className="bg-on-surface text-white font-bold text-xs uppercase px-6 py-3 flex items-center gap-2 hover:bg-primary transition-all block-shadow-black"
+        >
+          <span className="material-symbols-outlined text-sm">add</span>
           Capture New Lead
-        </Button>
+        </button>
       </div>
 
-      {/* Filter and search trail */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-        <div className="relative flex-grow max-w-xl">
-          <Input
-            id="leadSearch"
+      {/* Search and Filters Section */}
+      <section className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+        <div className="relative flex-1 max-w-xl">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={16} />
+          <input
+            type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search leads, companies, or lead scores..."
-            icon={Search}
+            placeholder="SEARCH PROJECTS, CLIENTS, OR LEAD SCORES..."
+            className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border-2 border-on-surface focus:ring-0 focus:border-primary font-bold text-xs uppercase placeholder:text-outline/50 transition-all text-on-surface"
           />
         </div>
-
-        {/* Filter pills */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar select-none">
+        
+        {/* Filter chips trail */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
           <button
             onClick={() => setStatusFilter('')}
-            className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider rounded-btn border transition-all ${
-              statusFilter === '' ? 'bg-ink text-white border-ink' : 'bg-white border-line text-ink hover:bg-gold-soft'
-            }`}
+            className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap border-2 ${statusFilter === '' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-on-surface text-on-surface hover:bg-surface-container-high'}`}
           >
-            All
+            All Leads
           </button>
           {['New', 'Contacted', 'Proposal Sent', 'Won'].map((stage) => (
             <button
               key={stage}
               onClick={() => setStatusFilter(stage)}
-              className={`px-4 py-2 text-[10px] font-bold uppercase tracking-wider rounded-btn border transition-all ${
-                statusFilter === stage ? 'bg-ink text-white border-ink' : 'bg-white border-line text-ink hover:bg-gold-soft'
-              }`}
+              className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap border-2 ${statusFilter === stage ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-on-surface text-on-surface hover:bg-surface-container-high'}`}
             >
               {stage}
             </button>
           ))}
           
-          <Button
-            variant="secondary"
+          <button
             onClick={() => setShowImportModal(true)}
-            className="py-2.5 px-4 font-mono text-[10px]"
-            icon={Import}
+            className="flex items-center gap-1 border-2 border-dashed border-outline-variant hover:bg-surface-container-low text-primary text-xs font-bold px-4 py-2 transition-all uppercase whitespace-nowrap ml-2"
           >
             Import CSV
-          </Button>
+          </button>
         </div>
-      </div>
+      </section>
 
-      {/* Leads Cards Grid */}
+      {/* Leads Grid Card Layout */}
       <section className="pb-12">
-        {leads.length === 0 ? (
-          <EmptyState
-            title="No leads on this path yet"
-            description="Start capturing prospects and planning opportunities."
-            action={
-              <Button onClick={openCreate} icon={Plus}>
-                Capture First Lead
-              </Button>
-            }
-          />
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <CardSkeleton />
+            <CardSkeleton />
+            <CardSkeleton />
+          </div>
+        ) : leads.length === 0 ? (
+          <div className="text-center py-16 border-2 border-dashed border-outline-variant text-xs text-on-surface-variant italic bg-white uppercase font-bold tracking-wide">
+            No leads found matching criteria.
+          </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {leads.map((l) => {
               const score = calculateScore(l.status);
               const priority = getPriorityTier(score);
-
+              const industryIcon = getIndustryIcon(l.company);
+              
               return (
-                <Card
-                  key={l._id}
-                  variant="flat"
-                  className="p-6 bg-white hover:border-gold/30 transition-all flex flex-col group relative overflow-hidden"
+                <div 
+                  key={l._id} 
+                  className="bg-surface-container-lowest border border-outline-variant p-6 hover:border-on-surface transition-all flex flex-col group relative"
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex flex-col">
-                      <Link to={`/leads/${l._id}`} className="font-display font-black text-sm uppercase text-ink hover:text-gold transition-colors tracking-tight">
-                        {l.company}
-                      </Link>
-                      <span className="text-xs text-slate-500 font-medium mt-0.5">{l.name}</span>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+                  
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="h-14 w-14 bg-surface-container flex items-center justify-center border border-outline-variant">
+                      <span className="material-symbols-outlined text-on-surface text-2xl">{industryIcon}</span>
                     </div>
-
-                    <div className="flex flex-col items-end gap-1.5 shrink-0">
-                      <Badge variant={statusColorVariant(l.status)}>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${l.status === 'Won' ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-high border border-outline-variant text-on-surface-variant'}`}>
                         {l.status}
-                      </Badge>
-                      <span className="text-[10px] font-bold text-gold font-mono">{score}% Score</span>
+                      </span>
+                      <div className="flex items-center gap-0.5 text-primary">
+                        <span className="font-extrabold text-xs">{score}%</span>
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>bolt</span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="h-px bg-line my-4"></div>
+                  <div className="mb-6">
+                    <h3 className="font-bold text-base text-on-surface leading-tight mb-1 group-hover:text-primary transition-colors">
+                      <Link to={`/leads/${l._id}`}>{l.company}</Link>
+                    </h3>
+                    <p className="text-xs text-on-surface-variant font-medium flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">person</span>
+                      {l.name}
+                    </p>
+                  </div>
 
-                  <div className="space-y-3 mt-auto">
-                    <div className="flex justify-between items-center text-[10px] font-mono font-bold text-slate-400">
-                      <span>Priority</span>
-                      <span className="text-ink">{priority}</span>
+                  <div className="mt-auto space-y-4">
+                    <div className="w-full bg-surface-variant h-1 overflow-hidden">
+                      <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${score}%` }}></div>
+                    </div>
+                    
+                    <div className="flex justify-between items-center text-on-surface-variant text-[10px] uppercase font-bold">
+                      <span>Lead Score</span>
+                      <span className="font-black text-on-surface">{priority}</span>
                     </div>
 
-                    {/* Progress score bar */}
-                    <div className="w-full bg-line h-1 rounded-full overflow-hidden">
-                      <div className="bg-gold h-full transition-all duration-500" style={{ width: `${score}%` }}></div>
-                    </div>
-
-                    {/* Compact action triggers */}
-                    <div className="grid grid-cols-2 gap-2 pt-2">
-                      <Link
+                    <div className="grid grid-cols-2 gap-2 mt-4">
+                      <Link 
                         to={`/leads/${l._id}`}
-                        className="border border-line hover:bg-gold-soft rounded-btn py-2.5 text-center text-[10px] font-bold uppercase tracking-wider text-ink transition-all flex items-center justify-center"
+                        className="border-2 border-on-surface py-2 text-center text-[10px] font-bold uppercase hover:bg-on-surface hover:text-white transition-all flex items-center justify-center"
                       >
                         Details
                       </Link>
-                      <Button
-                        variant="primary"
+                      <button 
                         onClick={() => openEdit(l)}
-                        className="py-2.5 rounded-btn text-[10px]"
+                        className="bg-on-surface text-white py-2 text-[10px] font-bold uppercase hover:bg-primary hover:border-primary transition-all flex items-center justify-center"
                       >
                         Update
-                      </Button>
+                      </button>
                     </div>
 
                     {user?.role === 'admin' && (
-                      <button
+                      <button 
                         onClick={() => handleDelete(l._id)}
-                        className="w-full border border-red-100 text-danger hover:bg-red-50 py-1.5 rounded-btn text-[9px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5"
+                        className="w-full border border-error/20 text-error hover:bg-error-container hover:border-error-container py-1.5 text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1"
                       >
-                        <Trash2 size={10} />
+                        <span className="material-symbols-outlined text-xs">delete</span>
                         Remove Lead
                       </button>
                     )}
                   </div>
-                </Card>
+                </div>
               );
             })}
           </div>
         )}
       </section>
 
-      {/* Leads Dialog Modal Form */}
+      {/* Modal Dialog Form */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/20 backdrop-blur-xs">
-          <div className="bg-white border border-line rounded-modal shadow-modal w-full max-w-lg overflow-y-auto max-h-[90vh]">
-            <div className="flex items-center justify-between px-6 py-5 border-b border-line">
-              <h3 className="text-base font-display font-black text-ink uppercase tracking-tight">
-                {editing ? 'Edit Lead Profile' : 'Add New Prospect'}
-              </h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-ink">
+        <div 
+          className="fixed inset-0 bg-on-background/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+          onClick={() => setShowModal(false)}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-y-auto max-h-[90vh] border border-outline-variant" 
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low sticky top-0 z-10">
+              <h3 className="font-bold text-sm md:text-base text-on-surface">{editing ? 'Edit Lead Profile' : 'Add New Prospect'}</h3>
+              <button 
+                onClick={() => setShowModal(false)} 
+                className="text-on-surface-variant hover:text-on-surface"
+              >
                 <X size={18} />
               </button>
             </div>
-
-            <form onSubmit={handleSave} className="p-6 space-y-4 font-sans">
+            
+            <form onSubmit={handleSave} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Contact Name"
-                  id="formName"
-                  placeholder="Jordan Davis"
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-                <Input
-                  label="Company Name"
-                  id="formCompany"
-                  placeholder="Quantum Systems"
-                  required
-                  value={form.company}
-                  onChange={(e) => setForm({ ...form, company: e.target.value })}
-                />
-                <Input
-                  label="Email Address"
-                  id="formEmail"
-                  type="email"
-                  placeholder="name@company.com"
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-                <Input
-                  label="Phone Number"
-                  id="formPhone"
-                  placeholder="+1 (555) 019-2834"
-                  required
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-
-                <Select
-                  label="Lead Source"
-                  id="formSource"
-                  value={form.source}
-                  onChange={(e) => setForm({ ...form, source: e.target.value })}
-                  options={SOURCES.map(s => ({ value: s, label: s }))}
-                />
-
-                <Input
-                  label="Expected Revenue (₹)"
-                  id="formRevenue"
-                  type="number"
-                  value={form.expectedRevenue}
-                  onChange={(e) => setForm({ ...form, expectedRevenue: Number(e.target.value) })}
-                />
-
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Contact Name</label>
+                  <input 
+                    value={form.name} 
+                    onChange={(e) => setForm({ ...form, name: e.target.value })} 
+                    required 
+                    placeholder="E.g., Jordan Davis"
+                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                  />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Company Name</label>
+                  <input 
+                    value={form.company} 
+                    onChange={(e) => setForm({ ...form, company: e.target.value })} 
+                    required 
+                    placeholder="E.g., Quantum Systems"
+                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                  />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Email Address</label>
+                  <input 
+                    type="email" 
+                    value={form.email} 
+                    onChange={(e) => setForm({ ...form, email: e.target.value })} 
+                    required 
+                    placeholder="name@company.com"
+                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                  />
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Phone Number</label>
+                  <input 
+                    value={form.phone} 
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })} 
+                    required 
+                    placeholder="+1 (555) 019-2834"
+                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Lead Source</label>
+                  <select 
+                    value={form.source} 
+                    onChange={(e) => setForm({ ...form, source: e.target.value })} 
+                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                  >
+                    {SOURCES.map((s) => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Expected Revenue (₹)</label>
+                  <input 
+                    type="number" 
+                    value={form.expectedRevenue} 
+                    onChange={(e) => setForm({ ...form, expectedRevenue: Number(e.target.value) })} 
+                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                  />
+                </div>
                 {editing && (
-                  <Select
-                    label="Status"
-                    id="formStatus"
-                    value={form.status}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
-                    options={STATUS.map(s => ({ value: s, label: s }))}
-                  />
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Status</label>
+                    <select 
+                      value={form.status} 
+                      onChange={(e) => setForm({ ...form, status: e.target.value })} 
+                      className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                    >
+                      {STATUS.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                  </div>
                 )}
-
                 {user?.role === 'admin' && (
-                  <Select
-                    label="Assign Executive"
-                    id="formAssigned"
-                    value={form.assignedTo}
-                    onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
-                    options={[
-                      { value: '', label: 'Unassigned' },
-                      ...salespeople.map(s => ({ value: s._id, label: s.name }))
-                    ]}
-                  />
+                  <div>
+                    <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Assign Executive</label>
+                    <select 
+                      value={form.assignedTo} 
+                      onChange={(e) => setForm({ ...form, assignedTo: e.target.value })} 
+                      className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                    >
+                      <option value="">Unassigned</option>
+                      {salespeople.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
+                    </select>
+                  </div>
                 )}
 
-                {/* Custom Fields */}
+                {/* Phase 2: Dynamic Custom Fields inputs inside lead modal */}
                 {customFieldDefinitions.length > 0 && (
-                  <div className="col-span-2 border-t border-line pt-4 mt-2">
-                    <h4 className="text-xs font-bold text-ink uppercase tracking-wider mb-3">Custom Lead Parameters</h4>
+                  <div className="col-span-2 border-t border-outline-variant/60 pt-4 mt-2">
+                    <h4 className="text-xs font-bold text-on-surface mb-3 flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-sm">dashboard_customize</span>
+                      Custom Lead Parameters
+                    </h4>
                     <div className="grid grid-cols-2 gap-4">
                       {customFieldDefinitions.map((field) => (
-                        <div key={field._id}>
+                        <div key={field._id} className="col-span-2 md:col-span-1">
+                          <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">
+                            {field.fieldName}
+                          </label>
                           {field.fieldType === 'select' ? (
-                            <Select
-                              label={field.fieldName}
+                            <select
                               value={form.customFields[field.fieldName] || ''}
                               onChange={(e) => setForm({
                                 ...form,
-                                customFields: { ...form.customFields, [field.fieldName]: e.target.value }
+                                customFields: {
+                                  ...form.customFields,
+                                  [field.fieldName]: e.target.value
+                                }
                               })}
-                              options={field.options.map(opt => ({ value: opt, label: opt }))}
-                            />
+                              className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                            >
+                              <option value="">Select option</option>
+                              {field.options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
+                            </select>
                           ) : (
-                            <Input
-                              label={field.fieldName}
+                            <input
                               type={field.fieldType === 'number' ? 'number' : field.fieldType === 'date' ? 'date' : 'text'}
                               value={form.customFields[field.fieldName] || ''}
                               onChange={(e) => setForm({
@@ -440,6 +494,7 @@ const Leads = () => {
                                   [field.fieldName]: field.fieldType === 'number' ? Number(e.target.value) : e.target.value
                                 }
                               })}
+                              className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
                             />
                           )}
                         </div>
@@ -448,20 +503,26 @@ const Leads = () => {
                   </div>
                 )}
               </div>
-
-              <div className="flex justify-end gap-3 pt-6 border-t border-line sticky bottom-0 bg-white">
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
+              
+              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/60 sticky bottom-0 bg-white">
+                <button 
+                  type="button" 
+                  onClick={() => setShowModal(false)} 
+                  className="px-4 py-2 border border-outline-variant rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container-low"
+                >
                   Cancel
-                </Button>
-                <Button type="submit">
+                </button>
+                <button 
+                  type="submit" 
+                  className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                >
                   {editing ? 'Update Profile' : 'Add Prospect'}
-                </Button>
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
-
       {showImportModal && (
         <ImportWizardModal 
           onClose={() => setShowImportModal(false)} 
@@ -473,4 +534,3 @@ const Leads = () => {
 };
 
 export default Leads;
-export { Leads };

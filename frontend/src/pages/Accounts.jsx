@@ -3,11 +3,6 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2, Edit2, X, Loader2, Building, Globe, Phone, MapPin, User } from 'lucide-react';
 import RoleGate from '../components/RoleGate';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import Input from '../components/ui/Input';
-import Select from '../components/ui/Select';
-import EmptyState from '../components/ui/EmptyState';
 
 const Accounts = () => {
   const { user } = useAuth();
@@ -115,26 +110,32 @@ const Accounts = () => {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
+    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Title & Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Company Accounts</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Client Accounts</h2>
-          <p className="text-xs text-slate-500 mt-1">Manage client organizations and business entities</p>
+          <h2 className="text-xl font-bold text-on-surface tracking-tight">Accounts & Companies</h2>
+          <p className="text-xs text-on-surface-variant">Manage client organizations and business entities</p>
         </div>
 
-        <Button onClick={handleOpenCreate} icon={Plus}>
+        <button
+          onClick={handleOpenCreate}
+          className="flex items-center justify-center gap-2 rounded-xl bg-gold hover:brightness-105 text-[#111111] px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10"
+        >
+          <Plus size={16} />
           Create Account
-        </Button>
+        </button>
       </div>
 
       {/* Search Input bar */}
       <div className="relative">
-        <Input
-          id="accountSearch"
+        <span className="absolute left-3.5 top-3.5 text-on-surface-variant">
+          <Search size={16} />
+        </span>
+        <input
+          type="text"
           placeholder="Filter accounts by name or industry..."
-          icon={Search}
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-outline-variant/50 bg-surface-container-low text-xs text-on-surface placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -143,42 +144,37 @@ const Accounts = () => {
       {/* Grid List View */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-gold" size={28} />
+          <Loader2 className="animate-spin text-primary" size={32} />
         </div>
       ) : companies.length === 0 ? (
-        <EmptyState
-          title="No accounts on this path yet"
-          description="Get started by creating your first client organization profile."
-          action={
-            <Button onClick={handleOpenCreate} icon={Plus}>
-              Create First Account
-            </Button>
-          }
-        />
+        <div className="text-center py-16 rounded-2xl border border-dashed border-outline-variant/50 bg-white/10">
+          <Building className="mx-auto h-10 w-10 text-slate-600" />
+          <h3 className="mt-4 text-sm font-bold text-on-surface">No Accounts Found</h3>
+          <p className="mt-2 text-xs text-on-surface-variant">Get started by creating your first client organization profile</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {companies.map((comp) => (
-            <Card
+            <div
               key={comp._id}
-              variant="flat"
-              className="p-6 bg-white hover:border-gold/30 transition-all flex flex-col justify-between"
+              className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm hover:border-outline/80 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex justify-between items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold-soft text-gold border border-gold/10">
-                    <Building size={18} />
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-primary border border-amber-500/20">
+                    <Building className="h-5 w-5" />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEdit(comp)}
-                      className="p-1.5 text-slate-400 hover:text-ink rounded-lg hover:bg-gold-soft transition-all"
+                      className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-slate-850"
                     >
                       <Edit2 size={13} />
                     </button>
                     <RoleGate allow={['admin', 'manager']}>
                       <button
                         onClick={() => handleDelete(comp._id)}
-                        className="p-1.5 text-slate-400 hover:text-danger rounded-lg hover:bg-red-50 transition-all"
+                        className="p-1.5 text-on-surface-variant hover:text-red-600 rounded-lg hover:bg-slate-850"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -186,125 +182,150 @@ const Accounts = () => {
                   </div>
                 </div>
 
-                <h3 className="mt-4 text-sm font-display font-black text-ink uppercase tracking-tight leading-snug">{comp.name}</h3>
-                <p className="text-[10px] text-gold font-bold font-mono uppercase tracking-wider mt-1">{comp.industry || 'General Industry'}</p>
+                <h3 className="mt-4 text-sm font-bold text-on-surface leading-snug">{comp.name}</h3>
+                <p className="text-[10px] text-primary font-semibold mt-1 uppercase tracking-wider">{comp.industry || 'General Industry'}</p>
 
                 {/* Sub details stack */}
-                <div className="mt-4 space-y-2 border-t border-line pt-3 text-xs text-ink">
+                <div className="mt-4 space-y-2 border-t border-outline-variant/40/60 pt-3 text-[11px] text-on-surface">
                   {comp.website && (
                     <div className="flex items-center gap-2">
-                      <Globe size={13} className="text-slate-400 shrink-0" />
-                      <a href={comp.website.startsWith('http') ? comp.website : `https://${comp.website}`} target="_blank" rel="noreferrer" className="hover:underline text-gold truncate">
+                      <Globe className="h-3.5 w-3.5 text-on-surface-variant shrink-0" />
+                      <a href={comp.website.startsWith('http') ? comp.website : `https://${comp.website}`} target="_blank" rel="noreferrer" className="hover:underline text-primary truncate">
                         {comp.website}
                       </a>
                     </div>
                   )}
                   {comp.phone && (
                     <div className="flex items-center gap-2">
-                      <Phone size={13} className="text-slate-400 shrink-0" />
-                      <span className="font-medium text-slate-600">{comp.phone}</span>
+                      <Phone className="h-3.5 w-3.5 text-on-surface-variant shrink-0" />
+                      <span>{comp.phone}</span>
                     </div>
                   )}
                   {comp.address && (
                     <div className="flex items-center gap-2">
-                      <MapPin size={13} className="text-slate-400 shrink-0" />
-                      <span className="truncate text-slate-650 font-medium">{comp.address}</span>
+                      <MapPin className="h-3.5 w-3.5 text-on-surface-variant shrink-0" />
+                      <span className="truncate">{comp.address}</span>
                     </div>
                   )}
                 </div>
               </div>
 
-              <div className="mt-5 border-t border-line pt-3 flex items-center justify-between text-[10px] text-slate-500 font-bold uppercase tracking-wider font-mono">
-                <span className="flex items-center gap-1.5">
-                  <User size={12} className="text-slate-400" />
-                  <span>Owner: {comp.assignedTo?.name || 'Unassigned'}</span>
+              <div className="mt-5 border-t border-outline-variant/40/60 pt-3 flex items-center justify-between text-[10px] text-on-surface-variant font-medium">
+                <span className="flex items-center gap-1">
+                  <User className="h-3 w-3 text-on-surface-variant" />
+                  Assigned: {comp.assignedTo?.name || 'Unassigned'}
                 </span>
-                <span>{new Date(comp.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                <span>{new Date(comp.createdAt).toLocaleDateString()}</span>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
 
       {/* Create / Edit Overlay Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-4 backdrop-blur-xs" onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
           <div
-            className="w-full max-w-md rounded-modal border border-line bg-white shadow-modal overflow-hidden"
+            className="w-full max-w-md rounded-2xl border border-outline-variant/50 bg-white shadow-card overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-line bg-[#FAF9F6] px-6 py-4">
-              <h3 className="text-base font-display font-black text-ink uppercase tracking-tight">
+            <div className="flex items-center justify-between border-b border-outline-variant/40 bg-white/50 px-6 py-4">
+              <h3 className="text-sm md:text-base font-bold text-on-surface">
                 {editing ? 'Modify Account Details' : 'Create Client Account'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-ink">
+              <button onClick={() => setShowModal(false)} className="text-on-surface-variant hover:text-on-surface transition-colors">
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 font-sans">
-              <Input
-                label="Account Name"
-                id="accName"
-                placeholder="e.g. NexaCore Solutions"
-                required
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-
-              <Input
-                label="Industry"
-                id="accIndustry"
-                placeholder="e.g. Technology, Retail, Finance"
-                value={form.industry}
-                onChange={(e) => setForm({ ...form, industry: e.target.value })}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Website URL"
-                  id="accWebsite"
-                  placeholder="e.g. www.nexacore.com"
-                  value={form.website}
-                  onChange={(e) => setForm({ ...form, website: e.target.value })}
-                />
-                <Input
-                  label="Phone Number"
-                  id="accPhone"
-                  placeholder="e.g. +91 98765 43210"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Account Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. NexaCore Solutions"
+                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </div>
 
-              <Input
-                label="Office Address"
-                id="accAddress"
-                placeholder="e.g. Cyber City, Bangalore"
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-              />
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Industry</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Technology, Retail, Finance"
+                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  value={form.industry}
+                  onChange={(e) => setForm({ ...form, industry: e.target.value })}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Website URL</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. www.nexacore.com"
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    value={form.website}
+                    onChange={(e) => setForm({ ...form, website: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Phone Number</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. +91 98765 43210"
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Office Address</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 5th Floor, Block C, Cyber City, Bangalore"
+                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  value={form.address}
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
+                />
+              </div>
 
               {(user?.role === 'admin' || user?.role === 'manager') && (
-                <Select
-                  label="Assign Teammate"
-                  id="accAssigned"
-                  value={form.assignedTo}
-                  onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
-                  options={[
-                    { value: '', label: 'Unassigned (Round Robin)' },
-                    ...salespeople.map(sp => ({ value: sp._id, label: `${sp.name} (${sp.role})` }))
-                  ]}
-                />
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Assign Teammate</label>
+                  <select
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    value={form.assignedTo}
+                    onChange={(e) => setForm({ ...form, assignedTo: e.target.value })}
+                  >
+                    <option value="">Unassigned (Round Robin eligible)</option>
+                    {salespeople.map((sp) => (
+                      <option key={sp._id} value={sp._id}>{sp.name} ({sp.role})</option>
+                    ))}
+                  </select>
+                </div>
               )}
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-line">
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/40">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="rounded-lg border border-outline-variant/40 px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-high"
+                >
                   Cancel
-                </Button>
-                <Button type="submit">
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-gold px-4 py-2 text-xs font-bold text-[#111111] hover:brightness-105"
+                >
                   Save Account
-                </Button>
+                </button>
               </div>
             </form>
           </div>
@@ -315,4 +336,3 @@ const Accounts = () => {
 };
 
 export default Accounts;
-export { Accounts };

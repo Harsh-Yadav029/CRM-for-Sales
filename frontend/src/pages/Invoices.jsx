@@ -2,13 +2,6 @@ import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { Search, Plus, Trash2, Edit2, X, Loader2, CreditCard, Calendar, PlusCircle, Printer } from 'lucide-react';
 import RoleGate from '../components/RoleGate';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import Input from '../components/ui/Input';
-import Select from '../components/ui/Select';
-import Table from '../components/ui/Table';
-import Badge from '../components/ui/Badge';
-import EmptyState from '../components/ui/EmptyState';
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState([]);
@@ -163,72 +156,70 @@ const Invoices = () => {
     }).format(v);
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 bg-paper font-sans">
+    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Title & Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Invoice Ledger</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Billing Invoices</h2>
-          <p className="text-xs text-slate-500 mt-1">Track paid, unpaid, and overdue client balances</p>
+          <h2 className="text-xl font-bold text-on-surface tracking-tight">Invoice Ledger</h2>
+          <p className="text-xs text-on-surface-variant">Track paid, unpaid, and overdue client balances</p>
         </div>
 
-        <Button onClick={handleOpenCreate} icon={Plus}>
+        <button
+          onClick={handleOpenCreate}
+          className="flex items-center justify-center gap-2 rounded-xl bg-gold hover:brightness-105 text-[#111111] px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10"
+        >
+          <Plus size={16} />
           Create Invoice
-        </Button>
+        </button>
       </div>
 
       {/* List Grid View */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-gold" size={28} />
+          <Loader2 className="animate-spin text-primary" size={32} />
         </div>
       ) : invoices.length === 0 ? (
-        <EmptyState
-          title="No invoices found"
-          description="Bill client accounts by configuring standard invoices."
-          action={
-            <Button onClick={handleOpenCreate} icon={Plus}>
-              Create First Invoice
-            </Button>
-          }
-        />
+        <div className="text-center py-16 rounded-2xl border border-dashed border-outline-variant/50 bg-white/10">
+          <CreditCard className="mx-auto h-10 w-10 text-slate-600" />
+          <h3 className="mt-4 text-sm font-bold text-on-surface">No Invoices Found</h3>
+          <p className="mt-2 text-xs text-on-surface-variant">Bill client accounts by configuring standard invoices</p>
+        </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {invoices.map((inv) => (
-            <Card
+            <div
               key={inv._id}
-              variant="flat"
-              className="p-6 bg-white hover:border-gold/30 transition-all flex flex-col justify-between"
+              className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm hover:border-outline/80 transition-all flex flex-col justify-between"
             >
               <div>
                 <div className="flex justify-between items-start gap-4">
                   <div>
-                    <h3 className="text-sm font-display font-black text-ink uppercase tracking-tight leading-snug">{inv.invoiceNumber}</h3>
-                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">
+                    <h3 className="text-sm font-bold text-on-surface leading-snug">{inv.invoiceNumber}</h3>
+                    <p className="text-[10px] text-on-surface-variant font-semibold mt-1">
                       Account: {inv.companyId?.name || 'Linked Account'}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => {
                         setPreviewInvoice(inv);
                         setShowPreviewModal(true);
                       }}
-                      className="p-1.5 text-slate-400 hover:text-ink rounded hover:bg-gold-soft transition-all"
+                      className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-slate-850"
                       title="Preview Invoice"
                     >
                       <Printer size={13} />
                     </button>
                     <button
                       onClick={() => handleOpenEdit(inv)}
-                      className="p-1.5 text-slate-400 hover:text-ink rounded hover:bg-gold-soft transition-all"
+                      className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-slate-850"
                     >
                       <Edit2 size={13} />
                     </button>
                     <RoleGate allow={['admin', 'manager']}>
                       <button
                         onClick={() => handleDelete(inv._id)}
-                        className="p-1.5 text-slate-400 hover:text-danger rounded hover:bg-red-50 transition-all"
+                        className="p-1.5 text-on-surface-variant hover:text-red-600 rounded-lg hover:bg-slate-850"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -236,111 +227,131 @@ const Invoices = () => {
                   </div>
                 </div>
 
-                <div className="mt-3 flex gap-2 select-none">
-                  <Badge variant={
-                    inv.status === 'paid' ? 'success' :
-                    inv.status === 'overdue' ? 'danger' : 'gold'
-                  }>
+                <div className="mt-3 flex gap-2">
+                  <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase ${
+                    inv.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                    inv.status === 'overdue' ? 'bg-red-500/10 text-red-600 border border-red-500/20' :
+                    'bg-gold/10 text-primary border border-amber-500/20'
+                  }`}>
                     {inv.status}
-                  </Badge>
-                  <span className="text-[10px] text-slate-500 flex items-center gap-1 font-bold font-mono uppercase tracking-wider">
-                    <Calendar size={11} />
+                  </span>
+                  <span className="text-[10px] text-on-surface-variant flex items-center gap-1 font-medium">
+                    <Calendar className="h-3 w-3" />
                     Due by: {new Date(inv.dueDate).toLocaleDateString()}
                   </span>
                 </div>
               </div>
 
-              <div className="mt-5 border-t border-line pt-3 flex items-center justify-between text-xs font-mono font-bold uppercase tracking-wider text-slate-500">
-                <span>
-                  Quote Ref: {inv.quoteId?.invoiceNumber || inv.quoteId?.title || 'None'}
+              <div className="mt-5 border-t border-outline-variant/40/60 pt-3 flex items-center justify-between">
+                <span className="text-[11px] text-on-surface-variant font-mono">
+                  Linked Quote: {inv.quoteId?.title || 'None'}
                 </span>
-                <span className="text-sm text-ink">
+                <span className="text-sm font-extrabold text-primary">
                   {fmt(inv.total || 0)}
                 </span>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
 
       {/* Create / Edit Overlay Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-4 backdrop-blur-xs overflow-y-auto" onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm overflow-y-auto" onClick={() => setShowModal(false)}>
           <div
-            className="w-full max-w-2xl rounded-modal border border-line bg-white shadow-modal my-8 overflow-hidden"
+            className="w-full max-w-2xl rounded-2xl border border-outline-variant/50 bg-white shadow-card my-8 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-line bg-[#FAF9F6] px-6 py-4">
-              <h3 className="text-base font-display font-black text-ink uppercase tracking-tight">
+            <div className="flex items-center justify-between border-b border-outline-variant/40 bg-white/50 px-6 py-4">
+              <h3 className="text-sm md:text-base font-bold text-on-surface">
                 {editing ? 'Modify Invoice Configurations' : 'Billing: Invoice Creation'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-ink">
+              <button onClick={() => setShowModal(false)} className="text-on-surface-variant hover:text-on-surface transition-colors">
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scroll font-sans">
+            <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scroll">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Input
-                  label="Invoice Number *"
-                  id="invNumber"
-                  placeholder="e.g. INV-9001"
-                  required
-                  value={form.invoiceNumber}
-                  onChange={(e) => setForm({ ...form, invoiceNumber: e.target.value })}
-                />
-                <Input
-                  label="Due Date *"
-                  id="invDue"
-                  type="date"
-                  required
-                  value={form.dueDate}
-                  onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
-                />
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Invoice Number *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. INV-9001"
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                    value={form.invoiceNumber}
+                    onChange={(e) => setForm({ ...form, invoiceNumber: e.target.value })}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Due Date *</label>
+                  <input
+                    type="date"
+                    required
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    value={form.dueDate}
+                    onChange={(e) => setForm({ ...form, dueDate: e.target.value })}
+                  />
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Select
-                  label="Bill-to Account (Company) *"
-                  id="invCompany"
-                  required
-                  placeholder="Choose organization..."
-                  value={form.companyId}
-                  onChange={(e) => setForm({ ...form, companyId: e.target.value })}
-                  options={companies.map(c => ({ value: c._id, label: c.name }))}
-                />
-                <Select
-                  label="Reference Quote (Optional)"
-                  id="invQuote"
-                  placeholder="Choose quote..."
-                  value={form.quoteId}
-                  onChange={(e) => setForm({ ...form, quoteId: e.target.value })}
-                  options={quotes.filter(q => q.companyId?._id === form.companyId || q.companyId === form.companyId).map(q => ({ value: q._id, label: `${q.title} (${fmt(q.total)})` }))}
-                />
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Bill-to Account (Company) *</label>
+                  <select
+                    required
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none"
+                    value={form.companyId}
+                    onChange={(e) => setForm({ ...form, companyId: e.target.value })}
+                  >
+                    <option value="">Choose organization...</option>
+                    {companies.map((c) => (
+                      <option key={c._id} value={c._id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Reference Quote (Optional)</label>
+                  <select
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none"
+                    value={form.quoteId}
+                    onChange={(e) => setForm({ ...form, quoteId: e.target.value })}
+                  >
+                    <option value="">Choose proposal quote...</option>
+                    {quotes.filter(q => q.companyId?._id === form.companyId || q.companyId === form.companyId).map((q) => (
+                      <option key={q._id} value={q._id}>{q.title} ({fmt(q.total)})</option>
+                    ))}
+                  </select>
+                </div>
               </div>
 
-              <Select
-                label="Invoice Status"
-                id="invStatus"
-                value={form.status}
-                onChange={(e) => setForm({ ...form, status: e.target.value })}
-                options={[
-                  { value: 'unpaid', label: 'Unpaid' },
-                  { value: 'paid', label: 'Paid' },
-                  { value: 'overdue', label: 'Overdue' }
-                ]}
-              />
+              {/* Status Select */}
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Invoice Status</label>
+                <select
+                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none"
+                  value={form.status}
+                  onChange={(e) => setForm({ ...form, status: e.target.value })}
+                >
+                  <option value="unpaid">Unpaid</option>
+                  <option value="paid">Paid</option>
+                  <option value="overdue">Overdue</option>
+                </select>
+              </div>
 
               {/* Line Items Builder Section */}
-              <div className="space-y-3 border-t border-line pt-4">
+              <div className="space-y-3 border-t border-outline-variant/40 pt-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-display font-black text-ink uppercase tracking-wider">Invoice Line Items</h4>
+                  <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider">Invoice Line Items</h4>
                   <button
                     type="button"
                     onClick={handleAddItemRow}
-                    className="flex items-center gap-1 text-[10px] font-bold text-gold hover:underline uppercase tracking-wider font-mono"
+                    className="flex items-center gap-1 text-[10px] font-bold text-primary hover:text-primary"
                   >
-                    <PlusCircle size={13} />
+                    <PlusCircle size={14} />
                     Add Product Line
                   </button>
                 </div>
@@ -348,44 +359,50 @@ const Invoices = () => {
                 <div className="space-y-3">
                   {form.items.map((item, idx) => (
                     <div key={idx} className="flex gap-3 items-end">
-                      <div className="flex-grow">
-                        <Select
-                          label="Product SKU"
-                          id={`inv_prod_${idx}`}
+                      <div className="flex-1">
+                        <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Product SKU</label>
+                        <select
                           required
-                          placeholder="Select product..."
+                          className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-2 py-2 text-xs text-on-surface focus:outline-none focus:border-amber-500"
                           value={item.productId}
                           onChange={(e) => handleItemChange(idx, 'productId', e.target.value)}
-                          options={products.map(p => ({ value: p._id, label: `${p.name} (${fmt(p.price)})` }))}
-                        />
+                        >
+                          <option value="">Select product SKU...</option>
+                          {products.map((p) => (
+                            <option key={p._id} value={p._id}>{p.name} ({fmt(p.price)})</option>
+                          ))}
+                        </select>
                       </div>
+
                       <div className="w-20">
-                        <Input
-                          label="Qty"
-                          id={`inv_qty_${idx}`}
+                        <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Qty</label>
+                        <input
                           type="number"
                           required
                           min={1}
+                          className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-2 py-2 text-xs text-on-surface placeholder-slate-600 focus:border-amber-500 focus:outline-none"
                           value={item.quantity}
                           onChange={(e) => handleItemChange(idx, 'quantity', Number(e.target.value))}
                         />
                       </div>
+
                       <div className="w-28">
-                        <Input
-                          label="Unit Price"
-                          id={`inv_price_${idx}`}
+                        <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Unit Price</label>
+                        <input
                           type="number"
                           required
                           min={0}
+                          className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-2 py-2 text-xs text-on-surface placeholder-slate-600 focus:border-amber-500 focus:outline-none"
                           value={item.price}
                           onChange={(e) => handleItemChange(idx, 'price', Number(e.target.value))}
                         />
                       </div>
+
                       <button
                         type="button"
                         disabled={form.items.length === 1}
                         onClick={() => handleRemoveItemRow(idx)}
-                        className="p-3 border border-line text-slate-400 hover:text-danger rounded-input disabled:opacity-30 h-[38px] flex items-center justify-center shrink-0"
+                        className="p-2 border border-outline-variant/50 text-on-surface-variant hover:text-red-600 rounded-lg disabled:opacity-30"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -394,125 +411,129 @@ const Invoices = () => {
                 </div>
               </div>
 
-              <div className="flex justify-between items-center bg-[#FAF9F6] p-4 rounded-card border border-line mt-6 font-mono text-xs font-bold uppercase tracking-wider text-slate-500">
-                <span>Gross Invoice Total</span>
-                <span className="text-sm text-ink">{fmt(calculateFormTotal())}</span>
+              {/* Running summary totals */}
+              <div className="flex justify-between items-center bg-surface-container p-4 rounded-xl border border-outline-variant/50/80 mt-6">
+                <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Gross Invoice Total</span>
+                <span className="text-base font-extrabold text-primary">{fmt(calculateFormTotal())}</span>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-line">
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/40">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="rounded-lg border border-outline-variant/40 px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-high"
+                >
                   Cancel
-                </Button>
-                <Button type="submit">
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-gold px-4 py-2 text-xs font-bold text-[#111111] hover:brightness-105"
+                >
                   Create Invoice
-                </Button>
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Invoice Printable document view Overlay */}
+      {/* Invoice Printable / PDF preview Modal Overlay */}
       {showPreviewModal && previewInvoice && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-4 backdrop-blur-xs overflow-y-auto" onClick={() => setShowPreviewModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-surface-container/70 p-4 backdrop-blur-sm overflow-y-auto" onClick={() => setShowPreviewModal(false)}>
           <div
-            className="w-full max-w-2xl bg-white border border-line text-ink rounded-modal shadow-modal p-8 overflow-hidden relative print:p-0 my-8 print:my-0"
+            className="w-full max-w-2xl bg-white text-slate-900 rounded-2xl shadow-card p-8 overflow-hidden relative print:p-0 my-8 print:my-0"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Controls */}
+            {/* Control buttons */}
             <div className="absolute right-6 top-6 flex items-center gap-2 print:hidden">
               <button
                 onClick={() => window.print()}
-                className="flex items-center gap-1.5 px-3 py-2 bg-[#FAF9F6] hover:bg-gold-soft text-ink rounded-btn text-xs font-bold transition-all border border-line"
+                className="flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-all border border-slate-200"
               >
                 <Printer size={13} />
                 Print / Save PDF
               </button>
               <button
                 onClick={() => setShowPreviewModal(false)}
-                className="p-2 bg-[#FAF9F6] hover:bg-gold-soft border border-line text-ink rounded-btn"
+                className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg"
               >
-                <X size={14} />
+                <X size={15} />
               </button>
             </div>
 
-            {/* Document Treatment Header */}
-            <div className="flex justify-between items-start border-b border-line pb-6 mt-6 print:mt-0 font-sans">
+            {/* Document Header */}
+            <div className="flex justify-between items-start border-b border-slate-200 pb-6 mt-6 print:mt-0">
               <div>
-                <h1 className="text-xl font-display font-black tracking-tight text-ink uppercase">COMMERCIAL INVOICE</h1>
-                <p className="text-[10px] text-slate-500 mt-1 font-mono font-bold">INVOICE ID: #{previewInvoice.invoiceNumber}</p>
+                <h1 className="text-2xl font-extrabold tracking-tight text-primary uppercase">COMMERCIAL INVOICE</h1>
+                <p className="text-xs text-on-surface-variant mt-1 font-mono">Invoice ID: #{previewInvoice.invoiceNumber}</p>
               </div>
-              <div className="text-right text-[11px] space-y-1 font-mono font-bold text-slate-500 uppercase tracking-wide">
-                <h3 className="text-ink font-display font-black text-xs">Walk the Plan CRM</h3>
-                <p>Finance & Collections Department</p>
-                <p>Date: {new Date(previewInvoice.createdAt).toLocaleDateString()}</p>
+              <div className="text-right text-xs space-y-1">
+                <h3 className="font-bold text-slate-800">Walk the Plan CRM</h3>
+                <p className="text-on-surface-variant">Finance & Collections Department</p>
+                <p className="text-on-surface-variant">Date: {new Date(previewInvoice.createdAt).toLocaleDateString()}</p>
               </div>
             </div>
 
             {/* Customer Details */}
-            <div className="grid grid-cols-2 gap-8 my-6 text-xs font-sans">
+            <div className="grid grid-cols-2 gap-8 my-6 text-xs">
               <div>
-                <h4 className="font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono text-[9px]">Billed To:</h4>
-                <p className="font-bold text-ink">{previewInvoice.companyId?.name}</p>
-                {previewInvoice.companyId?.phone && <p className="text-slate-500 mt-0.5">{previewInvoice.companyId.phone}</p>}
-                {previewInvoice.companyId?.address && <p className="text-slate-500 mt-0.5">{previewInvoice.companyId.address}</p>}
+                <h4 className="font-bold text-on-surface-variant uppercase tracking-wider mb-2">Billed To:</h4>
+                <p className="font-bold text-slate-800">{previewInvoice.companyId?.name}</p>
+                {previewInvoice.companyId?.phone && <p className="text-on-surface-variant mt-0.5">{previewInvoice.companyId.phone}</p>}
+                {previewInvoice.companyId?.address && <p className="text-on-surface-variant mt-0.5">{previewInvoice.companyId.address}</p>}
               </div>
 
               <div>
-                <h4 className="font-bold text-slate-400 uppercase tracking-wider mb-2 font-mono text-[9px]">Payment Details:</h4>
-                <div className="space-y-1 text-slate-500 font-medium">
-                  <p>Due Date: <span className="font-mono font-bold text-ink">{new Date(previewInvoice.dueDate).toLocaleDateString()}</span></p>
-                  <p>Status: <span className="font-bold uppercase text-gold">{previewInvoice.status}</span></p>
+                <h4 className="font-bold text-on-surface-variant uppercase tracking-wider mb-2">Payment Terms:</h4>
+                <div className="space-y-1 text-on-surface-variant">
+                  <p>Due Date: <span className="font-bold text-red-600">{new Date(previewInvoice.dueDate).toLocaleDateString()}</span></p>
+                  <p>Current Status: <span className="font-bold uppercase text-amber-600">{previewInvoice.status}</span></p>
                 </div>
               </div>
             </div>
 
             {/* Line Items Table */}
-            <table className="w-full text-xs text-left border-collapse my-6 font-sans">
+            <table className="w-full text-xs text-left border-collapse my-6">
               <thead>
-                <tr className="border-b border-line bg-[#FAF9F6] text-slate-500 uppercase font-mono font-bold text-[9px]">
+                <tr className="border-b border-slate-200 bg-slate-50 text-on-surface-variant uppercase font-bold text-[10px]">
                   <th className="py-2.5 px-3">Product Name</th>
                   <th className="py-2.5 px-3 text-right">Qty</th>
                   <th className="py-2.5 px-3 text-right">Unit Price</th>
                   <th className="py-2.5 px-3 text-right">Subtotal</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-line">
+              <tbody className="divide-y divide-slate-100">
                 {previewInvoice.items?.map((item, idx) => (
-                  <tr key={idx} className="text-ink">
+                  <tr key={idx} className="text-slate-700">
                     <td className="py-3 px-3">
                       <p className="font-bold">{item.productId?.name || 'Product Item'}</p>
-                      {item.productId?.sku && <p className="text-[10px] text-slate-550 font-mono mt-0.5">SKU: {item.productId.sku}</p>}
+                      {item.productId?.sku && <p className="text-[10px] text-on-surface-variant font-mono mt-0.5">SKU: {item.productId.sku}</p>}
                     </td>
-                    <td className="py-3 px-3 text-right font-mono font-bold text-slate-600">{item.quantity}</td>
-                    <td className="py-3 px-3 text-right font-mono">{fmt(item.price)}</td>
-                    <td className="py-3 px-3 text-right font-mono font-bold text-ink">{fmt(item.price * item.quantity)}</td>
+                    <td className="py-3 px-3 text-right font-semibold">{item.quantity}</td>
+                    <td className="py-3 px-3 text-right">{fmt(item.price)}</td>
+                    <td className="py-3 px-3 text-right font-bold text-slate-900">{fmt(item.price * item.quantity)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            {/* Financial Summary with Thin Gold Rule */}
-            <div className="flex justify-end pt-6">
-              <div className="w-64 space-y-2 text-xs font-sans">
-                <div className="flex justify-between text-slate-500 font-bold uppercase tracking-wider font-mono text-[10px]">
+            {/* Financial Summary */}
+            <div className="flex justify-end border-t border-slate-200 pt-6">
+              <div className="w-64 space-y-2 text-xs">
+                <div className="flex justify-between text-on-surface-variant font-semibold">
                   <span>Gross Invoice Total:</span>
                   <span>{fmt(previewInvoice.total)}</span>
                 </div>
-                
-                {/* Thin gold rule above total */}
-                <div className="w-full h-px bg-gold my-2"></div>
-                
-                <div className="flex justify-between pt-2 text-xs font-bold uppercase tracking-wider font-mono text-ink bg-[#FAF9F6] p-2.5 rounded-btn border border-line">
+                <div className="flex justify-between border-t border-slate-200 pt-2 text-sm font-extrabold text-[#111111] bg-slate-50 p-2 rounded">
                   <span>Amount Due (INR):</span>
-                  <span className="font-extrabold">{fmt(previewInvoice.total)}</span>
+                  <span>{fmt(previewInvoice.total)}</span>
                 </div>
               </div>
             </div>
 
-            {/* Terms */}
-            <div className="border-t border-line pt-6 mt-8 text-[9px] text-slate-500 font-mono font-bold uppercase tracking-wider leading-relaxed">
-              <h4 className="text-slate-600 font-display font-black text-[10px] mb-1">Standard Payment Terms</h4>
+            {/* Terms and Signoff */}
+            <div className="border-t border-slate-200 pt-6 mt-8 text-[10px] text-on-surface-variant leading-relaxed">
+              <h4 className="font-bold text-slate-600 uppercase tracking-wider mb-1">Standard Payment Terms</h4>
               <p>1. Please settle invoice dues prior to the payment due date shown above.</p>
               <p>2. Payment can be settled via corporate bank transfer or direct online link payments.</p>
             </div>
@@ -524,4 +545,3 @@ const Invoices = () => {
 };
 
 export default Invoices;
-export { Invoices };

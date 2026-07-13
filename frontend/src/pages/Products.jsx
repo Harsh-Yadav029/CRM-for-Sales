@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Search, Plus, Trash2, Edit2, X, Loader2, Package, Tag } from 'lucide-react';
+import { Search, Plus, Trash2, Edit2, X, Loader2, Package, Tag, Layers } from 'lucide-react';
 import RoleGate from '../components/RoleGate';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
-import Input from '../components/ui/Input';
-import Select from '../components/ui/Select';
-import Textarea from '../components/ui/Textarea';
-import Table from '../components/ui/Table';
-import Badge from '../components/ui/Badge';
-import EmptyState from '../components/ui/EmptyState';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -103,179 +95,204 @@ const Products = () => {
     }).format(v);
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
+    <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Title & Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Product Inventory</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Product SKU Catalog</h2>
-          <p className="text-xs text-slate-500 mt-1">Manage items, software licenses, SKUs, and service prices</p>
+          <h2 className="text-xl font-bold text-on-surface tracking-tight">Product Catalog</h2>
+          <p className="text-xs text-on-surface-variant">Manage items, software licenses, SKUs, and service prices</p>
         </div>
 
-        <Button onClick={handleOpenCreate} icon={Plus}>
+        <button
+          onClick={handleOpenCreate}
+          className="flex items-center justify-center gap-2 rounded-xl bg-gold hover:brightness-105 text-[#111111] px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10"
+        >
+          <Plus size={16} />
           Add Product
-        </Button>
+        </button>
       </div>
 
       {/* Search Input bar */}
       <div className="relative">
-        <Input
-          id="productSearch"
+        <span className="absolute left-3.5 top-3.5 text-on-surface-variant">
+          <Search size={16} />
+        </span>
+        <input
+          type="text"
           placeholder="Filter products by name or SKU..."
-          icon={Search}
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-outline-variant/50 bg-surface-container-low text-xs text-on-surface placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
 
-      {/* Table-First Layout */}
+      {/* Grid List View */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-gold" size={28} />
+          <Loader2 className="animate-spin text-primary" size={32} />
         </div>
       ) : products.length === 0 ? (
-        <EmptyState
-          title="No products in catalog yet"
-          description="Get started by adding items to your product catalogue list."
-          action={
-            <Button onClick={handleOpenCreate} icon={Plus}>
-              Create First Product
-            </Button>
-          }
-        />
+        <div className="text-center py-16 rounded-2xl border border-dashed border-outline-variant/50 bg-white/10">
+          <Package className="mx-auto h-10 w-10 text-slate-600" />
+          <h3 className="mt-4 text-sm font-bold text-on-surface">No Products Found</h3>
+          <p className="mt-2 text-xs text-on-surface-variant">Get started by adding items to your product catalogue list</p>
+        </div>
       ) : (
-        <Table headers={['SKU Code', 'Product Title', 'Price (INR)', 'Status', 'Last Updated', 'Actions']}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((prod) => (
-            <tr key={prod._id} className={prod.isActive ? 'hover:bg-gold-soft/30' : 'opacity-60 bg-red-50/10'}>
-              {/* SKU - Monospaced */}
-              <td className="py-3 px-5 font-mono font-bold text-slate-600 text-xs">
-                {prod.sku}
-              </td>
-
-              {/* Title / Description */}
-              <td className="py-3 px-5">
-                <div className="flex flex-col max-w-md">
-                  <span className="font-bold text-ink">{prod.name}</span>
-                  <span className="text-[10px] text-slate-500 mt-0.5 truncate">{prod.description || '—'}</span>
-                </div>
-              </td>
-
-              {/* Price - Monospaced */}
-              <td className="py-3 px-5 font-mono font-bold text-ink">
-                {fmt(prod.price)}
-              </td>
-
-              {/* Status */}
-              <td className="py-3 px-5 select-none">
-                <Badge variant={prod.isActive ? 'gold' : 'danger'}>
-                  {prod.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-              </td>
-
-              {/* Date - Monospaced */}
-              <td className="py-3 px-5 font-mono text-slate-500 text-[11px]">
-                {new Date(prod.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-              </td>
-
-              {/* Actions */}
-              <td className="py-3 px-5">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => handleOpenEdit(prod)}
-                    className="p-1 text-slate-400 hover:text-ink rounded hover:bg-gold-soft transition-all"
-                  >
-                    <Edit2 size={13} />
-                  </button>
-                  <RoleGate allow={['admin', 'manager']}>
+            <div
+              key={prod._id}
+              className={`rounded-2xl border bg-surface-container-low p-5 backdrop-blur-sm transition-all flex flex-col justify-between ${
+                prod.isActive ? 'border-outline-variant/50 hover:border-outline/80' : 'border-red-200 opacity-70'
+              }`}
+            >
+              <div>
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-primary border border-amber-500/20">
+                    <Package className="h-5 w-5" />
+                  </div>
+                  <div className="flex items-center gap-1.5">
                     <button
-                      onClick={() => handleDelete(prod._id)}
-                      className="p-1 text-slate-400 hover:text-danger rounded hover:bg-red-50 transition-all"
+                      onClick={() => handleOpenEdit(prod)}
+                      className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-slate-850"
                     >
-                      <Trash2 size={13} />
+                      <Edit2 size={13} />
                     </button>
-                  </RoleGate>
+                    <RoleGate allow={['admin', 'manager']}>
+                      <button
+                        onClick={() => handleDelete(prod._id)}
+                        className="p-1.5 text-on-surface-variant hover:text-red-600 rounded-lg hover:bg-slate-850"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </RoleGate>
+                  </div>
                 </div>
-              </td>
-            </tr>
+
+                <h3 className="mt-4 text-sm font-bold text-on-surface leading-snug">{prod.name}</h3>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] bg-surface-container-high text-on-surface border border-outline-variant px-2 py-0.5 rounded font-mono font-medium">
+                    SKU: {prod.sku}
+                  </span>
+                  {!prod.isActive && (
+                    <span className="text-[9px] bg-red-500/10 text-red-600 border border-red-500/25 px-1.5 py-0.5 rounded font-bold uppercase">
+                      Inactive
+                    </span>
+                  )}
+                </div>
+
+                <p className="mt-3 text-xs text-on-surface-variant line-clamp-3 leading-relaxed">
+                  {prod.description || 'No description provided.'}
+                </p>
+              </div>
+
+              <div className="mt-6 border-t border-outline-variant/40/60 pt-3 flex items-center justify-between">
+                <span className="flex items-center gap-1 text-xs font-bold text-primary">
+                  <Tag className="h-3.5 w-3.5 shrink-0" />
+                  {fmt(prod.price)}
+                </span>
+                <span className="text-[10px] text-on-surface-variant">
+                  Updated: {new Date(prod.updatedAt).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
           ))}
-        </Table>
+        </div>
       )}
 
       {/* Create / Edit Overlay Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/20 p-4 backdrop-blur-xs" onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
           <div
-            className="w-full max-w-md rounded-modal border border-line bg-white shadow-modal overflow-hidden"
+            className="w-full max-w-md rounded-2xl border border-outline-variant/50 bg-white shadow-card overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-line bg-[#FAF9F6] px-6 py-4">
-              <h3 className="text-base font-display font-black text-ink uppercase tracking-tight">
+            <div className="flex items-center justify-between border-b border-outline-variant/40 bg-white/50 px-6 py-4">
+              <h3 className="text-sm md:text-base font-bold text-on-surface">
                 {editing ? 'Modify Catalog Item' : 'Add New Product'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-ink">
+              <button onClick={() => setShowModal(false)} className="text-on-surface-variant hover:text-on-surface transition-colors">
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4 font-sans">
-              <Input
-                label="Product Title"
-                id="formName"
-                placeholder="e.g. NexaCore Business License"
-                required
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="SKU Code"
-                  id="formSku"
-                  placeholder="e.g. NX-BIZ-100"
+            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Product Title *</label>
+                <input
+                  type="text"
                   required
-                  value={form.sku}
-                  onChange={(e) => setForm({ ...form, sku: e.target.value })}
-                />
-                <Input
-                  label="Unit Price (INR)"
-                  id="formPrice"
-                  type="number"
-                  required
-                  min={0}
-                  placeholder="e.g. 75000"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                  placeholder="e.g. NexaCore Business License"
+                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </div>
 
-              <Textarea
-                label="Description"
-                id="formDescription"
-                placeholder="Document specifications, licenses..."
-                value={form.description}
-                onChange={(e) => setForm({ ...form, description: e.target.value })}
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">SKU Code *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. NX-BIZ-100"
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                    value={form.sku}
+                    onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Unit Price (INR) *</label>
+                  <input
+                    type="number"
+                    required
+                    min={0}
+                    placeholder="e.g. 75000"
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    value={form.price}
+                    onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+                  />
+                </div>
+              </div>
 
-              <div className="flex items-center gap-2 pt-2 select-none">
+              <div>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Description</label>
+                <textarea
+                  rows={4}
+                  placeholder="Document product specifications, package licenses, SLA guidelines..."
+                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none font-sans"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
                 <input
                   type="checkbox"
                   id="isActive"
-                  className="rounded border-line bg-[#FAF9F6] text-gold focus:ring-0 focus:ring-offset-0 h-4 w-4"
+                  className="rounded border-outline-variant/50 bg-surface-container text-primary focus:ring-0 focus:ring-offset-0 h-4 w-4"
                   checked={form.isActive}
                   onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                 />
-                <label htmlFor="isActive" className="text-xs font-bold text-ink">
+                <label htmlFor="isActive" className="text-xs font-bold text-on-surface select-none">
                   Available for Quotation & Billing (Active)
                 </label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-line">
-                <Button variant="secondary" onClick={() => setShowModal(false)}>
+              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/40">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="rounded-lg border border-outline-variant/40 px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-high"
+                >
                   Cancel
-                </Button>
-                <Button type="submit">
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-lg bg-gold px-4 py-2 text-xs font-bold text-[#111111] hover:brightness-105"
+                >
                   Save Product
-                </Button>
+                </button>
               </div>
             </form>
           </div>
@@ -286,4 +303,3 @@ const Products = () => {
 };
 
 export default Products;
-export { Products };

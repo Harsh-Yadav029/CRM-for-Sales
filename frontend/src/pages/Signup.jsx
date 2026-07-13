@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
-import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
+import { Loader2, ShieldCheck, Building2, UserPlus } from 'lucide-react';
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -22,6 +20,7 @@ const Signup = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // If registering via an invite token, email is pre-determined or we collect it
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -43,6 +42,7 @@ const Signup = () => {
 
       const { data } = await api.post('/api/auth/register', payload);
 
+      // Save token to localStorage (matches AuthContext logic)
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify({
         _id: data._id,
@@ -64,152 +64,117 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-12 bg-paper font-sans">
-      {/* Left Column: Register Form */}
-      <div className="lg:col-span-5 flex flex-col justify-between p-8 md:p-12 bg-white border-r border-line">
-        {/* Top Branding logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-md">
-            <img src="/1.png" alt="Walk The Plan Logo" className="w-full h-full object-cover" />
+    <div className="flex min-h-screen items-center justify-center bg-surface-container px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-outline-variant/50 bg-white/50 p-8 shadow-card backdrop-blur-xl">
+        <div className="text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 text-primary">
+            {token ? <UserPlus className="h-6 w-6" /> : <Building2 className="h-6 w-6" />}
           </div>
-          <span className="font-display text-ink uppercase font-black text-sm tracking-wide">Walk The Plan</span>
+          <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-on-surface">
+            {token ? 'Join Your Team' : 'Create Organization'}
+          </h2>
+          <p className="mt-2 text-sm text-on-surface-variant">
+            {token 
+              ? 'Complete registration to access your workspace' 
+              : 'Launch your multi-tenant sales CRM instance'}
+          </p>
         </div>
 
-        {/* Center Panel: Form */}
-        <div className="my-auto py-8 max-w-sm w-full mx-auto space-y-6">
-          <div>
-            <h1 className="text-2xl font-display font-black text-ink tracking-tight uppercase">
-              {token ? 'Join Your Team' : 'Create Organization'}
-            </h1>
-            <p className="text-xs text-slate-500 mt-1.5 font-medium">
-              {token 
-                ? 'Complete registration to access your workspace' 
-                : 'Launch your multi-tenant sales CRM instance'}
-            </p>
+        {error && (
+          <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 text-danger rounded-btn text-xs font-bold leading-normal">
-              {error}
+        {success && (
+          <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-400 flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5" />
+            {success}
+          </div>
+        )}
+
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4 rounded-md shadow-sm">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Full Name</label>
+              <input
+                type="text"
+                required
+                className="relative mt-1 block w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
+                placeholder="John Doe"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
             </div>
-          )}
 
-          {success && (
-            <div className="p-3 bg-emerald-50 border border-emerald-250 text-success rounded-btn text-xs font-bold flex items-center gap-2 leading-normal">
-              <ShieldCheck size={16} />
-              {success}
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Email Address</label>
+              <input
+                type="email"
+                required
+                className="relative mt-1 block w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
+                placeholder="admin@company.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <Input
-              label="Full Name"
-              id="name"
-              placeholder="John Doe"
-              required
-              value={form.name}
-              onChange={e => setForm({ ...form, name: e.target.value })}
-            />
-
-            <Input
-              label="Email Address"
-              id="email"
-              type="email"
-              placeholder="name@company.com"
-              required
-              value={form.email}
-              onChange={e => setForm({ ...form, email: e.target.value })}
-            />
-
-            <Input
-              label="Password"
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              required
-              minLength={6}
-              value={form.password}
-              onChange={e => setForm({ ...form, password: e.target.value })}
-            />
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Password</label>
+              <input
+                type="password"
+                required
+                minLength={6}
+                className="relative mt-1 block w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
+                placeholder="••••••••"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+            </div>
 
             {!token && (
-              <Input
-                label="Company Name"
-                id="tenantName"
-                placeholder="Acme Corp"
-                required
-                value={form.tenantName}
-                onChange={e => setForm({ ...form, tenantName: e.target.value })}
-              />
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Company Name</label>
+                <input
+                  type="text"
+                  required
+                  className="relative mt-1 block w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
+                  placeholder="Acme Corp"
+                  value={form.tenantName}
+                  onChange={(e) => setForm({ ...form, tenantName: e.target.value })}
+                />
+              </div>
             )}
+          </div>
 
-            <Button
+          <div>
+            <button
               type="submit"
               disabled={loading}
-              className="w-full justify-center"
+              className="group relative flex w-full justify-center rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-[#111111] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50"
             >
               {loading ? (
-                <>
-                  <Loader2 className="animate-spin" size={14} />
-                  <span>Creating Account...</span>
-                </>
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <>
-                  <span>Get Started</span>
-                  <ArrowRight size={14} />
-                </>
+                token ? 'Join Organization' : 'Create Organization'
               )}
-            </Button>
-          </form>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-6 border-t border-line text-[10px] font-bold text-slate-500 uppercase tracking-wider font-mono">
-          <p>
-            <span className="text-slate-400">Already registered? </span>
-            <button onClick={() => navigate('/login')} className="text-gold hover:underline">
-              Sign In
             </button>
-          </p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-gold">Privacy</a>
-            <a href="#" className="hover:text-gold">Support</a>
           </div>
-        </div>
-      </div>
 
-      {/* Right Column: Blueprint Graphic Panel */}
-      <div className="hidden lg:col-span-7 bg-ink relative overflow-hidden flex flex-col justify-center p-16 select-none">
-        <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#E7E2D8_1px,transparent_1px),linear-gradient(to_bottom,#E7E2D8_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-        
-        <div className="absolute top-1/3 left-0 w-full h-px border-t border-dashed border-gold/15"></div>
-        <div className="absolute top-2/3 left-0 w-full h-px border-t border-dashed border-gold/15"></div>
-        <div className="absolute left-1/3 top-0 w-px h-full border-l border-dashed border-gold/15"></div>
-        
-        <div className="relative z-10 max-w-lg space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/25 rounded-full text-gold text-[10px] font-mono tracking-widest uppercase">
-            <span>Enterprise System Blueprint</span>
+          <div className="text-center text-sm">
+            <span className="text-on-surface-variant">Already registered? </span>
+            <button
+              type="button"
+              className="font-medium text-primary hover:text-primary"
+              onClick={() => navigate('/login')}
+            >
+              Sign in
+            </button>
           </div>
-          
-          <h2 className="text-4xl font-display font-black text-white uppercase leading-tight tracking-wide">
-            Plan every deal.<br />
-            Win every customer.
-          </h2>
-          
-          <p className="text-sm text-white/50 leading-relaxed max-w-md font-sans">
-            A premium structured CRM designed for architectural firms, custom building estimators, and complex enterprise pipeline closure paths.
-          </p>
-        </div>
-
-        <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 border border-gold/5 rounded-full flex items-center justify-center">
-          <div className="w-80 h-80 border border-gold/5 rounded-full flex items-center justify-center">
-            <div className="w-64 h-64 border border-gold/10 rounded-full"></div>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   );
 };
 
 export default Signup;
-export { Signup };

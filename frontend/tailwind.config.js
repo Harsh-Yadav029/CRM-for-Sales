@@ -18,8 +18,8 @@ export default {
         danger: "#DC2626"
       },
       fontFamily: {
-        display: ['"Archivo Black"', 'sans-serif'],
-        sans: ['Inter', 'sans-serif'],
+        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       },
       borderRadius: {

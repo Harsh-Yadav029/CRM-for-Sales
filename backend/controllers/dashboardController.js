@@ -1,10 +1,11 @@
 const Lead = require('../models/Lead');
 const Task = require('../models/Task');
 const User = require('../models/User');
+const Event = require('../models/Event');
 
 const getStats = async (req, res, next) => {
   try {
-    const query = {};
+    const query = { tenantId: req.user.tenantId };
     if (req.user.role === 'sales') {
       query.assignedTo = req.user._id;
     }
@@ -57,6 +58,45 @@ const getStats = async (req, res, next) => {
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
+    // Today's Leads
+    const todayLeads = await Lead.find({
+      ...query,
+      createdAt: { $gte: today, $lte: endOfToday }
+    })
+    .populate('assignedTo', 'name')
+    .sort({ createdAt: -1 });
+
+    // Today's Meetings (Calendar Events)
+    const meetingsQuery = {
+      tenantId: req.user.tenantId,
+      startTime: { $gte: today, $lte: endOfToday },
+      status: { $ne: 'cancelled' }
+    };
+    if (req.user.role === 'sales') {
+      meetingsQuery.assignedTo = req.user._id;
+    }
+    const todayMeetings = await Event.find(meetingsQuery)
+      .populate('assignedTo', 'name')
+      .sort({ startTime: 1 });
+
+    // Deals Section (Active deals in the pipeline)
+    const activeDealsList = await Lead.find({
+      ...query,
+      status: { $nin: ['Won', 'Lost'] }
+    })
+    .populate('assignedTo', 'name')
+    .sort({ expectedRevenue: -1 })
+    .limit(5);
+
+    // Deals Closing This Month (Negotiation / Proposal Sent / Demo Scheduled)
+    const dealsClosingThisMonth = await Lead.find({
+      ...query,
+      status: { $in: ['Proposal Sent', 'Negotiation', 'Demo Scheduled'] }
+    })
+    .populate('assignedTo', 'name')
+    .sort({ expectedRevenue: -1 })
+    .limit(5);
+
     const tasksQuery = {
       assignedTo: req.user._id,
       dueDate: { $gte: today, $lte: endOfToday }
@@ -80,7 +120,11 @@ const getStats = async (req, res, next) => {
       wonRevenue,
       conversionRate,
       recentLeads,
-      todaysTasks
+      todaysTasks,
+      todayLeads,
+      todayMeetings,
+      activeDealsList,
+      dealsClosingThisMonth
     });
   } catch (error) {
     next(error);

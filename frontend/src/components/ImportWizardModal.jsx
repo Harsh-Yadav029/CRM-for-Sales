@@ -170,7 +170,7 @@ const ImportWizardModal = ({ onClose, onImportSuccess }) => {
 
   return (
     <div className="fixed inset-0 bg-on-background/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden border border-outline-variant flex flex-col max-h-[85vh]">
+      <div className="bg-white rounded-xl shadow-card w-full max-w-2xl overflow-hidden border border-outline-variant flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low shrink-0">
           <div className="flex items-center gap-2">
@@ -191,7 +191,7 @@ const ImportWizardModal = ({ onClose, onImportSuccess }) => {
               <p className="text-[10px] text-on-surface-variant/80 mt-1 max-w-xs text-center leading-normal">
                 Make sure your CSV file includes a header row containing contact details.
               </p>
-              <label className="mt-4 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer">
+              <label className="mt-4 px-4 py-2 bg-primary hover:brightness-105 text-on-surface rounded-xl text-xs font-bold transition-all shadow-sm cursor-pointer">
                 Select CSV File
                 <input
                   type="file"
@@ -346,7 +346,7 @@ const ImportWizardModal = ({ onClose, onImportSuccess }) => {
               <button
                 type="button"
                 onClick={handleImport}
-                className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                className="px-4 py-2 bg-primary hover:brightness-105 text-on-surface rounded-xl text-xs font-bold shadow-sm transition-all"
               >
                 Import Leads
               </button>
@@ -360,7 +360,7 @@ const ImportWizardModal = ({ onClose, onImportSuccess }) => {
                 onImportSuccess();
                 onClose();
               }}
-              className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+              className="px-4 py-2 bg-primary hover:brightness-105 text-on-surface rounded-xl text-xs font-bold shadow-sm transition-all"
             >
               Close
             </button>

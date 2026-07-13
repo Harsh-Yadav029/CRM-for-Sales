@@ -36,19 +36,19 @@ const SecurityLogs = () => {
   });
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-sm space-y-6">
+    <div className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-6 backdrop-blur-sm space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+          <h3 className="text-sm font-bold text-on-surface uppercase tracking-wider flex items-center gap-2">
             <Shield className="h-4 w-4 text-red-500" />
             Security & Audit Activity Logs
           </h3>
-          <p className="text-xs text-slate-400 mt-1">Audit log records documenting write modifications across all database collections</p>
+          <p className="text-xs text-on-surface-variant mt-1">Audit log records documenting write modifications across all database collections</p>
         </div>
 
         <button
           onClick={fetchLogs}
-          className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-800 hover:bg-slate-850 text-slate-300 hover:text-white text-xs font-semibold transition-all"
+          className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-outline-variant/50 hover:bg-slate-850 text-on-surface hover:text-on-surface text-xs font-semibold transition-all"
         >
           <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
           Refresh Dues
@@ -56,14 +56,14 @@ const SecurityLogs = () => {
       </div>
 
       {/* Filter Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 bg-slate-950 p-4 rounded-xl border border-slate-850">
-        <div className="flex items-center gap-2 text-slate-400 text-xs">
+      <div className="flex flex-wrap items-center gap-3 bg-surface-container p-4 rounded-xl border border-outline-variant/40">
+        <div className="flex items-center gap-2 text-on-surface-variant text-xs">
           <Filter size={13} />
           <span>Filters:</span>
         </div>
 
         <select
-          className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-[11px] text-white focus:outline-none"
+          className="rounded-lg border border-outline-variant/50 bg-white px-3 py-1.5 text-[11px] text-on-surface focus:outline-none"
           value={filterAction}
           onChange={(e) => setFilterAction(e.target.value)}
         >
@@ -74,7 +74,7 @@ const SecurityLogs = () => {
         </select>
 
         <select
-          className="rounded-lg border border-slate-800 bg-slate-900 px-3 py-1.5 text-[11px] text-white focus:outline-none"
+          className="rounded-lg border border-outline-variant/50 bg-white px-3 py-1.5 text-[11px] text-on-surface focus:outline-none"
           value={filterResource}
           onChange={(e) => setFilterResource(e.target.value)}
         >
@@ -89,10 +89,10 @@ const SecurityLogs = () => {
       {/* Logs Table / List */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-amber-500" size={32} />
+          <Loader2 className="animate-spin text-primary" size={32} />
         </div>
       ) : filteredLogs.length === 0 ? (
-        <p className="text-xs text-slate-400 italic py-8 text-center border border-dashed border-slate-800 rounded-xl">
+        <p className="text-xs text-on-surface-variant italic py-8 text-center border border-dashed border-outline-variant/50 rounded-xl">
           No security audit logs found matching selected criteria.
         </p>
       ) : (
@@ -103,13 +103,13 @@ const SecurityLogs = () => {
             return (
               <div
                 key={log._id}
-                className="bg-slate-950/60 border border-slate-850 rounded-xl p-4 space-y-3 transition-all hover:border-slate-800"
+                className="bg-black/20 border border-outline-variant/40 rounded-xl p-4 space-y-3 transition-all hover:border-outline-variant/50"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
                   <div className="flex flex-wrap items-center gap-2">
                     {/* Action badge */}
                     <span className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                      log.action?.toLowerCase() === 'delete' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                      log.action?.toLowerCase() === 'delete' ? 'bg-red-500/10 text-red-600 border border-red-500/20' :
                       log.action?.toLowerCase() === 'create' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                       'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                     }`}>
@@ -122,19 +122,19 @@ const SecurityLogs = () => {
                     </span>
 
                     {/* Changed By user */}
-                    <span className="text-slate-500 text-[10px]">
+                    <span className="text-on-surface-variant text-[10px]">
                       by {log.changedBy?.email || log.changedBy?.name || 'System User'}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-3">
-                    <span className="text-[10px] text-slate-500 font-medium">
+                    <span className="text-[10px] text-on-surface-variant font-medium">
                       {new Date(log.createdAt).toLocaleString()}
                     </span>
 
                     <button
                       onClick={() => toggleExpand(log._id)}
-                      className="text-slate-400 hover:text-white flex items-center gap-1 text-[10px] font-semibold"
+                      className="text-on-surface-variant hover:text-on-surface flex items-center gap-1 text-[10px] font-semibold"
                     >
                       {isExpanded ? (
                         <>
@@ -153,14 +153,14 @@ const SecurityLogs = () => {
 
                 {isExpanded && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t border-slate-900/60 text-[10px] font-mono">
-                    <div className="bg-slate-900 p-3 rounded-lg border border-slate-850">
-                      <p className="text-[9px] font-bold text-slate-500 uppercase mb-2">Previous State (Old Value)</p>
-                      <pre className="text-red-400 overflow-x-auto whitespace-pre-wrap max-h-40">
+                    <div className="bg-white p-3 rounded-lg border border-outline-variant/40">
+                      <p className="text-[9px] font-bold text-on-surface-variant uppercase mb-2">Previous State (Old Value)</p>
+                      <pre className="text-red-600 overflow-x-auto whitespace-pre-wrap max-h-40">
                         {log.oldValue ? JSON.stringify(log.oldValue, null, 2) : 'null (None)'}
                       </pre>
                     </div>
-                    <div className="bg-slate-900 p-3 rounded-lg border border-slate-850">
-                      <p className="text-[9px] font-bold text-slate-500 uppercase mb-2">New State (New Value)</p>
+                    <div className="bg-white p-3 rounded-lg border border-outline-variant/40">
+                      <p className="text-[9px] font-bold text-on-surface-variant uppercase mb-2">New State (New Value)</p>
                       <pre className="text-emerald-400 overflow-x-auto whitespace-pre-wrap max-h-40">
                         {log.newValue ? JSON.stringify(log.newValue, null, 2) : 'null (Deleted)'}
                       </pre>

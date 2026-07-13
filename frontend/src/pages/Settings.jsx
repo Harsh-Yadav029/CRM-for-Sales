@@ -165,22 +165,22 @@ const Settings = () => {
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
       {/* Profile Details Card */}
-      <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
+      <div className="bg-white shadow-card rounded-2xl border border-outline-variant/50 p-5 shadow-card space-y-4">
         <h3 className="text-xs font-extrabold text-primary uppercase tracking-wider flex items-center gap-2">
           <span className="material-symbols-outlined text-base">account_circle</span>
           Personal Profile
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="p-4 bg-slate-950/40 rounded-xl border border-slate-850">
+          <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
             <span className="text-[10px] font-extrabold text-on-surface-variant/70 uppercase block mb-1">Full Name</span>
             <span className="text-xs md:text-sm font-bold text-on-surface">{user?.name}</span>
           </div>
-          <div className="p-4 bg-slate-950/40 rounded-xl border border-slate-850">
+          <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
             <span className="text-[10px] font-extrabold text-on-surface-variant/70 uppercase block mb-1">Email Address</span>
             <span className="text-xs md:text-sm font-bold text-on-surface">{user?.email}</span>
           </div>
-          <div className="p-4 bg-slate-950/40 rounded-xl border border-slate-850">
+          <div className="p-4 bg-surface-container-low rounded-xl border border-outline-variant/40">
             <span className="text-[10px] font-extrabold text-on-surface-variant/70 uppercase block mb-1">Assigned Role</span>
             <span className="text-xs md:text-sm font-bold text-on-surface flex items-center gap-1.5 capitalize">
               <span className="material-symbols-outlined text-base text-primary">shield</span>
@@ -193,7 +193,7 @@ const Settings = () => {
       {user?.role === 'admin' && (
         <div className="space-y-6">
           {/* Custom Fields Layout Builder Section */}
-          <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
+          <div className="bg-white shadow-card rounded-2xl border border-outline-variant/50 p-5 shadow-card space-y-4">
             <h3 className="text-xs font-extrabold text-primary uppercase tracking-wider flex items-center gap-2">
               <span className="material-symbols-outlined text-base">dashboard_customize</span>
               Layout Builder & Custom Fields
@@ -201,7 +201,7 @@ const Settings = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Creator form */}
-              <div className="lg:col-span-5 p-4 bg-slate-950/40 border border-slate-800 rounded-xl space-y-3">
+              <div className="lg:col-span-5 p-4 bg-surface-container-low border border-outline-variant/50 rounded-xl space-y-3">
                 <h4 className="text-xs font-bold text-on-surface">Define Custom Parameter</h4>
                 
                 {fieldMsg && (
@@ -218,7 +218,7 @@ const Settings = () => {
                       onChange={(e) => setNewFieldForm({ ...newFieldForm, fieldName: e.target.value })}
                       required
                       placeholder="E.g., Contract Term"
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                     />
                   </div>
                   <div>
@@ -226,7 +226,7 @@ const Settings = () => {
                     <select 
                       value={newFieldForm.fieldType}
                       onChange={(e) => setNewFieldForm({ ...newFieldForm, fieldType: e.target.value })}
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                     >
                       <option value="text">Text Input</option>
                       <option value="number">Number Input</option>
@@ -243,7 +243,7 @@ const Settings = () => {
                         onChange={(e) => setNewFieldForm({ ...newFieldForm, optionsString: e.target.value })}
                         required
                         placeholder="Option A, Option B, Option C"
-                        className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                        className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                       />
                     </div>
                   )}
@@ -252,7 +252,7 @@ const Settings = () => {
                     <button 
                       type="submit"
                       disabled={fieldLoading}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-105 text-on-surface rounded-xl text-xs font-bold shadow-sm transition-all"
                     >
                       {fieldLoading && <Loader2 className="animate-spin" size={12} />}
                       Create Custom Field
@@ -265,13 +265,13 @@ const Settings = () => {
               <div className="lg:col-span-7 space-y-3">
                 <h4 className="text-xs font-bold text-on-surface px-1">Active Custom Fields ({customFields.length})</h4>
                 {customFields.length === 0 ? (
-                  <p className="text-xs text-on-surface-variant italic text-center py-8 border border-dashed border-slate-800 rounded-xl bg-slate-950/20">
+                  <p className="text-xs text-on-surface-variant italic text-center py-8 border border-dashed border-outline-variant/50 rounded-xl bg-background">
                     No custom fields configured yet. Create one on the left.
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[300px] overflow-y-auto pr-1 custom-scroll">
                     {customFields.map((field) => (
-                      <div key={field._id} className="p-3 bg-slate-950/40 border border-slate-800 rounded-xl flex items-center justify-between shadow-sm">
+                      <div key={field._id} className="p-3 bg-surface-container-low border border-outline-variant/50 rounded-xl flex items-center justify-between shadow-sm">
                         <div>
                           <span className="text-xs font-bold text-on-surface block leading-tight">{field.fieldName}</span>
                           <span className="text-[10px] text-on-surface-variant/85 font-semibold capitalize uppercase tracking-wider block mt-1">
@@ -280,7 +280,7 @@ const Settings = () => {
                         </div>
                         <button
                           onClick={() => handleDeleteField(field._id)}
-                          className="p-1.5 hover:bg-red-950/20 text-on-surface-variant hover:text-red-450 rounded-lg transition-all"
+                          className="p-1.5 hover:bg-red-50 text-on-surface-variant hover:text-red-450 rounded-lg transition-all"
                           title="Delete Custom Field Definition"
                         >
                           <span className="material-symbols-outlined text-sm">delete</span>
@@ -294,7 +294,7 @@ const Settings = () => {
           </div>
 
           {/* Phase 3: Sales Automation Rules builder section */}
-          <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-5 shadow-xl space-y-4">
+          <div className="bg-white shadow-card rounded-2xl border border-outline-variant/50 p-5 shadow-card space-y-4">
             <h3 className="text-xs font-extrabold text-primary uppercase tracking-wider flex items-center gap-2">
               <span className="material-symbols-outlined text-base">alt_route</span>
               Sales Workflow Rules & Automation
@@ -302,7 +302,7 @@ const Settings = () => {
             
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               {/* Rules creator form */}
-              <div className="lg:col-span-5 p-4 bg-slate-950/40 border border-slate-800 rounded-xl space-y-3">
+              <div className="lg:col-span-5 p-4 bg-surface-container-low border border-outline-variant/50 rounded-xl space-y-3">
                 <h4 className="text-xs font-bold text-on-surface">Instantiate New Workflow Trigger</h4>
                 
                 {workflowMsg && (
@@ -319,7 +319,7 @@ const Settings = () => {
                       onChange={(e) => setNewWorkflowForm({ ...newWorkflowForm, name: e.target.value })}
                       required
                       placeholder="E.g., Automated Proposal Task"
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                     />
                   </div>
 
@@ -328,7 +328,7 @@ const Settings = () => {
                     <select 
                       value={newWorkflowForm.triggerStage}
                       onChange={(e) => setNewWorkflowForm({ ...newWorkflowForm, triggerStage: e.target.value })}
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                     >
                       {['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'].map(stage => (
                         <option key={stage} value={stage}>{stage}</option>
@@ -341,7 +341,7 @@ const Settings = () => {
                     <select 
                       value={newWorkflowForm.actionType}
                       onChange={(e) => setNewWorkflowForm({ ...newWorkflowForm, actionType: e.target.value })}
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                     >
                       <option value="task">Create Scheduled Task</option>
                       <option value="email">Send Simulated Email</option>
@@ -356,7 +356,7 @@ const Settings = () => {
                         onChange={(e) => setNewWorkflowForm({ ...newWorkflowForm, taskTitle: e.target.value })}
                         required
                         placeholder="E.g., Call client to verify proposal receipt"
-                        className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                        className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                       />
                     </div>
                   ) : (
@@ -368,7 +368,7 @@ const Settings = () => {
                           onChange={(e) => setNewWorkflowForm({ ...newWorkflowForm, emailSubject: e.target.value })}
                           required
                           placeholder="Welcome to NexaCore Solutions!"
-                          className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                          className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                         />
                       </div>
                       <div>
@@ -379,7 +379,7 @@ const Settings = () => {
                           required
                           rows={3}
                           placeholder="Dear {name}, thank you for choosing {company}."
-                          className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface outline-none resize-none"
+                          className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface outline-none resize-none"
                         />
                       </div>
                     </div>
@@ -389,7 +389,7 @@ const Settings = () => {
                     <button 
                       type="submit"
                       disabled={workflowLoading}
-                      className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-105 text-on-surface rounded-xl text-xs font-bold shadow-sm transition-all"
                     >
                       {workflowLoading && <Loader2 className="animate-spin" size={12} />}
                       Create Workflow Rule
@@ -402,13 +402,13 @@ const Settings = () => {
               <div className="lg:col-span-7 space-y-3">
                 <h4 className="text-xs font-bold text-on-surface px-1">Active Rules ({workflows.length})</h4>
                 {workflows.length === 0 ? (
-                  <p className="text-xs text-on-surface-variant italic text-center py-8 border border-dashed border-slate-800 rounded-xl bg-slate-950/20">
+                  <p className="text-xs text-on-surface-variant italic text-center py-8 border border-dashed border-outline-variant/50 rounded-xl bg-background">
                     No automation rules configured. Define one on the left.
                   </p>
                 ) : (
                   <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1 custom-scroll">
                     {workflows.map((w) => (
-                      <div key={w._id} className="p-3.5 bg-slate-950/40 border border-slate-800 rounded-xl flex items-start justify-between shadow-sm">
+                      <div key={w._id} className="p-3.5 bg-surface-container-low border border-outline-variant/50 rounded-xl flex items-start justify-between shadow-sm">
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="text-xs font-bold text-on-surface leading-tight">{w.name}</span>
@@ -425,7 +425,7 @@ const Settings = () => {
                         </div>
                         <button
                           onClick={() => handleDeleteWorkflow(w._id)}
-                          className="p-1.5 hover:bg-red-950/20 text-on-surface-variant hover:text-red-400 rounded-lg transition-all shrink-0 ml-2"
+                          className="p-1.5 hover:bg-red-50 text-on-surface-variant hover:text-red-600 rounded-lg transition-all shrink-0 ml-2"
                           title="Delete Workflow Rule"
                         >
                           <span className="material-symbols-outlined text-sm">delete</span>
@@ -448,7 +448,7 @@ const Settings = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Register New User Card */}
-            <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-5 shadow-xl flex flex-col justify-between">
+            <div className="bg-white shadow-card rounded-2xl border border-outline-variant/50 p-5 shadow-card flex flex-col justify-between">
               <div>
                 <h3 className="text-xs font-extrabold text-primary uppercase tracking-wider flex items-center gap-2 mb-4">
                   <span className="material-symbols-outlined text-base">person_add</span>
@@ -469,7 +469,7 @@ const Settings = () => {
                       onChange={(e) => setRegForm({ ...regForm, name: e.target.value })} 
                       required 
                       placeholder="E.g., Jane Smith"
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                     />
                   </div>
                   
@@ -481,7 +481,7 @@ const Settings = () => {
                       onChange={(e) => setRegForm({ ...regForm, email: e.target.value })} 
                       required 
                       placeholder="email@company.com"
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                     />
                   </div>
                   
@@ -494,7 +494,7 @@ const Settings = () => {
                         onChange={(e) => setRegForm({ ...regForm, password: e.target.value })} 
                         required 
                         placeholder="••••••••"
-                        className="w-full border border-slate-800 rounded-xl py-2 px-3 pr-10 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                        className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 pr-10 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                       />
                       <button 
                         type="button" 
@@ -511,7 +511,7 @@ const Settings = () => {
                     <select 
                       value={regForm.role} 
                       onChange={(e) => setRegForm({ ...regForm, role: e.target.value })} 
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-outline-variant/50 rounded-xl py-2 px-3 text-xs bg-surface-container focus:border-primary transition-colors text-on-surface"
                     >
                       <option value="sales">Sales Executive</option>
                       <option value="admin">Administrator</option>
@@ -522,7 +522,7 @@ const Settings = () => {
                     <button 
                       type="submit" 
                       disabled={regLoading} 
-                      className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all disabled:opacity-60"
+                      className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-105 text-on-surface rounded-xl text-xs font-bold shadow-sm transition-all disabled:opacity-60"
                     >
                       {regLoading && <Loader2 className="animate-spin" size={13} />}
                       Register User
@@ -533,7 +533,7 @@ const Settings = () => {
             </div>
 
             {/* Team Members List Card */}
-            <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-5 shadow-xl">
+            <div className="bg-white shadow-card rounded-2xl border border-outline-variant/50 p-5 shadow-card">
               <h3 className="text-xs font-extrabold text-primary uppercase tracking-wider mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-base">groups</span>
                 Team Members
@@ -544,7 +544,7 @@ const Settings = () => {
               ) : (
                 <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1 custom-scroll">
                   {salespeople.map((s) => (
-                    <div key={s._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-slate-950/40 rounded-xl border border-slate-850 gap-3">
+                    <div key={s._id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-surface-container-low rounded-xl border border-outline-variant/40 gap-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs uppercase shrink-0">
                           {s.name.slice(0, 2)}
@@ -558,7 +558,7 @@ const Settings = () => {
                       <div className="flex items-center gap-3">
                         {/* Edit Role Select */}
                         <select
-                          className="rounded-lg border border-slate-800 bg-slate-950 px-2 py-1 text-[10px] text-on-surface focus:outline-none disabled:opacity-75 font-semibold uppercase"
+                          className="rounded-lg border border-outline-variant/50 bg-surface-container px-2 py-1 text-[10px] text-on-surface focus:outline-none disabled:opacity-75 font-semibold uppercase"
                           value={s.role}
                           disabled={user?.role !== 'admin' || s._id === user?._id}
                           onChange={(e) => handleUpdateTeammateStatus(s._id, s.isActive, e.target.value)}
@@ -572,7 +572,7 @@ const Settings = () => {
                         <label className="flex items-center gap-1 cursor-pointer select-none">
                           <input
                             type="checkbox"
-                            className="rounded border-slate-800 bg-slate-950 text-primary h-3.5 w-3.5"
+                            className="rounded border-outline-variant/50 bg-surface-container text-primary h-3.5 w-3.5"
                             checked={s.isActive !== false}
                             disabled={user?.role !== 'admin' || s._id === user?._id}
                             onChange={(e) => handleUpdateTeammateStatus(s._id, e.target.checked, s.role)}

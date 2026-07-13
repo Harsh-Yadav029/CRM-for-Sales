@@ -76,22 +76,20 @@ const Dashboard = () => {
     }
   ];
 
-  // Helper values
   const totalRevenue = stats?.wonRevenue || 0;
   const activeDeals = stats?.activeDeals || 0;
   const winRate = stats?.conversionRate || 0;
-  const todaysTasksCount = stats?.todaysTasks?.length || 0;
   const recentLeads = stats?.recentLeads || [];
 
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
-      {/* Onboarding Wizard / Setup Banner */}
+      {/* Onboarding Wizard */}
       {wizard && (
-        <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+        <div className="bg-white rounded-2xl border border-outline-variant/50 overflow-hidden shadow-card">
           <div className="grid grid-cols-1 lg:grid-cols-12">
-            <div className="lg:col-span-4 p-6 bg-slate-950/40 border-r border-slate-800 flex flex-col justify-between">
+            <div className="lg:col-span-4 p-6 bg-surface-container-low border-r border-outline-variant/40 flex flex-col justify-between">
               <div>
-                <h2 className="text-sm font-bold text-on-surface uppercase tracking-wider">Welcome, {user?.name?.split(' ')[0] || 'User'} </h2>
+                <h2 className="text-sm font-bold text-on-surface uppercase tracking-wider">Welcome, {user?.name?.split(' ')[0] || 'User'}</h2>
                 <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">Let's get your Walk The Plan workspace ready for action.</p>
                 <div className="mt-4">
                   <button
@@ -103,7 +101,7 @@ const Dashboard = () => {
                   </button>
                 </div>
               </div>
-              <div className="mt-6 pt-3 border-t border-slate-800/60 flex justify-between text-[11px] uppercase font-bold text-on-surface-variant">
+              <div className="mt-6 pt-3 border-t border-outline-variant/40 flex justify-between text-[11px] uppercase font-bold text-on-surface-variant">
                 <span>Need help?</span>
                 <Link to="/settings" className="text-primary hover:underline">Configure settings</Link>
               </div>
@@ -111,11 +109,11 @@ const Dashboard = () => {
             <div className="lg:col-span-8 p-6 relative">
               <button
                 onClick={() => setWizard(false)}
-                className="absolute top-4 right-4 text-[10px] font-bold text-on-surface-variant/60 hover:text-on-surface bg-slate-950/60 hover:bg-slate-950 px-3 py-1 border border-slate-800 rounded-lg transition-all uppercase"
+                className="absolute top-4 right-4 text-[10px] font-bold text-on-surface-variant/60 hover:text-on-surface bg-surface-container hover:bg-surface-container-high px-3 py-1 border border-outline-variant/40 rounded-lg transition-all uppercase font-label"
               >
                 Dismiss
               </button>
-              <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Quick Setup</h3>
+              <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider font-label">Quick Setup</h3>
               <p className="text-[11px] text-on-surface-variant mt-0.5 mb-4">Complete these steps to optimize your CRM workflow</p>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -124,14 +122,14 @@ const Dashboard = () => {
                     <button
                       key={i}
                       onClick={() => setStep(i)}
-                      className={`w-full flex items-center justify-between p-2.5 border rounded-xl text-left transition-all text-xs font-bold uppercase tracking-wide ${step === i ? 'border-primary bg-primary/10 text-primary' : 'border-slate-800 text-on-surface-variant hover:border-slate-700'}`}
+                      className={`w-full flex items-center justify-between p-2.5 border rounded-lg text-left transition-all text-xs font-bold uppercase tracking-wide ${step === i ? 'border-primary bg-gold/10 text-primary' : 'border-outline-variant/50 text-on-surface-variant hover:border-outline'}`}
                     >
                       <span className="truncate">{s.t}</span>
                       <span className="material-symbols-outlined text-xs">chevron_right</span>
                     </button>
                   ))}
                 </div>
-                <div className="bg-slate-950/30 p-4 border border-slate-800 rounded-xl flex flex-col justify-between min-h-[160px]">
+                <div className="bg-surface-container-low p-4 border border-outline-variant/40 rounded-lg flex flex-col justify-between min-h-[160px]">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="material-symbols-outlined text-primary text-lg">{steps[step].icon}</span>
@@ -141,7 +139,7 @@ const Dashboard = () => {
                   </div>
                   <button
                     onClick={steps[step].fn}
-                    className="w-fit mt-3 bg-primary hover:brightness-110 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all uppercase"
+                    className="btn-primary w-fit mt-3 bg-gold hover:brightness-105 text-[#111111] text-xs font-bold px-4 py-2 rounded-lg transition-all uppercase"
                   >
                     {steps[step].b}
                   </button>
@@ -155,20 +153,20 @@ const Dashboard = () => {
       {/* Dashboard Hero */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Architecture & Construction</p>
+          <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1 font-label">Architecture & Construction</p>
           <h2 className="text-2xl md:text-3xl uppercase font-black text-on-surface tracking-tight">Sales Command Center</h2>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-3">
           <button
             onClick={() => window.print()}
-            className="bg-transparent border-2 border-slate-800 px-6 py-2 rounded-xl text-xs font-bold uppercase transition-all hover:bg-slate-800 hover:text-white flex items-center gap-2"
+            className="bg-white border border-outline-variant px-5 py-2 rounded-lg text-xs font-bold uppercase transition-all hover:bg-surface-container-high hover:shadow-sm flex items-center gap-2 text-on-surface"
           >
             <span className="material-symbols-outlined text-sm">download</span>
             Export Report
           </button>
           <button
             onClick={() => navigate('/leads')}
-            className="bg-primary text-white px-6 py-2 rounded-xl text-xs font-bold uppercase transition-all hover:brightness-110 flex items-center gap-2 shadow-lg shadow-primary/20"
+            className="btn-primary bg-gold text-[#111111] px-5 py-2 rounded-lg text-xs font-bold uppercase transition-all hover:brightness-105 flex items-center gap-2 shadow-sm"
           >
             <span className="material-symbols-outlined text-sm">add</span>
             New Plan
@@ -177,81 +175,81 @@ const Dashboard = () => {
       </div>
 
       {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Total Revenue */}
-        <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-6 relative group transition-all hover:border-slate-700">
-          <div className="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+        <div className="bg-white rounded-2xl border border-outline-variant/40 p-6 relative group transition-all hover:shadow-card-hover">
+          <div className="absolute top-0 left-0 w-1 h-full bg-gold rounded-l-2xl"></div>
           <div className="flex justify-between items-start mb-4">
-            <span className="material-symbols-outlined text-primary bg-primary/10 p-3 rounded-xl">payments</span>
-            <span className="text-primary font-bold text-xs flex items-center gap-1">
+            <span className="material-symbols-outlined text-primary bg-gold/15 p-3 rounded-xl">payments</span>
+            <span className="text-success font-bold text-xs flex items-center gap-1">
               <span className="material-symbols-outlined text-xs">trending_up</span>
               +12.4%
             </span>
           </div>
-          <p className="text-xs font-bold text-on-surface-variant uppercase mb-1">Total Revenue</p>
-          <h3 className="text-2xl md:text-3xl font-extrabold text-on-surface">{fmt(totalRevenue)}</h3>
-          <div className="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-[10px] uppercase font-bold text-on-surface-variant">
+          <p className="text-xs font-bold text-on-surface-variant uppercase mb-1 font-label">Total Revenue</p>
+          <h3 className="text-2xl md:text-3xl font-extrabold text-on-surface tabular-nums">{fmt(totalRevenue)}</h3>
+          <div className="mt-4 pt-4 border-t border-outline-variant/30 flex justify-between items-center text-[10px] uppercase font-bold text-on-surface-variant font-label">
             <span>Target: {fmt(2100000)}</span>
             <span className="text-primary font-black">118%</span>
           </div>
         </div>
 
         {/* Active Plans */}
-        <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-6 relative group transition-all hover:border-slate-700">
-          <div className="absolute top-0 left-0 w-1 h-full bg-slate-400"></div>
+        <div className="bg-white rounded-2xl border border-outline-variant/40 p-6 relative group transition-all hover:shadow-card-hover">
+          <div className="absolute top-0 left-0 w-1 h-full bg-secondary rounded-l-2xl"></div>
           <div className="flex justify-between items-start mb-4">
-            <span className="material-symbols-outlined text-secondary bg-secondary-container/20 p-3 rounded-xl">floor_lamp</span>
-            <span className="text-on-surface-variant font-bold text-xs uppercase">Current Stage</span>
+            <span className="material-symbols-outlined text-secondary bg-secondary-container/40 p-3 rounded-xl">floor_lamp</span>
+            <span className="text-on-surface-variant font-bold text-xs uppercase font-label">Current Stage</span>
           </div>
-          <p className="text-xs font-bold text-on-surface-variant uppercase mb-1">Active Plans</p>
+          <p className="text-xs font-bold text-on-surface-variant uppercase mb-1 font-label">Active Plans</p>
           <h3 className="text-2xl md:text-3xl font-extrabold text-on-surface">{activeDeals}</h3>
           <div className="mt-4 flex gap-1 h-1.5">
-            <div className="flex-1 bg-primary"></div>
-            <div className="flex-1 bg-primary"></div>
-            <div className="flex-1 bg-primary"></div>
-            <div className="flex-1 bg-slate-800"></div>
-            <div className="flex-1 bg-slate-800"></div>
+            <div className="flex-1 bg-gold rounded-full"></div>
+            <div className="flex-1 bg-gold rounded-full"></div>
+            <div className="flex-1 bg-gold rounded-full"></div>
+            <div className="flex-1 bg-outline-variant/30 rounded-full"></div>
+            <div className="flex-1 bg-outline-variant/30 rounded-full"></div>
           </div>
-          <p className="mt-2 text-[10px] uppercase font-bold text-on-surface-variant">60% Blueprint Finalization</p>
+          <p className="mt-2 text-[10px] uppercase font-bold text-on-surface-variant font-label">60% Blueprint Finalization</p>
         </div>
 
         {/* Lead Conversion */}
-        <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-6 relative group transition-all hover:border-slate-700">
-          <div className="absolute top-0 left-0 w-1 h-full bg-secondary"></div>
+        <div className="bg-white rounded-2xl border border-outline-variant/40 p-6 relative group transition-all hover:shadow-card-hover">
+          <div className="absolute top-0 left-0 w-1 h-full bg-tertiary rounded-l-2xl"></div>
           <div className="flex justify-between items-start mb-4">
-            <span className="material-symbols-outlined text-secondary bg-secondary/15 p-3 rounded-xl">groups</span>
-            <span className="text-secondary font-bold text-xs flex items-center gap-1 uppercase">
+            <span className="material-symbols-outlined text-tertiary bg-tertiary-container/40 p-3 rounded-xl">groups</span>
+            <span className="text-success font-bold text-xs flex items-center gap-1 uppercase font-label">
               <span className="material-symbols-outlined text-xs">keyboard_double_arrow_up</span>
               High Performance
             </span>
           </div>
-          <p className="text-xs font-bold text-on-surface-variant uppercase mb-1">Lead Conversion</p>
+          <p className="text-xs font-bold text-on-surface-variant uppercase mb-1 font-label">Lead Conversion</p>
           <h3 className="text-2xl md:text-3xl font-extrabold text-on-surface">{winRate}%</h3>
-          <div className="mt-4 pt-4 border-t border-slate-800 flex justify-between items-center text-[10px] uppercase font-bold text-on-surface-variant">
+          <div className="mt-4 pt-4 border-t border-outline-variant/30 flex justify-between items-center text-[10px] uppercase font-bold text-on-surface-variant font-label">
             <span>Prev Period: 28.1%</span>
           </div>
         </div>
       </div>
 
-      {/* Main Content Area: Project Trajectory & Tasks */}
+      {/* Main Content Area */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Project Trajectory Chart */}
-        <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-6 md:p-8">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-outline-variant/40 p-6 md:p-8 shadow-card">
           <div className="flex justify-between items-center mb-8">
             <h4 className="text-base md:text-lg uppercase font-black text-on-surface">Project Trajectory</h4>
             <div className="flex gap-4">
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-slate-700 rounded-full"></span>
-                <span className="text-[10px] font-bold uppercase text-on-surface-variant">Acquisition</span>
+                <span className="w-3 h-3 bg-outline-variant rounded-full"></span>
+                <span className="text-[10px] font-bold uppercase text-on-surface-variant font-label">Acquisition</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-primary rounded-full"></span>
-                <span className="text-[10px] font-bold uppercase text-on-surface-variant">Closure</span>
+                <span className="w-3 h-3 bg-gold rounded-full"></span>
+                <span className="text-[10px] font-bold uppercase text-on-surface-variant font-label">Closure</span>
               </div>
             </div>
           </div>
           {/* Custom Dual Bar Chart */}
-          <div className="relative h-64 flex items-end justify-between gap-4 border-b border-slate-800 pb-2 px-2">
+          <div className="relative h-64 flex items-end justify-between gap-4 border-b border-outline-variant/30 pb-2 px-2">
             {[
               { label: 'MON', acq: '40%', cls: '20%' },
               { label: 'TUE', acq: '60%', cls: '35%' },
@@ -263,10 +261,10 @@ const Dashboard = () => {
             ].map((item, idx) => (
               <div key={idx} className="flex-1 flex flex-col items-center gap-1">
                 <div className="w-full flex flex-col items-center justify-end gap-1.5 h-full">
-                  <div className="w-4 md:w-6 bg-slate-700 rounded-t transition-all duration-1000" style={{ height: item.acq }}></div>
-                  <div className="w-4 md:w-6 bg-primary rounded-t transition-all duration-1000" style={{ height: item.cls }}></div>
+                  <div className="w-4 md:w-6 bg-outline-variant/40 rounded-t transition-all duration-1000" style={{ height: item.acq }}></div>
+                  <div className="w-4 md:w-6 bg-gold rounded-t transition-all duration-1000" style={{ height: item.cls }}></div>
                 </div>
-                <span className="text-[9px] font-extrabold text-outline mt-2">{item.label}</span>
+                <span className="text-[9px] font-extrabold text-on-surface-variant/60 mt-2 font-label">{item.label}</span>
               </div>
             ))}
           </div>
@@ -277,10 +275,10 @@ const Dashboard = () => {
           <QuotaWidget />
 
           {/* Tasks Section */}
-          <div className="bg-slate-900/60 backdrop-blur-md rounded-2xl border border-slate-800 p-6">
-            <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-3">
+          <div className="bg-white rounded-2xl border border-outline-variant/40 p-6 shadow-card">
+            <div className="flex justify-between items-center mb-6 border-b border-outline-variant/30 pb-3">
               <h4 className="text-base uppercase font-black text-on-surface">Upcoming Tasks</h4>
-              <Link to="/tasks" className="text-primary font-bold text-xs uppercase hover:underline">View All</Link>
+              <Link to="/tasks" className="text-primary font-bold text-xs uppercase hover:underline font-label">View All</Link>
             </div>
             <div className="space-y-3">
               {stats?.todaysTasks && stats.todaysTasks.length > 0 ? (
@@ -288,22 +286,22 @@ const Dashboard = () => {
                   <div
                     key={task._id}
                     onClick={() => navigate('/tasks')}
-                    className="p-4 border border-slate-800 hover:border-slate-750 flex items-center justify-between group cursor-pointer transition-all bg-slate-950/40 rounded-xl"
+                    className="p-4 border border-outline-variant/40 hover:border-outline flex items-center justify-between group cursor-pointer transition-all bg-surface-container-lowest rounded-xl hover:shadow-sm"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 border border-slate-800 bg-slate-900 flex items-center justify-center text-primary rounded-lg">
+                      <div className="w-9 h-9 border border-outline-variant/40 bg-surface-container-low flex items-center justify-center text-primary rounded-lg">
                         <span className="material-symbols-outlined text-lg">call</span>
                       </div>
                       <div>
                         <h3 className="font-bold text-xs text-on-surface group-hover:text-primary transition-colors truncate max-w-[140px]">{task.title}</h3>
-                        <p className="text-[10px] text-on-surface-variant font-medium">Due: {new Date(task.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
+                        <p className="text-[10px] text-on-surface-variant font-medium font-label">Due: {new Date(task.dueDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
                       </div>
                     </div>
-                    <span className="material-symbols-outlined text-slate-700 group-hover:text-primary transition-all">check_circle</span>
+                    <span className="material-symbols-outlined text-outline-variant group-hover:text-primary transition-all">check_circle</span>
                   </div>
                 ))
               ) : (
-                <div className="p-6 border border-slate-800 text-center text-xs text-on-surface-variant italic bg-slate-950/40 rounded-xl">
+                <div className="p-6 border border-outline-variant/40 text-center text-xs text-on-surface-variant italic bg-surface-container-low rounded-xl">
                   No tasks scheduled for today.
                 </div>
               )}
@@ -312,10 +310,10 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Floating Zia AI Chat Trigger Button */}
+      {/* Floating AI Chat Trigger */}
       <button
         onClick={() => setAiOpen(true)}
-        className="fixed bottom-20 md:bottom-6 right-6 h-12 w-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center shadow-2xl transition-all hover:scale-110 z-40 border border-amber-600/30"
+        className="fixed bottom-20 md:bottom-6 right-6 h-12 w-12 rounded-full bg-gold hover:brightness-105 text-[#111111] flex items-center justify-center shadow-card-hover transition-all hover:scale-110 z-40"
         title="Consult Zia AI"
       >
         <span className="material-symbols-outlined text-[24px]">smart_toy</span>

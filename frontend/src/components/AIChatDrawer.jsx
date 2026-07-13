@@ -41,23 +41,23 @@ const AIChatDrawer = ({ isOpen, onClose, leadId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm border-l border-slate-800 bg-slate-900 shadow-2xl flex flex-col justify-between">
+    <div className="fixed inset-y-0 right-0 z-50 w-full max-w-sm border-l border-outline-variant/50 bg-white shadow-card flex flex-col justify-between">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-slate-850 bg-slate-900/50 px-5 py-4">
+      <div className="flex items-center justify-between border-b border-outline-variant/40 bg-white/50 px-5 py-4">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20">
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gold/10 text-primary border border-amber-500/20">
             <Bot size={16} />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1">
+            <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1">
               Zia Assistant
-              <Sparkles size={11} className="text-amber-500 fill-amber-500" />
+              <Sparkles size={11} className="text-primary fill-amber-500" />
             </h3>
-            <p className="text-[9px] text-slate-500">Gemini Sales Intelligence</p>
+            <p className="text-[9px] text-on-surface-variant">Gemini Sales Intelligence</p>
           </div>
         </div>
 
-        <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+        <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface transition-colors">
           <X size={16} />
         </button>
       </div>
@@ -72,15 +72,15 @@ const AIChatDrawer = ({ isOpen, onClose, leadId }) => {
             }`}
           >
             {msg.sender === 'ai' && (
-              <div className="h-6 w-6 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center shrink-0">
+              <div className="h-6 w-6 rounded-full bg-gold/10 text-primary border border-amber-500/20 flex items-center justify-center shrink-0">
                 <Bot size={12} />
               </div>
             )}
             <div
               className={`rounded-2xl p-3 text-xs leading-relaxed ${
                 msg.sender === 'user'
-                  ? 'bg-amber-500 text-slate-950 font-medium'
-                  : 'bg-slate-950 text-slate-200 border border-slate-850'
+                  ? 'bg-gold text-[#111111] font-medium'
+                  : 'bg-surface-container text-on-surface border border-outline-variant/40'
               }`}
             >
               <p className="whitespace-pre-wrap">{msg.text}</p>
@@ -89,10 +89,10 @@ const AIChatDrawer = ({ isOpen, onClose, leadId }) => {
         ))}
         {loading && (
           <div className="flex gap-2.5 max-w-[85%]">
-            <div className="h-6 w-6 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 flex items-center justify-center shrink-0">
+            <div className="h-6 w-6 rounded-full bg-gold/10 text-primary border border-amber-500/20 flex items-center justify-center shrink-0">
               <Bot size={12} />
             </div>
-            <div className="rounded-2xl p-3 bg-slate-950 text-slate-400 border border-slate-850 text-xs flex items-center gap-1.5">
+            <div className="rounded-2xl p-3 bg-surface-container text-on-surface-variant border border-outline-variant/40 text-xs flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce"></span>
               <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></span>
               <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]"></span>
@@ -103,19 +103,19 @@ const AIChatDrawer = ({ isOpen, onClose, leadId }) => {
       </div>
 
       {/* Footer input form */}
-      <form onSubmit={handleSubmit} className="border-t border-slate-850 p-4 bg-slate-950/40">
-        <div className="relative flex items-center bg-slate-950 rounded-xl border border-slate-850 px-3 py-2">
+      <form onSubmit={handleSubmit} className="border-t border-outline-variant/40 p-4 bg-surface-container-low">
+        <div className="relative flex items-center bg-surface-container rounded-xl border border-outline-variant/40 px-3 py-2">
           <input
             type="text"
             placeholder="Ask Zia..."
-            className="w-full bg-transparent text-xs text-white placeholder-slate-600 focus:outline-none pr-8"
+            className="w-full bg-transparent text-xs text-on-surface placeholder-slate-600 focus:outline-none pr-8"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
           />
           <button
             type="submit"
             disabled={!message.trim() || loading}
-            className="absolute right-2 text-amber-500 hover:text-amber-400 disabled:opacity-30 transition-colors"
+            className="absolute right-2 text-primary hover:text-primary disabled:opacity-30 transition-colors"
           >
             <Send size={15} />
           </button>

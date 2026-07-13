@@ -62,32 +62,32 @@ const QuotaWidget = () => {
     }).format(v);
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5 backdrop-blur-sm shadow-xl relative overflow-hidden">
+    <div className="rounded-2xl border border-outline-variant/50 bg-white/60 p-5 backdrop-blur-sm shadow-card relative overflow-hidden">
       {/* Decorative background glow */}
-      <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-amber-500/10 blur-xl"></div>
+      <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gold/10 blur-xl"></div>
       
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/20">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gold/10 text-primary border border-amber-500/20">
           <Target className="h-5 w-5" />
         </div>
         <div>
-          <h4 className="text-xs font-bold text-white uppercase tracking-wider">Sales Quota Attainment</h4>
-          <p className="text-[10px] text-slate-400">Quarter Q{quota.quarter} {quota.year}</p>
+          <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider">Sales Quota Attainment</h4>
+          <p className="text-[10px] text-on-surface-variant">Quarter Q{quota.quarter} {quota.year}</p>
         </div>
       </div>
 
       <div className="mt-4 flex items-baseline justify-between">
-        <span className="text-xl font-extrabold text-white tracking-tight">{fmt(quota.attainedAmount)}</span>
-        <span className="text-xs text-slate-400">target: {fmt(quota.targetAmount)}</span>
+        <span className="text-xl font-extrabold text-on-surface tracking-tight">{fmt(quota.attainedAmount)}</span>
+        <span className="text-xs text-on-surface-variant">target: {fmt(quota.targetAmount)}</span>
       </div>
 
       {/* Progress track */}
       <div className="mt-3">
-        <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 mb-1 uppercase tracking-wider">
+        <div className="flex justify-between items-center text-[10px] font-bold text-on-surface-variant mb-1 uppercase tracking-wider">
           <span>Attainment</span>
-          <span className="text-amber-500 font-extrabold">{pct}%</span>
+          <span className="text-primary font-extrabold">{pct}%</span>
         </div>
-        <div className="h-2 w-full rounded bg-slate-950 overflow-hidden border border-slate-850">
+        <div className="h-2 w-full rounded bg-surface-container overflow-hidden border border-outline-variant/40">
           <div 
             className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded transition-all duration-500 shadow-md shadow-amber-500/10"
             style={{ width: `${pct}%` }}
@@ -95,7 +95,7 @@ const QuotaWidget = () => {
         </div>
       </div>
 
-      <div className="mt-4 border-t border-slate-850 pt-3 flex items-center gap-2 text-[10px] text-slate-400 font-medium">
+      <div className="mt-4 border-t border-outline-variant/40 pt-3 flex items-center gap-2 text-[10px] text-on-surface-variant font-medium">
         {pct >= 100 ? (
           <>
             <Award className="h-4 w-4 text-emerald-500" />
@@ -103,7 +103,7 @@ const QuotaWidget = () => {
           </>
         ) : (
           <>
-            <TrendingUp className="h-4 w-4 text-amber-500" />
+            <TrendingUp className="h-4 w-4 text-primary" />
             <span>Close {fmt(quota.targetAmount - quota.attainedAmount)} more to reach target</span>
           </>
         )}

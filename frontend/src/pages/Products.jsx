@@ -99,13 +99,13 @@ const Products = () => {
       {/* Title & Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Product Catalog</h2>
-          <p className="text-xs text-slate-400">Manage items, software licenses, SKUs, and service prices</p>
+          <h2 className="text-xl font-bold text-on-surface tracking-tight">Product Catalog</h2>
+          <p className="text-xs text-on-surface-variant">Manage items, software licenses, SKUs, and service prices</p>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10"
+          className="flex items-center justify-center gap-2 rounded-xl bg-gold hover:brightness-105 text-[#111111] px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10"
         >
           <Plus size={16} />
           Add Product
@@ -114,13 +114,13 @@ const Products = () => {
 
       {/* Search Input bar */}
       <div className="relative">
-        <span className="absolute left-3.5 top-3.5 text-slate-500">
+        <span className="absolute left-3.5 top-3.5 text-on-surface-variant">
           <Search size={16} />
         </span>
         <input
           type="text"
           placeholder="Filter products by name or SKU..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-800 bg-slate-900/40 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-outline-variant/50 bg-surface-container-low text-xs text-on-surface placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
@@ -129,39 +129,39 @@ const Products = () => {
       {/* Grid List View */}
       {loading ? (
         <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-amber-500" size={32} />
+          <Loader2 className="animate-spin text-primary" size={32} />
         </div>
       ) : products.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl border border-dashed border-slate-800 bg-slate-900/10">
+        <div className="text-center py-16 rounded-2xl border border-dashed border-outline-variant/50 bg-white/10">
           <Package className="mx-auto h-10 w-10 text-slate-600" />
-          <h3 className="mt-4 text-sm font-bold text-white">No Products Found</h3>
-          <p className="mt-2 text-xs text-slate-400">Get started by adding items to your product catalogue list</p>
+          <h3 className="mt-4 text-sm font-bold text-on-surface">No Products Found</h3>
+          <p className="mt-2 text-xs text-on-surface-variant">Get started by adding items to your product catalogue list</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {products.map((prod) => (
             <div
               key={prod._id}
-              className={`rounded-2xl border bg-slate-900/40 p-5 backdrop-blur-sm transition-all flex flex-col justify-between ${
-                prod.isActive ? 'border-slate-800 hover:border-slate-700/80' : 'border-red-950/40 opacity-70'
+              className={`rounded-2xl border bg-surface-container-low p-5 backdrop-blur-sm transition-all flex flex-col justify-between ${
+                prod.isActive ? 'border-outline-variant/50 hover:border-outline/80' : 'border-red-200 opacity-70'
               }`}
             >
               <div>
                 <div className="flex justify-between items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gold/10 text-primary border border-amber-500/20">
                     <Package className="h-5 w-5" />
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEdit(prod)}
-                      className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-850"
+                      className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-slate-850"
                     >
                       <Edit2 size={13} />
                     </button>
                     <RoleGate allow={['admin', 'manager']}>
                       <button
                         onClick={() => handleDelete(prod._id)}
-                        className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-slate-850"
+                        className="p-1.5 text-on-surface-variant hover:text-red-600 rounded-lg hover:bg-slate-850"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -169,29 +169,29 @@ const Products = () => {
                   </div>
                 </div>
 
-                <h3 className="mt-4 text-sm font-bold text-white leading-snug">{prod.name}</h3>
+                <h3 className="mt-4 text-sm font-bold text-on-surface leading-snug">{prod.name}</h3>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] bg-slate-800 text-slate-300 border border-slate-750 px-2 py-0.5 rounded font-mono font-medium">
+                  <span className="text-[10px] bg-surface-container-high text-on-surface border border-outline-variant px-2 py-0.5 rounded font-mono font-medium">
                     SKU: {prod.sku}
                   </span>
                   {!prod.isActive && (
-                    <span className="text-[9px] bg-red-500/10 text-red-400 border border-red-500/25 px-1.5 py-0.5 rounded font-bold uppercase">
+                    <span className="text-[9px] bg-red-500/10 text-red-600 border border-red-500/25 px-1.5 py-0.5 rounded font-bold uppercase">
                       Inactive
                     </span>
                   )}
                 </div>
 
-                <p className="mt-3 text-xs text-slate-400 line-clamp-3 leading-relaxed">
+                <p className="mt-3 text-xs text-on-surface-variant line-clamp-3 leading-relaxed">
                   {prod.description || 'No description provided.'}
                 </p>
               </div>
 
-              <div className="mt-6 border-t border-slate-850/60 pt-3 flex items-center justify-between">
-                <span className="flex items-center gap-1 text-xs font-bold text-amber-400">
+              <div className="mt-6 border-t border-outline-variant/40/60 pt-3 flex items-center justify-between">
+                <span className="flex items-center gap-1 text-xs font-bold text-primary">
                   <Tag className="h-3.5 w-3.5 shrink-0" />
                   {fmt(prod.price)}
                 </span>
-                <span className="text-[10px] text-slate-500">
+                <span className="text-[10px] text-on-surface-variant">
                   Updated: {new Date(prod.updatedAt).toLocaleDateString()}
                 </span>
               </div>
@@ -202,28 +202,28 @@ const Products = () => {
 
       {/* Create / Edit Overlay Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 p-4 backdrop-blur-sm" onClick={() => setShowModal(false)}>
           <div
-            className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden"
+            className="w-full max-w-md rounded-2xl border border-outline-variant/50 bg-white shadow-card overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between border-b border-slate-850 bg-slate-900/50 px-6 py-4">
-              <h3 className="text-sm md:text-base font-bold text-white">
+            <div className="flex items-center justify-between border-b border-outline-variant/40 bg-white/50 px-6 py-4">
+              <h3 className="text-sm md:text-base font-bold text-on-surface">
                 {editing ? 'Modify Catalog Item' : 'Add New Product'}
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-slate-400 hover:text-white transition-colors">
+              <button onClick={() => setShowModal(false)} className="text-on-surface-variant hover:text-on-surface transition-colors">
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Product Title *</label>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Product Title *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. NexaCore Business License"
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
@@ -231,24 +231,24 @@ const Products = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">SKU Code *</label>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">SKU Code *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. NX-BIZ-100"
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 font-mono"
                     value={form.sku}
                     onChange={(e) => setForm({ ...form, sku: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Unit Price (INR) *</label>
+                  <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Unit Price (INR) *</label>
                   <input
                     type="number"
                     required
                     min={0}
                     placeholder="e.g. 75000"
-                    className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                     value={form.price}
                     onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
                   />
@@ -256,11 +256,11 @@ const Products = () => {
               </div>
 
               <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Description</label>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Description</label>
                 <textarea
                   rows={4}
                   placeholder="Document product specifications, package licenses, SLA guidelines..."
-                  className="w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none font-sans"
+                  className="w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none font-sans"
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />
@@ -270,26 +270,26 @@ const Products = () => {
                 <input
                   type="checkbox"
                   id="isActive"
-                  className="rounded border-slate-800 bg-slate-950 text-amber-500 focus:ring-0 focus:ring-offset-0 h-4 w-4"
+                  className="rounded border-outline-variant/50 bg-surface-container text-primary focus:ring-0 focus:ring-offset-0 h-4 w-4"
                   checked={form.isActive}
                   onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
                 />
-                <label htmlFor="isActive" className="text-xs font-bold text-slate-300 select-none">
+                <label htmlFor="isActive" className="text-xs font-bold text-on-surface select-none">
                   Available for Quotation & Billing (Active)
                 </label>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-850">
+              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/40">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="rounded-lg border border-slate-850 px-4 py-2 text-xs font-bold text-slate-400 hover:bg-slate-800"
+                  className="rounded-lg border border-outline-variant/40 px-4 py-2 text-xs font-bold text-on-surface-variant hover:bg-surface-container-high"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-slate-950 hover:bg-amber-400"
+                  className="rounded-lg bg-gold px-4 py-2 text-xs font-bold text-[#111111] hover:brightness-105"
                 >
                   Save Product
                 </button>

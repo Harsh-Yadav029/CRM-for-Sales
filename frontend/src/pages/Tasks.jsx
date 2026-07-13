@@ -119,7 +119,7 @@ const Tasks = () => {
         </div>
         <button 
           onClick={() => setShowModal(true)} 
-          className="flex items-center gap-1.5 bg-primary hover:brightness-110 text-white text-xs font-bold px-4 py-2 rounded-xl transition-all shadow-md"
+          className="btn-primary flex items-center gap-1.5 bg-gold hover:brightness-105 text-[#111111] text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm"
         >
           <Plus size={14} /> New Task
         </button>
@@ -154,11 +154,11 @@ const Tasks = () => {
       {/* New Task Modal */}
       {showModal && (
         <div 
-          className="fixed inset-0 bg-on-background/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
           onClick={() => setShowModal(false)}
         >
           <div 
-            className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border border-outline-variant" 
+            className="bg-white rounded-2xl shadow-modal w-full max-w-md overflow-hidden border border-outline-variant/50" 
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low">
@@ -227,7 +227,7 @@ const Tasks = () => {
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                  className="btn-primary px-4 py-2 bg-gold hover:brightness-105 text-[#111111] rounded-lg text-xs font-bold shadow-sm transition-all"
                 >
                   Schedule Task
                 </button>

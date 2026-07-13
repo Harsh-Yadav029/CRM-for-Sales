@@ -159,7 +159,7 @@ const BlueprintViewer = () => {
   if (loading) {
     return (
       <div className="flex justify-center py-12">
-        <Loader2 className="animate-spin text-amber-500" size={32} />
+        <Loader2 className="animate-spin text-primary" size={32} />
       </div>
     );
   }
@@ -171,20 +171,20 @@ const BlueprintViewer = () => {
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto">
       {/* Title Header */}
       <div>
-        <h2 className="text-xl font-bold text-white tracking-tight">Stage Blueprints & Playbooks</h2>
-        <p className="text-xs text-slate-400">Configure mandatory validation guidelines for pipeline progression</p>
+        <h2 className="text-xl font-bold text-on-surface tracking-tight">Stage Blueprints & Playbooks</h2>
+        <p className="text-xs text-on-surface-variant">Configure mandatory validation guidelines for pipeline progression</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Flow Viewer & Graph */}
         <div className="lg:col-span-8 space-y-6">
           {/* Select Pipeline Switcher */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 backdrop-blur-sm space-y-4">
+          <div className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Target Sales Pipeline</label>
+                <label className="block text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-1">Target Sales Pipeline</label>
                 <select
-                  className="rounded-lg border border-slate-850 bg-slate-950 px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none w-64"
+                  className="rounded-lg border border-outline-variant/40 bg-surface-container px-3 py-2 text-xs text-on-surface focus:border-amber-500 focus:outline-none w-64"
                   value={selectedPipelineId}
                   onChange={(e) => handlePipelineChange(e.target.value)}
                 >
@@ -197,7 +197,7 @@ const BlueprintViewer = () => {
               <button
                 onClick={handleSaveBlueprint}
                 disabled={saving}
-                className="flex items-center justify-center gap-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10 disabled:opacity-60"
+                className="flex items-center justify-center gap-2 rounded-xl bg-gold hover:brightness-105 text-[#111111] px-4 py-2.5 text-xs font-bold transition-all shadow-lg shadow-amber-500/10 disabled:opacity-60"
               >
                 <Save size={15} />
                 {saving ? 'Saving...' : 'Save Playbook'}
@@ -205,14 +205,14 @@ const BlueprintViewer = () => {
             </div>
 
             {/* Visual Connections Pipeline Nodes */}
-            <div className="pt-6 border-t border-slate-850">
-              <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-6">Workflow Blueprint Graph Map</h4>
-              <div className="flex flex-wrap items-center gap-y-8 gap-x-3 bg-slate-950 p-6 rounded-xl border border-slate-850 overflow-x-auto">
+            <div className="pt-6 border-t border-outline-variant/40">
+              <h4 className="text-[10px] font-extrabold uppercase tracking-wider text-on-surface-variant mb-6">Workflow Blueprint Graph Map</h4>
+              <div className="flex flex-wrap items-center gap-y-8 gap-x-3 bg-surface-container p-6 rounded-xl border border-outline-variant/40 overflow-x-auto">
                 {stagesList.map((stage, idx) => (
                   <React.Fragment key={stage}>
                     {/* Stage Circle Node */}
                     <div className="flex flex-col items-center shrink-0 min-w-[100px]">
-                      <div className="h-10 w-10 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xs shadow-md shadow-amber-500/5">
+                      <div className="h-10 w-10 rounded-full border border-amber-500/40 bg-gold/10 text-primary flex items-center justify-center font-bold text-xs shadow-md shadow-amber-500/5">
                         {idx + 1}
                       </div>
                       <span className="text-[10px] font-bold text-slate-200 mt-2 truncate text-center max-w-[120px]">
@@ -222,8 +222,8 @@ const BlueprintViewer = () => {
 
                     {/* Node connector line */}
                     {idx < stagesList.length - 1 && (
-                      <div className="h-0.5 w-8 bg-slate-800 shrink-0 relative flex items-center justify-center">
-                        <span className="absolute text-[8px] text-amber-500 material-symbols-outlined">chevron_right</span>
+                      <div className="h-0.5 w-8 bg-surface-container-high shrink-0 relative flex items-center justify-center">
+                        <span className="absolute text-[8px] text-primary material-symbols-outlined">chevron_right</span>
                       </div>
                     )}
                   </React.Fragment>
@@ -233,21 +233,21 @@ const BlueprintViewer = () => {
           </div>
 
           {/* Active Transitions Grid list */}
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 backdrop-blur-sm space-y-4">
-            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider">Configured Phase Transitions</h3>
+          <div className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm space-y-4">
+            <h3 className="text-xs font-extrabold text-on-surface uppercase tracking-wider">Configured Phase Transitions</h3>
             {activeBlueprint?.transitions?.length === 0 ? (
-              <p className="text-xs text-slate-400 italic py-6 text-center">No lead transition guards configured for this pipeline yet.</p>
+              <p className="text-xs text-on-surface-variant italic py-6 text-center">No lead transition guards configured for this pipeline yet.</p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {activeBlueprint?.transitions?.map((trans, idx) => (
-                  <div key={idx} className="p-4 bg-slate-950/70 border border-slate-850 rounded-xl flex justify-between items-start">
+                  <div key={idx} className="p-4 bg-surface-container/70 border border-outline-variant/40 rounded-xl flex justify-between items-start">
                     <div className="space-y-2">
                       <div>
-                        <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                          <Play size={10} className="text-amber-500 fill-amber-500" />
+                        <h4 className="text-xs font-bold text-on-surface flex items-center gap-1.5">
+                          <Play size={10} className="text-primary fill-amber-500" />
                           {trans.name}
                         </h4>
-                        <p className="text-[10px] text-slate-400 mt-0.5">
+                        <p className="text-[10px] text-on-surface-variant mt-0.5">
                           {trans.fromStage} ➔ {trans.toStage}
                         </p>
                       </div>
@@ -255,7 +255,7 @@ const BlueprintViewer = () => {
                       {trans.requiredFields?.length > 0 && (
                         <div className="flex flex-wrap gap-1 pt-1">
                           {trans.requiredFields.map(f => (
-                            <span key={f} className="px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-[8px] font-mono text-amber-400 rounded">
+                            <span key={f} className="px-1.5 py-0.5 bg-white border border-outline-variant/50 text-[8px] font-mono text-primary rounded">
                               {f}
                             </span>
                           ))}
@@ -265,7 +265,7 @@ const BlueprintViewer = () => {
 
                     <button
                       onClick={() => handleRemoveTransition(idx)}
-                      className="p-1 text-slate-500 hover:text-red-400 rounded hover:bg-slate-900"
+                      className="p-1 text-on-surface-variant hover:text-red-600 rounded hover:bg-white"
                     >
                       <Trash2 size={13} />
                     </button>
@@ -278,20 +278,20 @@ const BlueprintViewer = () => {
 
         {/* Right Column: Rule builder form */}
         <div className="lg:col-span-4">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 backdrop-blur-sm space-y-4 sticky top-6">
-            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
-              <Settings className="h-4 w-4 text-amber-500" />
+          <div className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm space-y-4 sticky top-6">
+            <h3 className="text-xs font-extrabold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+              <Settings className="h-4 w-4 text-primary" />
               Configure Transition Rule
             </h3>
 
             <form onSubmit={handleAddTransition} className="space-y-4">
               <div>
-                <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">Transition Title *</label>
+                <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Transition Title *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Perform Solution Audit"
-                  className="w-full rounded-lg border border-slate-850 bg-slate-950 px-3 py-2 text-xs text-white placeholder-slate-600 focus:border-amber-500 focus:outline-none"
+                  className="w-full rounded-lg border border-outline-variant/40 bg-surface-container px-3 py-2 text-xs text-on-surface placeholder-slate-600 focus:border-amber-500 focus:outline-none"
                   value={newTrans.name}
                   onChange={(e) => setNewTrans({ ...newTrans, name: e.target.value })}
                 />
@@ -299,9 +299,9 @@ const BlueprintViewer = () => {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">From Stage *</label>
+                  <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">From Stage *</label>
                   <select
-                    className="w-full rounded-lg border border-slate-850 bg-slate-950 px-2 py-2 text-xs text-white focus:outline-none"
+                    className="w-full rounded-lg border border-outline-variant/40 bg-surface-container px-2 py-2 text-xs text-on-surface focus:outline-none"
                     value={newTrans.fromStage}
                     onChange={(e) => setNewTrans({ ...newTrans, fromStage: e.target.value })}
                   >
@@ -313,9 +313,9 @@ const BlueprintViewer = () => {
                 </div>
 
                 <div>
-                  <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mb-1">To Stage *</label>
+                  <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">To Stage *</label>
                   <select
-                    className="w-full rounded-lg border border-slate-850 bg-slate-950 px-2 py-2 text-xs text-white focus:outline-none"
+                    className="w-full rounded-lg border border-outline-variant/40 bg-surface-container px-2 py-2 text-xs text-on-surface focus:outline-none"
                     value={newTrans.toStage}
                     onChange={(e) => setNewTrans({ ...newTrans, toStage: e.target.value })}
                   >
@@ -328,19 +328,19 @@ const BlueprintViewer = () => {
               </div>
 
               {/* Checkbox fields validation rules builder */}
-              <div className="space-y-2 border-t border-slate-850 pt-3">
-                <label className="block text-[9px] font-extrabold text-slate-400 uppercase tracking-wider">Mandatory Lead Fields</label>
+              <div className="space-y-2 border-t border-outline-variant/40 pt-3">
+                <label className="block text-[9px] font-extrabold text-on-surface-variant uppercase tracking-wider">Mandatory Lead Fields</label>
                 <div className="space-y-2 max-h-36 overflow-y-auto pr-1">
                   {availableFieldOptions.map(opt => (
                     <div key={opt.value} className="flex items-center gap-2">
                       <input
                         type="checkbox"
                         id={`chk-${opt.value}`}
-                        className="rounded border-slate-850 bg-slate-950 text-amber-500 h-3.5 w-3.5"
+                        className="rounded border-outline-variant/40 bg-surface-container text-primary h-3.5 w-3.5"
                         checked={newTrans.requiredFields.includes(opt.value)}
                         onChange={() => handleFieldCheckbox(opt.value)}
                       />
-                      <label htmlFor={`chk-${opt.value}`} className="text-[10px] text-slate-300 select-none">
+                      <label htmlFor={`chk-${opt.value}`} className="text-[10px] text-on-surface select-none">
                         {opt.label}
                       </label>
                     </div>
@@ -350,7 +350,7 @@ const BlueprintViewer = () => {
 
               <button
                 type="submit"
-                className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-slate-800 hover:bg-slate-750 text-white py-2.5 text-xs font-bold transition-all border border-slate-750"
+                className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-surface-container-high hover:bg-slate-750 text-on-surface py-2.5 text-xs font-bold transition-all border border-outline-variant"
               >
                 <Plus size={14} />
                 Register Transition Rule

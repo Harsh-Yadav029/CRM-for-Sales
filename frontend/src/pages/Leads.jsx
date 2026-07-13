@@ -11,14 +11,14 @@ const SOURCES = ['Website', 'Referral', 'Social Media', 'Cold Call', 'Email Camp
 
 const statusColor = (s) =>
   ({
-    New: 'bg-primary/10 text-primary border border-primary/20',
-    Contacted: 'bg-slate-800 text-on-surface border border-slate-700',
-    'Demo Scheduled': 'bg-slate-800 text-primary font-bold border border-primary/20',
-    'Proposal Sent': 'bg-tertiary-container/30 text-tertiary border border-tertiary-fixed-dim',
-    Negotiation: 'bg-secondary-container/20 text-secondary border border-secondary-fixed-dim',
-    Won: 'bg-secondary-container/20 text-secondary border border-secondary/30 font-semibold',
-    Lost: 'bg-error-container/20 text-error border border-error/30 font-semibold'
-  }[s] || 'bg-slate-900 text-on-surface-variant border border-slate-800');
+    New: 'bg-gold/10 text-primary border border-gold/30',
+    Contacted: 'bg-surface-container text-on-surface border border-outline-variant/50',
+    'Demo Scheduled': 'bg-gold/10 text-primary font-bold border border-gold/30',
+    'Proposal Sent': 'bg-tertiary-container/30 text-tertiary border border-tertiary-container',
+    Negotiation: 'bg-secondary-container/30 text-secondary border border-secondary-container',
+    Won: 'bg-green-50 text-green-700 border border-green-200 font-semibold',
+    Lost: 'bg-red-50 text-red-700 border border-red-200 font-semibold'
+  }[s] || 'bg-surface-container text-on-surface-variant border border-outline-variant/50');
 
 const calculateScore = (status) => {
   const scores = {
@@ -110,7 +110,6 @@ const Leads = () => {
   const openEdit = (l) => {
     setEditing(l);
     
-    // Map existing custom fields
     const leadCustomFields = {};
     if (l.customFields) {
       Object.keys(l.customFields).forEach((key) => {
@@ -165,7 +164,6 @@ const Leads = () => {
     );
   }
 
-  // Stats calculation
   const totalLeadsCount = leads.length;
   const qualifiedLeadsCount = leads.filter((l) => l.status === 'Won' || l.status === 'Negotiation' || l.status === 'Proposal Sent').length;
   const conversionRate = totalLeadsCount ? Math.round((leads.filter((l) => l.status === 'Won').length / totalLeadsCount) * 100) : 0;
@@ -194,12 +192,15 @@ const Leads = () => {
     return 'Standard Priority';
   };
 
+  // Common input class for the modal
+  const inputClass = "w-full border border-outline-variant rounded-lg py-2 px-3 text-xs bg-white focus:border-primary transition-colors text-on-surface";
+
   return (
     <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
       {/* Dashboard Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
-          <span className="text-xs font-bold uppercase tracking-widest text-primary">Pipeline Management</span>
+          <span className="text-xs font-bold uppercase tracking-widest text-primary font-label">Pipeline Management</span>
           <h2 className="text-xl md:text-2xl font-black text-on-surface mt-1 uppercase tracking-tight">Leads Inventory</h2>
           <p className="text-xs text-on-surface-variant max-w-2xl mt-1 leading-relaxed">
             Track and manage high-potential architectural partnerships and construction site projects.
@@ -207,7 +208,7 @@ const Leads = () => {
         </div>
         <button
           onClick={openCreate}
-          className="bg-primary text-white font-bold text-xs uppercase px-6 py-3 rounded-xl flex items-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+          className="btn-primary bg-gold text-[#111111] font-bold text-xs uppercase px-6 py-3 rounded-lg flex items-center gap-2 hover:brightness-105 transition-all shadow-sm"
         >
           <span className="material-symbols-outlined text-sm">add</span>
           Capture New Lead
@@ -217,21 +218,21 @@ const Leads = () => {
       {/* Search and Filters Section */}
       <section className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" size={16} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={16} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="SEARCH PROJECTS, CLIENTS, OR LEAD SCORES..."
-            className="w-full pl-12 pr-4 py-3 bg-slate-900/60 border border-slate-800 focus:border-primary rounded-xl font-bold text-xs uppercase placeholder:text-slate-655 transition-all text-on-surface"
+            className="w-full pl-12 pr-4 py-3 bg-white border border-outline-variant focus:border-primary rounded-lg font-bold text-xs uppercase placeholder:text-outline transition-all text-on-surface shadow-sm"
           />
         </div>
         
-        {/* Filter chips trail */}
+        {/* Filter chips */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
           <button
             onClick={() => setStatusFilter('')}
-            className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap rounded-xl border ${statusFilter === '' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-slate-900 border-slate-800 text-on-surface hover:bg-slate-800'}`}
+            className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap rounded-lg border ${statusFilter === '' ? 'bg-gold text-[#111111] border-gold shadow-sm' : 'bg-white border-outline-variant/60 text-on-surface hover:bg-surface-container-low'}`}
           >
             All Leads
           </button>
@@ -239,7 +240,7 @@ const Leads = () => {
             <button
               key={stage}
               onClick={() => setStatusFilter(stage)}
-              className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap rounded-xl border ${statusFilter === stage ? 'bg-primary text-white border-primary shadow-sm' : 'bg-slate-900 border-slate-800 text-on-surface hover:bg-slate-800'}`}
+              className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap rounded-lg border ${statusFilter === stage ? 'bg-gold text-[#111111] border-gold shadow-sm' : 'bg-white border-outline-variant/60 text-on-surface hover:bg-surface-container-low'}`}
             >
               {stage}
             </button>
@@ -247,7 +248,7 @@ const Leads = () => {
           
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1 border border-dashed border-slate-700 hover:bg-slate-800 text-primary text-xs font-bold rounded-xl px-4 py-2 transition-all uppercase whitespace-nowrap ml-2"
+            className="flex items-center gap-1 border border-dashed border-outline hover:bg-surface-container-low text-primary text-xs font-bold rounded-lg px-4 py-2 transition-all uppercase whitespace-nowrap ml-2"
           >
             Import CSV
           </button>
@@ -263,11 +264,11 @@ const Leads = () => {
             <CardSkeleton />
           </div>
         ) : leads.length === 0 ? (
-          <div className="text-center py-16 border border-dashed border-slate-800 rounded-2xl text-xs text-on-surface-variant italic bg-slate-900/40 uppercase font-bold tracking-wide">
+          <div className="text-center py-16 border border-dashed border-outline-variant rounded-2xl text-xs text-on-surface-variant italic bg-white uppercase font-bold tracking-wide shadow-card">
             No leads found matching criteria.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {leads.map((l) => {
               const score = calculateScore(l.status);
               const priority = getPriorityTier(score);
@@ -276,19 +277,19 @@ const Leads = () => {
               return (
                 <div 
                   key={l._id} 
-                  className="bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-all flex flex-col group relative overflow-hidden shadow-xl"
+                  className="bg-white border border-outline-variant/40 rounded-2xl p-6 hover:shadow-card-hover transition-all flex flex-col group relative overflow-hidden shadow-card"
                 >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gold transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
                   
                   <div className="flex justify-between items-start mb-6">
-                    <div className="h-14 w-14 bg-slate-950/40 rounded-xl flex items-center justify-center border border-slate-800">
+                    <div className="h-14 w-14 bg-surface-container-low rounded-xl flex items-center justify-center border border-outline-variant/40">
                       <span className="material-symbols-outlined text-on-surface text-2xl">{industryIcon}</span>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
                       <span className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-lg ${
-                        l.status === 'Won' ? 'bg-secondary/15 text-secondary border border-secondary/20' : 
-                        l.status === 'Lost' ? 'bg-error/15 text-error border border-error/20' :
-                        'bg-slate-950/50 border border-slate-800 text-on-surface-variant'
+                        l.status === 'Won' ? 'bg-green-50 text-green-700 border border-green-200' : 
+                        l.status === 'Lost' ? 'bg-red-50 text-red-700 border border-red-200' :
+                        'bg-surface-container border border-outline-variant/50 text-on-surface-variant'
                       }`}>
                         {l.status}
                       </span>
@@ -310,11 +311,11 @@ const Leads = () => {
                   </div>
 
                   <div className="mt-auto space-y-4">
-                    <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
-                      <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${score}%` }}></div>
+                    <div className="w-full bg-outline-variant/30 h-1 rounded-full overflow-hidden">
+                      <div className="bg-gold h-full transition-all duration-1000 rounded-full" style={{ width: `${score}%` }}></div>
                     </div>
                     
-                    <div className="flex justify-between items-center text-on-surface-variant text-[10px] uppercase font-bold">
+                    <div className="flex justify-between items-center text-on-surface-variant text-[10px] uppercase font-bold font-label">
                       <span>Lead Score</span>
                       <span className="font-black text-on-surface">{priority}</span>
                     </div>
@@ -322,13 +323,13 @@ const Leads = () => {
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       <Link 
                         to={`/leads/${l._id}`}
-                        className="border border-slate-850 bg-slate-950/40 rounded-xl py-2.5 text-center text-[10px] font-bold uppercase hover:bg-slate-800 transition-all flex items-center justify-center"
+                        className="border border-outline-variant/60 bg-surface-container-lowest rounded-lg py-2.5 text-center text-[10px] font-bold uppercase hover:bg-surface-container-low hover:shadow-sm transition-all flex items-center justify-center text-on-surface"
                       >
                         Details
                       </Link>
                       <button 
                         onClick={() => openEdit(l)}
-                        className="bg-primary text-white rounded-xl py-2.5 text-[10px] font-bold uppercase hover:brightness-110 transition-all flex items-center justify-center"
+                        className="btn-primary bg-gold text-[#111111] rounded-lg py-2.5 text-[10px] font-bold uppercase hover:brightness-105 transition-all flex items-center justify-center"
                       >
                         Update
                       </button>
@@ -337,7 +338,7 @@ const Leads = () => {
                     {user?.role === 'admin' && (
                       <button 
                         onClick={() => handleDelete(l._id)}
-                        className="w-full border border-red-950/40 text-red-400 hover:bg-red-950/20 hover:border-red-900/40 py-1.5 rounded-xl text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1"
+                        className="w-full border border-red-200 text-red-600 hover:bg-red-50 py-1.5 rounded-lg text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1"
                       >
                         <span className="material-symbols-outlined text-xs">delete</span>
                         Remove Lead
@@ -354,14 +355,14 @@ const Leads = () => {
       {/* Modal Dialog Form */}
       {showModal && (
         <div 
-          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
           onClick={() => setShowModal(false)}
         >
           <div 
-            className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]" 
+            className="bg-white border border-outline-variant/50 rounded-2xl shadow-modal w-full max-w-lg overflow-y-auto max-h-[90vh]" 
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-850 bg-slate-900/50 sticky top-0 z-10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/40 bg-surface-container-lowest sticky top-0 z-10">
               <h3 className="font-bold text-sm md:text-base text-on-surface">{editing ? 'Edit Lead Profile' : 'Add New Prospect'}</h3>
               <button 
                 onClick={() => setShowModal(false)} 
@@ -374,72 +375,72 @@ const Leads = () => {
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Contact Name</label>
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">Contact Name</label>
                   <input 
                     value={form.name} 
                     onChange={(e) => setForm({ ...form, name: e.target.value })} 
                     required 
                     placeholder="E.g., Jordan Davis"
-                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                    className={inputClass}
                   />
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Company Name</label>
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">Company Name</label>
                   <input 
                     value={form.company} 
                     onChange={(e) => setForm({ ...form, company: e.target.value })} 
                     required 
                     placeholder="E.g., Quantum Systems"
-                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                    className={inputClass}
                   />
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Email Address</label>
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">Email Address</label>
                   <input 
                     type="email" 
                     value={form.email} 
                     onChange={(e) => setForm({ ...form, email: e.target.value })} 
                     required 
                     placeholder="name@company.com"
-                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                    className={inputClass}
                   />
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Phone Number</label>
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">Phone Number</label>
                   <input 
                     value={form.phone} 
                     onChange={(e) => setForm({ ...form, phone: e.target.value })} 
                     required 
                     placeholder="+1 (555) 019-2834"
-                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                    className={inputClass}
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Lead Source</label>
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">Lead Source</label>
                   <select 
                     value={form.source} 
                     onChange={(e) => setForm({ ...form, source: e.target.value })} 
-                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                    className={inputClass}
                   >
                     {SOURCES.map((s) => <option key={s}>{s}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Expected Revenue (₹)</label>
+                  <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">Expected Revenue (₹)</label>
                   <input 
                     type="number" 
                     value={form.expectedRevenue} 
                     onChange={(e) => setForm({ ...form, expectedRevenue: Number(e.target.value) })} 
-                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                    className={inputClass}
                   />
                 </div>
                 {editing && (
                   <div>
-                    <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Status</label>
+                    <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">Status</label>
                     <select 
                       value={form.status} 
                       onChange={(e) => setForm({ ...form, status: e.target.value })} 
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className={inputClass}
                     >
                       {STATUS.map((s) => <option key={s}>{s}</option>)}
                     </select>
@@ -447,11 +448,11 @@ const Leads = () => {
                 )}
                 {user?.role === 'admin' && (
                   <div>
-                    <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">Assign Executive</label>
+                    <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">Assign Executive</label>
                     <select 
                       value={form.assignedTo} 
                       onChange={(e) => setForm({ ...form, assignedTo: e.target.value })} 
-                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                      className={inputClass}
                     >
                       <option value="">Unassigned</option>
                       {salespeople.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
@@ -459,9 +460,9 @@ const Leads = () => {
                   </div>
                 )}
 
-                {/* Phase 2: Dynamic Custom Fields inputs inside lead modal */}
+                {/* Dynamic Custom Fields */}
                 {customFieldDefinitions.length > 0 && (
-                  <div className="col-span-2 border-t border-slate-800 pt-4 mt-2">
+                  <div className="col-span-2 border-t border-outline-variant/40 pt-4 mt-2">
                     <h4 className="text-xs font-bold text-on-surface mb-3 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-sm">dashboard_customize</span>
                       Custom Lead Parameters
@@ -469,7 +470,7 @@ const Leads = () => {
                     <div className="grid grid-cols-2 gap-4">
                       {customFieldDefinitions.map((field) => (
                         <div key={field._id} className="col-span-2 md:col-span-1">
-                          <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1">
+                          <label className="block text-[10px] font-extrabold text-on-surface-variant uppercase tracking-wider mb-1 font-label">
                             {field.fieldName}
                           </label>
                           {field.fieldType === 'select' ? (
@@ -482,7 +483,7 @@ const Leads = () => {
                                   [field.fieldName]: e.target.value
                                 }
                               })}
-                              className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                              className={inputClass}
                             >
                               <option value="">Select option</option>
                               {field.options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
@@ -498,7 +499,7 @@ const Leads = () => {
                                   [field.fieldName]: field.fieldType === 'number' ? Number(e.target.value) : e.target.value
                                 }
                               })}
-                              className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
+                              className={inputClass}
                             />
                           )}
                         </div>
@@ -508,17 +509,17 @@ const Leads = () => {
                 )}
               </div>
               
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800 sticky bottom-0 bg-slate-900">
+              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/40 sticky bottom-0 bg-white">
                 <button 
                   type="button" 
                   onClick={() => setShowModal(false)} 
-                  className="px-4 py-2 border border-slate-800 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-slate-800"
+                  className="px-4 py-2 border border-outline-variant rounded-lg text-xs font-bold text-on-surface-variant hover:bg-surface-container-low"
                 >
                   Cancel
                 </button>
                 <button 
                   type="submit" 
-                  className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl text-xs font-bold shadow-sm transition-all"
+                  className="btn-primary px-4 py-2 bg-gold hover:brightness-105 text-[#111111] rounded-lg text-xs font-bold shadow-sm transition-all"
                 >
                   {editing ? 'Update Profile' : 'Add Prospect'}
                 </button>

@@ -109,7 +109,7 @@ const Reports = () => {
   if (loading) {
     return (
       <div className="flex justify-center py-16">
-        <Loader2 className="animate-spin text-amber-500" size={32} />
+        <Loader2 className="animate-spin text-primary" size={32} />
       </div>
     );
   }
@@ -119,13 +119,13 @@ const Reports = () => {
       {/* Title & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Analytics Builder</h2>
-          <p className="text-xs text-slate-400">Drag metric blocks onto the canvas to design custom business dashboards</p>
+          <h2 className="text-xl font-bold text-on-surface tracking-tight">Analytics Builder</h2>
+          <p className="text-xs text-on-surface-variant">Drag metric blocks onto the canvas to design custom business dashboards</p>
         </div>
 
         <button
           onClick={handleResetLayout}
-          className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/40 text-slate-300 hover:text-white px-4 py-2.5 text-xs font-semibold transition-all"
+          className="flex items-center justify-center gap-1.5 rounded-xl border border-outline-variant/50 bg-surface-container-low text-on-surface hover:text-on-surface px-4 py-2.5 text-xs font-semibold transition-all"
         >
           <RefreshCw size={14} />
           Reset Layout
@@ -135,12 +135,12 @@ const Reports = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Side: Drag-and-drop Sidebar of Available Widgets */}
         <div className="lg:col-span-3 space-y-4">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 backdrop-blur-sm space-y-3">
-            <h3 className="text-xs font-extrabold text-white uppercase tracking-wider flex items-center gap-1.5">
-              <Sliders className="h-4 w-4 text-amber-500" />
+          <div className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm space-y-3">
+            <h3 className="text-xs font-extrabold text-on-surface uppercase tracking-wider flex items-center gap-1.5">
+              <Sliders className="h-4 w-4 text-primary" />
               Chart Blocks
             </h3>
-            <p className="text-[10px] text-slate-400">Drag or click to mount widgets on your board</p>
+            <p className="text-[10px] text-on-surface-variant">Drag or click to mount widgets on your board</p>
 
             <div className="space-y-3 pt-2">
               {AVAILABLE_BLOCKS.map(block => (
@@ -149,13 +149,13 @@ const Reports = () => {
                   draggable
                   onDragStart={() => handleDragStartBlock(block.type)}
                   onClick={() => handleAddWidget(block.type)}
-                  className="p-3 bg-slate-950 hover:bg-slate-900 border border-slate-850 rounded-xl cursor-grab active:cursor-grabbing transition-all flex justify-between items-center group"
+                  className="p-3 bg-surface-container hover:bg-white border border-outline-variant/40 rounded-xl cursor-grab active:cursor-grabbing transition-all flex justify-between items-center group"
                 >
                   <div className="min-w-0">
-                    <p className="text-xs font-bold text-white group-hover:text-amber-500 transition-colors">{block.name}</p>
-                    <p className="text-[9px] text-slate-500 truncate mt-0.5 max-w-[170px]">{block.description}</p>
+                    <p className="text-xs font-bold text-on-surface group-hover:text-primary transition-colors">{block.name}</p>
+                    <p className="text-[9px] text-on-surface-variant truncate mt-0.5 max-w-[170px]">{block.description}</p>
                   </div>
-                  <Plus size={14} className="text-slate-500 group-hover:text-white shrink-0 ml-2" />
+                  <Plus size={14} className="text-on-surface-variant group-hover:text-on-surface shrink-0 ml-2" />
                 </div>
               ))}
             </div>
@@ -164,43 +164,43 @@ const Reports = () => {
 
         {/* Right Side: Active Interactive Canvas */}
         <div
-          className="lg:col-span-9 rounded-2xl border-2 border-dashed border-slate-850 bg-slate-950/10 p-6 min-h-[60vh] space-y-6"
+          className="lg:col-span-9 rounded-2xl border-2 border-dashed border-outline-variant/40 bg-background p-6 min-h-[60vh] space-y-6"
           onDragOver={handleDragOverCanvas}
           onDrop={handleDropOnCanvas}
         >
           {activeWidgets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center space-y-3">
               <Layout className="h-10 w-10 text-slate-700" />
-              <h3 className="text-sm font-bold text-white">Your Canvas is Empty</h3>
-              <p className="text-xs text-slate-400 max-w-sm">Drag widgets from the left column or click their plus buttons to start building your dashboard reports</p>
+              <h3 className="text-sm font-bold text-on-surface">Your Canvas is Empty</h3>
+              <p className="text-xs text-on-surface-variant max-w-sm">Drag widgets from the left column or click their plus buttons to start building your dashboard reports</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {activeWidgets.map(widget => (
                 <div
                   key={widget.id}
-                  className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 backdrop-blur-sm flex flex-col justify-between"
+                  className="rounded-2xl border border-outline-variant/50 bg-surface-container-low p-5 backdrop-blur-sm flex flex-col justify-between"
                 >
                   {/* Header / Controls */}
                   <div className="flex justify-between items-start gap-4 mb-4">
                     <div>
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">{widget.title}</h4>
+                      <h4 className="text-xs font-bold text-on-surface uppercase tracking-wider">{widget.title}</h4>
                     </div>
 
                     <div className="flex items-center gap-1.5">
                       {/* Chart visual switcher button cogs */}
                       {widget.type !== 'leaderboard' && (
-                        <div className="flex border border-slate-800 bg-slate-950 p-0.5 rounded-lg">
+                        <div className="flex border border-outline-variant/50 bg-surface-container p-0.5 rounded-lg">
                           <button
                             onClick={() => handleChangeChartType(widget.id, 'bar')}
-                            className={`p-1 rounded text-slate-400 hover:text-white ${widget.chartType === 'bar' ? 'bg-amber-500/10 text-amber-500' : ''}`}
+                            className={`p-1 rounded text-on-surface-variant hover:text-on-surface ${widget.chartType === 'bar' ? 'bg-gold/10 text-primary' : ''}`}
                             title="Bar Chart"
                           >
                             <BarChart4 size={12} />
                           </button>
                           <button
                             onClick={() => handleChangeChartType(widget.id, 'line')}
-                            className={`p-1 rounded text-slate-400 hover:text-white ${widget.chartType === 'line' ? 'bg-amber-500/10 text-amber-500' : ''}`}
+                            className={`p-1 rounded text-on-surface-variant hover:text-on-surface ${widget.chartType === 'line' ? 'bg-gold/10 text-primary' : ''}`}
                             title="Line Chart"
                           >
                             <LineChart size={12} />
@@ -208,7 +208,7 @@ const Reports = () => {
                           {widget.type === 'source' && (
                             <button
                               onClick={() => handleChangeChartType(widget.id, 'pie')}
-                              className={`p-1 rounded text-slate-400 hover:text-white ${widget.chartType === 'pie' ? 'bg-amber-500/10 text-amber-500' : ''}`}
+                              className={`p-1 rounded text-on-surface-variant hover:text-on-surface ${widget.chartType === 'pie' ? 'bg-gold/10 text-primary' : ''}`}
                               title="Pie Chart"
                             >
                               <PieIcon size={12} />
@@ -217,7 +217,7 @@ const Reports = () => {
                           {widget.type === 'revenue' && (
                             <button
                               onClick={() => handleChangeChartType(widget.id, 'area')}
-                              className={`p-1 rounded text-slate-400 hover:text-white ${widget.chartType === 'area' ? 'bg-amber-500/10 text-amber-500' : ''}`}
+                              className={`p-1 rounded text-on-surface-variant hover:text-on-surface ${widget.chartType === 'area' ? 'bg-gold/10 text-primary' : ''}`}
                               title="Area Chart"
                             >
                               <LineChart size={12} />
@@ -228,7 +228,7 @@ const Reports = () => {
                       
                       <button
                         onClick={() => handleRemoveWidget(widget.id)}
-                        className="p-1 border border-slate-800 text-slate-500 hover:text-red-400 rounded-lg"
+                        className="p-1 border border-outline-variant/50 text-on-surface-variant hover:text-red-600 rounded-lg"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -255,23 +255,23 @@ const Reports = () => {
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                               ))}
                             </Pie>
-                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e7e8e9' }} />
                             <Legend iconType="circle" />
                           </PieChart>
                         ) : widget.chartType === 'line' ? (
                           <ReLineChart data={data.sources}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="name" stroke="#64748b" fontSize={9} />
-                            <YAxis stroke="#64748b" fontSize={9} />
-                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e7e8e9" />
+                            <XAxis dataKey="name" stroke="#7e7760" fontSize={9} />
+                            <YAxis stroke="#7e7760" fontSize={9} />
+                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e7e8e9' }} />
                             <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} />
                           </ReLineChart>
                         ) : (
                           <BarChart data={data.sources}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="name" stroke="#64748b" fontSize={9} />
-                            <YAxis stroke="#64748b" fontSize={9} />
-                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e7e8e9" />
+                            <XAxis dataKey="name" stroke="#7e7760" fontSize={9} />
+                            <YAxis stroke="#7e7760" fontSize={9} />
+                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e7e8e9' }} />
                             <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         )}
@@ -283,30 +283,30 @@ const Reports = () => {
                       <ResponsiveContainer width="100%" height="100%">
                         {widget.chartType === 'line' ? (
                           <ReLineChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="name" stroke="#64748b" fontSize={9} />
-                            <YAxis stroke="#64748b" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
-                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e7e8e9" />
+                            <XAxis dataKey="name" stroke="#7e7760" fontSize={9} />
+                            <YAxis stroke="#7e7760" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
+                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e7e8e9' }} />
                             <Legend />
                             <Line type="monotone" dataKey="revenue" name="Expected" stroke="#3b82f6" strokeWidth={2} />
                             <Line type="monotone" dataKey="won" name="Won" stroke="#10b981" strokeWidth={2} />
                           </ReLineChart>
                         ) : widget.chartType === 'area' ? (
                           <AreaChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="name" stroke="#64748b" fontSize={9} />
-                            <YAxis stroke="#64748b" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
-                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e7e8e9" />
+                            <XAxis dataKey="name" stroke="#7e7760" fontSize={9} />
+                            <YAxis stroke="#7e7760" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
+                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e7e8e9' }} />
                             <Legend />
                             <Area type="monotone" dataKey="revenue" name="Expected" fillOpacity={0.15} fill="#3b82f6" stroke="#3b82f6" />
                             <Area type="monotone" dataKey="won" name="Won" fillOpacity={0.15} fill="#10b981" stroke="#10b981" />
                           </AreaChart>
                         ) : (
                           <BarChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="name" stroke="#64748b" fontSize={9} />
-                            <YAxis stroke="#64748b" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
-                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e7e8e9" />
+                            <XAxis dataKey="name" stroke="#7e7760" fontSize={9} />
+                            <YAxis stroke="#7e7760" fontSize={9} tickFormatter={(v) => `₹${v/1000}k`} />
+                            <Tooltip formatter={(value) => [fmt(value), 'Revenue']} contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e7e8e9' }} />
                             <Legend />
                             <Bar dataKey="revenue" name="Expected" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                             <Bar dataKey="won" name="Won" fill="#10b981" radius={[4, 4, 0, 0]} />
@@ -320,18 +320,18 @@ const Reports = () => {
                       <ResponsiveContainer width="100%" height="100%">
                         {widget.chartType === 'line' ? (
                           <ReLineChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="name" stroke="#64748b" fontSize={9} />
-                            <YAxis stroke="#64748b" fontSize={9} />
-                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e7e8e9" />
+                            <XAxis dataKey="name" stroke="#7e7760" fontSize={9} />
+                            <YAxis stroke="#7e7760" fontSize={9} />
+                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e7e8e9' }} />
                             <Line type="monotone" dataKey="count" name="Leads" stroke="#a855f7" strokeWidth={2} />
                           </ReLineChart>
                         ) : (
                           <BarChart data={data.stages}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                            <XAxis dataKey="name" stroke="#64748b" fontSize={9} />
-                            <YAxis stroke="#64748b" fontSize={9} />
-                            <Tooltip contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b' }} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e7e8e9" />
+                            <XAxis dataKey="name" stroke="#7e7760" fontSize={9} />
+                            <YAxis stroke="#7e7760" fontSize={9} />
+                            <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e7e8e9' }} />
                             <Bar dataKey="count" name="Leads" fill="#a855f7" radius={[4, 4, 0, 0]} />
                           </BarChart>
                         )}
@@ -343,20 +343,20 @@ const Reports = () => {
                       <div className="w-full h-full overflow-y-auto pr-1">
                         <table className="w-full text-left text-[10px]">
                           <thead>
-                            <tr className="border-b border-slate-800 bg-slate-950 text-slate-500 font-bold uppercase">
+                            <tr className="border-b border-outline-variant/50 bg-surface-container text-on-surface-variant font-bold uppercase">
                               <th className="py-2 px-3">Sales Exec</th>
                               <th className="py-2 px-3">Win Pct</th>
                               <th className="py-2 px-3 text-right">Won (₹)</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-850">
+                          <tbody className="divide-y divide-outline-variant/40">
                             {data.executives.map((exec, idx) => {
                               const pct = exec.leads ? Math.round((exec.won / exec.leads) * 100) : 0;
                               return (
-                                <tr key={idx} className="text-slate-300">
+                                <tr key={idx} className="text-on-surface">
                                   <td className="py-2 px-3 font-semibold truncate max-w-[100px]">{exec.name}</td>
-                                  <td className="py-2 px-3 font-mono font-bold text-amber-500">{pct}%</td>
-                                  <td className="py-2 px-3 text-right font-bold text-white">{fmt(exec.revenue)}</td>
+                                  <td className="py-2 px-3 font-mono font-bold text-primary">{pct}%</td>
+                                  <td className="py-2 px-3 text-right font-bold text-on-surface">{fmt(exec.revenue)}</td>
                                 </tr>
                               );
                             })}

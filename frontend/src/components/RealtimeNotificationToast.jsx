@@ -63,24 +63,24 @@ const RealtimeNotificationToast = () => {
       {toasts.map(toast => (
         <div
           key={toast.id}
-          className="pointer-events-auto flex items-start gap-3 rounded-xl border border-slate-800 bg-slate-900/90 p-4 shadow-2xl backdrop-blur-md animate-slide-in"
+          className="pointer-events-auto flex items-start gap-3 rounded-xl border border-outline-variant/50 bg-white/90 p-4 shadow-card backdrop-blur-md animate-slide-in"
         >
           <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
             toast.type === 'lead'
               ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-              : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+              : 'bg-gold/10 text-primary border border-amber-500/20'
           }`}>
             {toast.type === 'lead' ? <MessageSquare size={14} /> : <Bell size={14} />}
           </div>
 
           <div className="flex-1 min-w-0">
-            <h4 className="text-xs font-bold text-white leading-tight">{toast.title}</h4>
-            <p className="text-[10px] text-slate-400 mt-1 leading-normal">{toast.message}</p>
+            <h4 className="text-xs font-bold text-on-surface leading-tight">{toast.title}</h4>
+            <p className="text-[10px] text-on-surface-variant mt-1 leading-normal">{toast.message}</p>
           </div>
 
           <button
             onClick={() => removeToast(toast.id)}
-            className="text-slate-500 hover:text-white transition-colors shrink-0"
+            className="text-on-surface-variant hover:text-on-surface transition-colors shrink-0"
           >
             <X size={14} />
           </button>

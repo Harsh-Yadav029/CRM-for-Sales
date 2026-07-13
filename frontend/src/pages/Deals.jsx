@@ -42,9 +42,9 @@ const Deals = () => {
         id: 'software',
         name: 'Software Licensing Pipeline',
         columns: [
-          { id: 'discovery', title: 'Discovery / Inquiry', color: 'bg-indigo-500', statuses: ['New', 'Contacted'], defaultDropStatus: 'New' },
-          { id: 'proposal', title: 'Proposal & Demo', color: 'bg-amber-500', statuses: ['Demo Scheduled', 'Proposal Sent'], defaultDropStatus: 'Demo Scheduled' },
-          { id: 'closing', title: 'Negotiations & Close', color: 'bg-emerald-500', statuses: ['Negotiation', 'Won', 'Lost'], defaultDropStatus: 'Negotiation' }
+          { id: 'discovery', title: 'Discovery / Inquiry', color: 'bg-blue-500', statuses: ['New', 'Contacted'], defaultDropStatus: 'New' },
+          { id: 'proposal', title: 'Proposal & Demo', color: 'bg-gold', statuses: ['Demo Scheduled', 'Proposal Sent'], defaultDropStatus: 'Demo Scheduled' },
+          { id: 'closing', title: 'Negotiations & Close', color: 'bg-green-500', statuses: ['Negotiation', 'Won', 'Lost'], defaultDropStatus: 'Negotiation' }
         ]
       },
       {
@@ -53,7 +53,7 @@ const Deals = () => {
         columns: [
           { id: 'discovery', title: 'Client Analysis', color: 'bg-blue-500', statuses: ['New', 'Contacted'], defaultDropStatus: 'Contacted' },
           { id: 'proposal', title: 'Solution SLA Proposal', color: 'bg-purple-500', statuses: ['Demo Scheduled', 'Proposal Sent', 'Negotiation'], defaultDropStatus: 'Proposal Sent' },
-          { id: 'closing', title: 'Final Contract Close', color: 'bg-emerald-500', statuses: ['Won', 'Lost'], defaultDropStatus: 'Won' }
+          { id: 'closing', title: 'Final Contract Close', color: 'bg-green-500', statuses: ['Won', 'Lost'], defaultDropStatus: 'Won' }
         ]
       }
     ];
@@ -97,7 +97,6 @@ const Deals = () => {
     const column = stageColumns.find(c => c.id === columnId);
     if (!column) return;
 
-    // Check if lead is already in this column
     const lead = leads.find(l => l._id === leadId);
     if (lead && column.statuses.includes(lead.status)) {
       return;
@@ -110,7 +109,6 @@ const Deals = () => {
     setUpdatingId(leadId);
     try {
       await api.put(`/api/leads/${leadId}/status`, { status: newStatus });
-      // Update local state
       setLeads(prevLeads =>
         prevLeads.map(l => (l._id === leadId ? { ...l, status: newStatus } : l))
       );
@@ -129,7 +127,6 @@ const Deals = () => {
     );
   }
 
-  // Calculate pipeline stats
   const totalPipelineValue = leads.reduce((acc, l) => acc + (l.expectedRevenue || 0), 0);
   const weightedValue = leads.reduce((acc, l) => acc + (l.expectedRevenue || 0) * (STAGE_WEIGHTS[l.status] || 0), 0);
   const activeDeals = leads.filter(l => l.status !== 'Lost' && l.status !== 'Won').length;
@@ -144,23 +141,23 @@ const Deals = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-3.5rem)] md:h-screen overflow-hidden">
       {/* Dashboard Header / Metrics */}
-      <section className="bg-slate-900/60 backdrop-blur-md px-6 py-6 border-b border-slate-800 shrink-0">
+      <section className="bg-white px-6 py-6 border-b border-outline-variant/40 shrink-0 shadow-nav">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 max-w-7xl mx-auto">
           <div>
-            <span className="text-[10px] font-bold uppercase text-primary tracking-widest block mb-1">Deal Pipeline</span>
+            <span className="text-[10px] font-bold uppercase text-primary tracking-widest block mb-1 font-label">Deal Pipeline</span>
             <h2 className="text-xl md:text-2xl uppercase font-black text-on-surface leading-tight">Current Portfolio</h2>
             
-            {/* Pipeline Selector Switcher */}
+            {/* Pipeline Selector */}
             {pipelines.length > 0 && (
-              <div className="flex items-center gap-2 mt-4 bg-slate-950/40 p-1 rounded-xl border border-slate-800 max-w-xs">
+              <div className="flex items-center gap-2 mt-4 bg-surface-container-low p-1 rounded-lg border border-outline-variant/40 max-w-xs">
                 {pipelines.map(p => (
                   <button
                     key={p.id}
                     onClick={() => setActivePipelineId(p.id)}
-                    className={`flex-1 text-center py-1.5 px-3 rounded-lg text-[10px] font-bold uppercase transition-all tracking-wider ${
+                    className={`flex-1 text-center py-1.5 px-3 rounded-md text-[10px] font-bold uppercase transition-all tracking-wider ${
                       activePipelineId === p.id 
-                        ? 'bg-primary text-white shadow' 
-                        : 'text-on-surface-variant hover:text-white'
+                        ? 'bg-gold text-[#111111] shadow-sm' 
+                        : 'text-on-surface-variant hover:text-on-surface'
                     }`}
                   >
                     {p.name.split(' ')[0]}
@@ -169,16 +166,16 @@ const Deals = () => {
               </div>
             )}
           </div>
-          <div className="bg-slate-950/30 border border-slate-800 rounded-2xl p-4 flex flex-col items-end min-w-[240px] shadow-lg">
-            <span className="text-[10px] font-bold uppercase text-on-surface-variant mb-0.5">Total Pipeline Value</span>
-            <span className="text-xl text-primary font-black tracking-tight">{fmt(totalPipelineValue)}</span>
+          <div className="bg-surface-container-low border border-outline-variant/40 rounded-2xl p-4 flex flex-col items-end min-w-[240px] shadow-card">
+            <span className="text-[10px] font-bold uppercase text-on-surface-variant mb-0.5 font-label">Total Pipeline Value</span>
+            <span className="text-xl text-primary font-black tracking-tight tabular-nums">{fmt(totalPipelineValue)}</span>
           </div>
         </div>
       </section>
 
       {/* Kanban Board Area */}
-      <main className="flex-1 overflow-x-auto p-4 md:p-6 bg-slate-950/20 custom-scroll">
-        <div className="flex gap-6 h-full min-w-max pb-4">
+      <main className="flex-1 overflow-x-auto p-4 md:p-6 bg-background custom-scroll">
+        <div className="flex gap-5 h-full min-w-max pb-4">
           {stageColumns.map(column => {
             const columnLeads = leads.filter(l => column.statuses.includes(l.status));
             const columnValue = columnLeads.reduce((acc, l) => acc + (l.expectedRevenue || 0), 0);
@@ -191,20 +188,20 @@ const Deals = () => {
                 onDrop={(e) => handleDrop(e, column.id)}
               >
                 {/* Column Header */}
-                <div className="flex justify-between items-center mb-4 border-b border-slate-800 pb-2 shrink-0">
-                  <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                <div className="flex justify-between items-center mb-4 border-b border-outline-variant/30 pb-2 shrink-0">
+                  <h3 className="text-xs font-bold uppercase tracking-widest flex items-center gap-2 text-on-surface">
                     <span className={`w-2 h-2 rounded-full ${column.color}`}></span>
                     {column.title}
                   </h3>
-                  <span className="text-[10px] font-bold bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-lg text-on-surface-variant uppercase">
+                  <span className="text-[10px] font-bold bg-surface-container border border-outline-variant/40 px-2 py-0.5 rounded-lg text-on-surface-variant uppercase font-label">
                     {columnLeads.length} {columnLeads.length === 1 ? 'Deal' : 'Deals'} ({fmt(columnValue)})
                   </span>
                 </div>
 
-                {/* Column Cards Container */}
-                <div className="flex-1 overflow-y-auto space-y-4 pr-1 custom-scroll">
+                {/* Column Cards */}
+                <div className="flex-1 overflow-y-auto space-y-3 pr-1 custom-scroll">
                   {columnLeads.length === 0 ? (
-                    <div className="h-28 border border-dashed border-slate-800 rounded-xl flex items-center justify-center text-xs text-on-surface-variant/65 italic bg-slate-900/20">
+                    <div className="h-28 border border-dashed border-outline-variant rounded-xl flex items-center justify-center text-xs text-on-surface-variant/65 italic bg-surface-container-low">
                       Drag deals here
                     </div>
                   ) : (
@@ -213,12 +210,12 @@ const Deals = () => {
                         key={lead._id}
                         draggable
                         onDragStart={(e) => handleDragStart(e, lead._id)}
-                        className={`bg-slate-900/60 backdrop-blur-sm border border-slate-800 p-5 rounded-2xl transition-all hover:border-slate-700 hover:shadow-xl group relative overflow-hidden cursor-grab active:cursor-grabbing ${updatingId === lead._id ? 'opacity-50 pointer-events-none' : ''}`}
+                        className={`bg-white border border-outline-variant/40 p-5 rounded-2xl transition-all hover:shadow-card-hover group relative overflow-hidden cursor-grab active:cursor-grabbing shadow-card ${updatingId === lead._id ? 'opacity-50 pointer-events-none' : ''}`}
                       >
-                        <div className="absolute top-0 left-0 w-1 h-full bg-slate-800"></div>
+                        <div className="absolute top-0 left-0 w-1 h-full bg-outline-variant/30 group-hover:bg-gold transition-colors"></div>
                         <div className="flex flex-col gap-1">
                           <div className="flex justify-between items-start mb-2">
-                            <span className="text-[9px] font-bold bg-primary/20 text-primary border border-primary/25 px-2 py-0.5 rounded-lg uppercase tracking-tighter">
+                            <span className="text-[9px] font-bold bg-gold/10 text-primary border border-gold/25 px-2 py-0.5 rounded-lg uppercase tracking-tighter">
                               {lead.status}
                             </span>
                             <div className="flex items-center gap-1">
@@ -229,7 +226,7 @@ const Deals = () => {
                                     if (prevColIdx >= 0) moveLead(lead._id, stageColumns[prevColIdx].defaultDropStatus);
                                   }}
                                   title="Move Left"
-                                  className="p-0.5 hover:bg-slate-800 rounded text-on-surface-variant hover:text-primary transition-all"
+                                  className="p-0.5 hover:bg-surface-container-high rounded text-on-surface-variant hover:text-primary transition-all"
                                 >
                                   <span className="material-symbols-outlined text-sm">arrow_back</span>
                                 </button>
@@ -241,7 +238,7 @@ const Deals = () => {
                                     if (nextColIdx < stageColumns.length) moveLead(lead._id, stageColumns[nextColIdx].defaultDropStatus);
                                   }}
                                   title="Move Right"
-                                  className="p-0.5 hover:bg-slate-800 rounded text-on-surface-variant hover:text-primary transition-all"
+                                  className="p-0.5 hover:bg-surface-container-high rounded text-on-surface-variant hover:text-primary transition-all"
                                 >
                                   <span className="material-symbols-outlined text-sm">arrow_forward</span>
                                 </button>
@@ -256,12 +253,12 @@ const Deals = () => {
                             <span className="material-symbols-outlined text-xs">person</span> {lead.name}
                           </p>
 
-                          <div className="flex justify-between items-end mt-4 pt-3 border-t border-slate-850">
+                          <div className="flex justify-between items-end mt-4 pt-3 border-t border-outline-variant/30">
                             <div>
-                              <p className="text-[9px] font-bold uppercase text-slate-500 mb-0.5">Expected Value</p>
-                              <p className="text-sm text-primary font-black">{fmt(lead.expectedRevenue)}</p>
+                              <p className="text-[9px] font-bold uppercase text-on-surface-variant/60 mb-0.5 font-label">Expected Value</p>
+                              <p className="text-sm text-primary font-black tabular-nums">{fmt(lead.expectedRevenue)}</p>
                             </div>
-                            <div className="w-6 h-6 rounded-full border border-slate-800 bg-slate-900 flex items-center justify-center font-bold text-[9px] text-primary">
+                            <div className="w-6 h-6 rounded-full border border-outline-variant bg-gold/15 flex items-center justify-center font-bold text-[9px] text-primary">
                               {lead.name.charAt(0).toUpperCase()}
                             </div>
                           </div>

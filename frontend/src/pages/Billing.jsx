@@ -75,7 +75,7 @@ const Billing = () => {
       description: 'Core pipeline tools for small rep teams',
       features: ['Up to 5 teammates', 'Standard Deal Pipelines', 'Activity Logs', 'VoIP call logs'],
       icon: Zap,
-      color: 'border-slate-800 bg-slate-900/20'
+      color: 'border-outline-variant/50 bg-white/20'
     },
     {
       name: 'Growth',
@@ -83,7 +83,7 @@ const Billing = () => {
       description: 'Scalable automation features for expanding teams',
       features: ['Unlimited Teammates', 'Multi-Pipeline Switcher', 'Visual Workflow Blueprint customizer', 'Export business reports'],
       icon: Building,
-      color: 'border-amber-500/30 bg-amber-500/5',
+      color: 'border-amber-500/30 bg-gold/5',
       badge: 'Popular'
     },
     {
@@ -102,14 +102,14 @@ const Billing = () => {
       <div className="p-4 md:p-6 space-y-6 max-w-7xl mx-auto pb-24 md:pb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-white tracking-tight">Organization Billing</h2>
-            <p className="text-xs text-slate-400">Manage tenant-level product subscription tiers and invoices</p>
+            <h2 className="text-xl font-bold text-on-surface tracking-tight">Organization Billing</h2>
+            <p className="text-xs text-on-surface-variant">Manage tenant-level product subscription tiers and invoices</p>
           </div>
 
           <button
             onClick={handlePortal}
             disabled={actionLoading !== null}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/40 text-slate-300 hover:text-white px-4 py-2.5 text-xs font-semibold transition-all disabled:opacity-50"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-outline-variant/50 bg-surface-container-low text-on-surface hover:text-on-surface px-4 py-2.5 text-xs font-semibold transition-all disabled:opacity-50"
           >
             {actionLoading === 'portal' ? <Loader2 className="animate-spin" size={13} /> : <CreditCard size={14} />}
             Customer Billing Portal
@@ -129,7 +129,7 @@ const Billing = () => {
               >
                 {plan.badge && (
                   <span className={`absolute top-4 right-4 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
-                    plan.badge === 'Popular' ? 'bg-amber-500/20 text-amber-400' : 'bg-blue-500/20 text-blue-400'
+                    plan.badge === 'Popular' ? 'bg-gold/20 text-primary' : 'bg-blue-500/20 text-blue-400'
                   }`}>
                     {plan.badge}
                   </span>
@@ -137,23 +137,23 @@ const Billing = () => {
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-slate-950 flex items-center justify-center text-amber-500">
+                    <div className="h-8 w-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
                       <Icon size={16} />
                     </div>
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">{plan.name}</h3>
+                    <h3 className="text-sm font-bold text-on-surface uppercase tracking-wider">{plan.name}</h3>
                   </div>
 
                   <div>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-white">{plan.price}</span>
-                      <span className="text-[10px] text-slate-500">/ month</span>
+                      <span className="text-2xl font-black text-on-surface">{plan.price}</span>
+                      <span className="text-[10px] text-on-surface-variant">/ month</span>
                     </div>
-                    <p className="text-[11px] text-slate-400 mt-1 leading-normal">{plan.description}</p>
+                    <p className="text-[11px] text-on-surface-variant mt-1 leading-normal">{plan.description}</p>
                   </div>
 
-                  <ul className="space-y-2 pt-3 border-t border-slate-850">
+                  <ul className="space-y-2 pt-3 border-t border-outline-variant/40">
                     {plan.features.map(f => (
-                      <li key={f} className="flex items-start gap-2 text-[10px] text-slate-300">
+                      <li key={f} className="flex items-start gap-2 text-[10px] text-on-surface">
                         <Check size={12} className="text-emerald-500 shrink-0 mt-0.5" />
                         <span>{f}</span>
                       </li>
@@ -163,7 +163,7 @@ const Billing = () => {
 
                 <div className="pt-6">
                   {isActive ? (
-                    <div className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-850 text-slate-400 text-xs font-bold border border-slate-800">
+                    <div className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-slate-850 text-on-surface-variant text-xs font-bold border border-outline-variant/50">
                       <ShieldCheck size={14} className="text-emerald-500" />
                       Active Organization Plan
                     </div>
@@ -171,7 +171,7 @@ const Billing = () => {
                     <button
                       onClick={() => handleUpgrade(plan.name)}
                       disabled={actionLoading !== null}
-                      className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold transition-all disabled:opacity-50"
+                      className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gold hover:brightness-105 text-[#111111] text-xs font-bold transition-all disabled:opacity-50"
                     >
                       {actionLoading === plan.name ? (
                         <Loader2 className="animate-spin" size={13} />

@@ -64,16 +64,16 @@ const Signup = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-md space-y-8 rounded-2xl border border-slate-800 bg-slate-900/50 p-8 shadow-2xl backdrop-blur-xl">
+    <div className="flex min-h-screen items-center justify-center bg-surface-container px-4 py-12 sm:px-6 lg:px-8">
+      <div className="w-full max-w-md space-y-8 rounded-2xl border border-outline-variant/50 bg-white/50 p-8 shadow-card backdrop-blur-xl">
         <div className="text-center">
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-gold/10 text-primary">
             {token ? <UserPlus className="h-6 w-6" /> : <Building2 className="h-6 w-6" />}
           </div>
-          <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-white">
+          <h2 className="mt-6 text-3xl font-extrabold tracking-tight text-on-surface">
             {token ? 'Join Your Team' : 'Create Organization'}
           </h2>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-on-surface-variant">
             {token 
               ? 'Complete registration to access your workspace' 
               : 'Launch your multi-tenant sales CRM instance'}
@@ -81,7 +81,7 @@ const Signup = () => {
         </div>
 
         {error && (
-          <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+          <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-600">
             {error}
           </div>
         )}
@@ -96,11 +96,11 @@ const Signup = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Full Name</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Full Name</label>
               <input
                 type="text"
                 required
-                className="relative mt-1 block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
+                className="relative mt-1 block w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
                 placeholder="John Doe"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -108,11 +108,11 @@ const Signup = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Email Address</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Email Address</label>
               <input
                 type="email"
                 required
-                className="relative mt-1 block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
+                className="relative mt-1 block w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
                 placeholder="admin@company.com"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -120,12 +120,12 @@ const Signup = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Password</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Password</label>
               <input
                 type="password"
                 required
                 minLength={6}
-                className="relative mt-1 block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
+                className="relative mt-1 block w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
                 placeholder="••••••••"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
@@ -134,11 +134,11 @@ const Signup = () => {
 
             {!token && (
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400">Company Name</label>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Company Name</label>
                 <input
                   type="text"
                   required
-                  className="relative mt-1 block w-full rounded-lg border border-slate-800 bg-slate-950 px-3 py-2 text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
+                  className="relative mt-1 block w-full rounded-lg border border-outline-variant/50 bg-surface-container px-3 py-2 text-on-surface placeholder-slate-500 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500 sm:text-sm"
                   placeholder="Acme Corp"
                   value={form.tenantName}
                   onChange={(e) => setForm({ ...form, tenantName: e.target.value })}
@@ -151,7 +151,7 @@ const Signup = () => {
             <button
               type="submit"
               disabled={loading}
-              className="group relative flex w-full justify-center rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50"
+              className="group relative flex w-full justify-center rounded-lg bg-gold px-4 py-2 text-sm font-semibold text-[#111111] hover:brightness-105 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-slate-900 disabled:opacity-50"
             >
               {loading ? (
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -162,10 +162,10 @@ const Signup = () => {
           </div>
 
           <div className="text-center text-sm">
-            <span className="text-slate-500">Already registered? </span>
+            <span className="text-on-surface-variant">Already registered? </span>
             <button
               type="button"
-              className="font-medium text-amber-500 hover:text-amber-400"
+              className="font-medium text-primary hover:text-primary"
               onClick={() => navigate('/login')}
             >
               Sign in

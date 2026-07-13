@@ -9,22 +9,26 @@ const {
   checkAvailability,
   getTeamCalendar
 } = require('../controllers/eventController');
-const { protect, authorize } = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
+const { checkRole } = require('../middleware/rbacMiddleware');
 const { validate } = require('../middleware/validationMiddleware');
-const { eventSchema } = require('../validators/eventValidator');
+const { createEventSchema, updateEventSchema } = require('../validators/eventValidator');
 
 router.use(protect);
 
-router.post('/availability', checkAvailability);
-router.get('/team', authorize('admin', 'manager'), getTeamCalendar);
+router.route('/availability')
+  .post(checkAvailability);
+
+router.route('/team')
+  .get(checkRole(['admin', 'manager']), getTeamCalendar);
 
 router.route('/')
   .get(getEvents)
-  .post(validate(eventSchema), createEvent);
+  .post(validate(createEventSchema), createEvent);
 
 router.route('/:id')
   .get(getEventById)
-  .put(validate(eventSchema), updateEvent)
+  .put(validate(updateEventSchema), updateEvent)
   .delete(deleteEvent);
 
 module.exports = router;

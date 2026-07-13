@@ -1,5 +1,29 @@
 const mongoose = require('mongoose');
 
+const participantSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false
+  },
+  email: {
+    type: String,
+    required: true,
+    trim: true,
+    lowercase: true
+  },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  rsvpStatus: {
+    type: String,
+    enum: ['pending', 'accepted', 'declined'],
+    default: 'pending'
+  }
+});
+
 const eventSchema = new mongoose.Schema(
   {
     tenantId: {
@@ -11,7 +35,6 @@ const eventSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: ['meeting', 'call', 'internal'],
-      default: 'meeting',
       required: true
     },
     title: {
@@ -33,44 +56,26 @@ const eventSchema = new mongoose.Schema(
     },
     timezone: {
       type: String,
-      required: true,
       default: 'UTC'
     },
     relatedTo: {
       module: {
         type: String,
-        enum: ['Lead', 'Contact', 'Deal', 'Account']
+        enum: ['Lead', 'Contact', 'Deal', 'Account'],
+        required: false
       },
       recordId: {
-        type: mongoose.Schema.Types.ObjectId
+        type: mongoose.Schema.Types.ObjectId,
+        required: false
       }
     },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true
+      required: true,
+      index: true
     },
-    participants: [
-      {
-        userId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User'
-        },
-        email: {
-          type: String,
-          required: true
-        },
-        name: {
-          type: String,
-          required: true
-        },
-        rsvpStatus: {
-          type: String,
-          enum: ['pending', 'accepted', 'declined'],
-          default: 'pending'
-        }
-      }
-    ],
+    participants: [participantSchema],
     location: {
       type: String,
       default: ''
@@ -95,20 +100,14 @@ const eventSchema = new mongoose.Schema(
         default: 1
       },
       endDate: {
-        type: Date
+        type: Date,
+        required: false
       }
     },
     reminders: [
       {
-        minutesBefore: {
-          type: Number,
-          required: true
-        },
-        channel: {
-          type: String,
-          enum: ['email', 'push'],
-          default: 'email'
-        }
+        minutesBefore: { type: Number, required: true },
+        channel: { type: String, enum: ['email', 'push'], required: true }
       }
     ],
     status: {
@@ -123,10 +122,12 @@ const eventSchema = new mongoose.Schema(
         default: 'none'
       },
       externalEventId: {
-        type: String
+        type: String,
+        default: ''
       },
       lastSyncedAt: {
-        type: Date
+        type: Date,
+        required: false
       }
     }
   },
@@ -135,7 +136,7 @@ const eventSchema = new mongoose.Schema(
   }
 );
 
-// Compound index matching query patterns for scoped calendar views
+// Performance compound index matching query patterns
 eventSchema.index({ tenantId: 1, assignedTo: 1, startTime: 1 });
 
 module.exports = mongoose.model('Event', eventSchema);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, User, Users, Sliders, Play, Shield, Key, Eye, EyeOff, LayoutGrid, CheckSquare } from 'lucide-react';
+import { Loader2, User, Users, Sliders, Play, Shield, Key, Eye, EyeOff, LayoutGrid, CheckSquare, Trash2 } from 'lucide-react';
 import PipelineSettings from '../components/PipelineSettings';
 import BlueprintViewer from '../components/BlueprintViewer';
 import SecurityLogs from '../components/SecurityLogs';

@@ -1,30 +1,70 @@
 const crypto = require('crypto');
+const twilio = require('twilio');
+const WebhookEvent = require('../models/WebhookEvent');
 
 /**
- * Middleware to cryptographically verify incoming Nylas webhook payloads.
+ * Checks and registers webhook event IDs to prevent duplicate processing (idempotency).
+ * @param {string} eventId 
+ * @param {string} provider 
+ * @returns {Promise<boolean>} True if duplicate event, false if first time and successfully logged
  */
-const verifyNylasSignature = (req, res, next) => {
-  const signature = req.headers['x-nylas-signature'];
-  if (!signature) {
-    return res.status(401).json({ message: 'Nylas webhook signature header missing' });
+const isDuplicateEvent = async (eventId, provider) => {
+  try {
+    if (!eventId) return false;
+    await WebhookEvent.create({ eventId, provider });
+    return false; // Unique event
+  } catch (err) {
+    if (err.code === 11000) {
+      return true; // Duplicate key error
+    }
+    throw err;
   }
+};
 
-  const clientSecret = process.env.NYLAS_CLIENT_SECRET || 'mock_secret';
-  
-  // Use rawBody if available, otherwise stringify body
-  const payload = req.rawBody || JSON.stringify(req.body);
+/**
+ * Verifies cryptographic signatures from Nylas webhooks.
+ * @param {string} signature 
+ * @param {Object} body 
+ * @param {string} clientSecret 
+ * @returns {boolean} True if signature is valid or if running in non-production mode
+ */
+const verifyNylasSignature = (signature, body, clientSecret) => {
+  if (!signature) return false;
   const calculatedSignature = crypto
-    .createHmac('sha256', clientSecret)
-    .update(payload)
+    .createHmac('sha256', clientSecret || 'mock_secret')
+    .update(JSON.stringify(body))
     .digest('hex');
 
-  if (signature !== calculatedSignature && process.env.NODE_ENV === 'production') {
-    return res.status(401).json({ message: 'Nylas signature verification failed' });
+  if (signature === calculatedSignature) {
+    return true;
   }
+  return process.env.NODE_ENV !== 'production';
+};
 
-  next();
+/**
+ * Verifies cryptographic signatures from Twilio webhooks.
+ * @param {string} signature 
+ * @param {string} url 
+ * @param {Object} body 
+ * @param {string} authToken 
+ * @returns {boolean} True if signature is valid or if running in non-production mode
+ */
+const verifyTwilioSignature = (signature, url, body, authToken) => {
+  if (!signature) return false;
+  const isValid = twilio.validateRequest(
+    authToken || 'mock_token',
+    signature,
+    url,
+    body
+  );
+  if (isValid) {
+    return true;
+  }
+  return process.env.NODE_ENV !== 'production';
 };
 
 module.exports = {
-  verifyNylasSignature
+  isDuplicateEvent,
+  verifyNylasSignature,
+  verifyTwilioSignature
 };

@@ -29,7 +29,7 @@ const LeadDetails = () => {
   
   const [lead, setLead] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [leadEvents, setLeadEvents] = useState([]);
+  const [events, setEvents] = useState([]);
   const [noteText, setNoteText] = useState('');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -50,18 +50,17 @@ const LeadDetails = () => {
     }
   };
 
-  const fetchLeadEvents = async () => {
-    try {
-      const { data } = await api.get('/api/events');
-      const related = data.filter(e => e.relatedTo && e.relatedTo.recordId === id);
-      setLeadEvents(related);
-    } catch (_) {}
-  };
-
   const fetchTasks = async () => {
     try {
       const { data } = await api.get('/api/tasks');
       setTasks(data.filter((t) => t.leadId?._id === id || t.leadId === id));
+    } catch (_) {}
+  };
+
+  const fetchEvents = async () => {
+    try {
+      const { data } = await api.get('/api/events');
+      setEvents(data.filter(e => e.relatedTo?.recordId === id));
     } catch (_) {}
   };
 
@@ -76,7 +75,7 @@ const LeadDetails = () => {
   useEffect(() => {
     fetchLead();
     fetchTasks();
-    fetchLeadEvents();
+    fetchEvents();
     fetchCustomFields();
   }, [id]);
 
@@ -188,11 +187,11 @@ const LeadDetails = () => {
     icon: 'assignment'
   }));
 
-  const eventsTimeline = leadEvents.map((e) => ({
+  const eventsTimeline = events.map((e) => ({
     type: 'meeting',
-    title: e.title,
-    desc: `${e.description || ''} (Time: ${new Date(e.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`,
-    user: e.assignedTo?.name || 'You',
+    title: `${e.type.toUpperCase()}: ${e.title}`,
+    desc: `${e.description || ''}\nTime: ${new Date(e.startTime).toLocaleString('en-IN', { timeStyle: 'short', dateStyle: 'medium' })}\nLocation: ${e.location || 'N/A'}`,
+    user: e.assignedTo?.name || 'System',
     date: new Date(e.startTime),
     icon: 'calendar'
   }));
@@ -300,6 +299,28 @@ const LeadDetails = () => {
             <p className="text-[9px] font-bold text-slate-400 uppercase font-mono mt-1">Value Projection</p>
           </Card>
 
+          {/* Upcoming Events Mini-Widget */}
+          <Card variant="raised" className="p-6 bg-white space-y-4">
+            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Upcoming Stops</h3>
+            {events.filter(e => new Date(e.startTime) >= new Date() && e.status !== 'cancelled').length === 0 ? (
+              <p className="text-[10px] text-slate-400 italic">No upcoming stops scheduled.</p>
+            ) : (
+              <div className="space-y-3">
+                {events.filter(e => new Date(e.startTime) >= new Date() && e.status !== 'cancelled').map(e => (
+                  <div key={e._id} className="p-3 bg-gold-soft/30 border border-line rounded-card space-y-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-bold text-ink uppercase tracking-tight">{e.title}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded bg-white text-gold font-bold font-mono border border-line">{e.type}</span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 font-bold font-mono uppercase mt-0.5">
+                      {new Date(e.startTime).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} • {new Date(e.startTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+
           {/* Customer Company Info */}
           <Card variant="raised" className="p-6 bg-white space-y-4">
             <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Customer Information</h3>
@@ -329,25 +350,6 @@ const LeadDetails = () => {
                 <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Assigned Executive</span>
                 <span className="text-xs font-bold text-ink mt-0.5">{lead.assignedTo?.name || 'Unassigned'}</span>
               </div>
-            </div>
-          </Card>
-
-          {/* Upcoming Scheduled Stops Mini-Widget */}
-          <Card variant="flat" className="p-6 bg-white space-y-4">
-            <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Upcoming Stops</h3>
-            <div className="space-y-3">
-              {leadEvents.filter(e => new Date(e.startTime) > new Date()).length === 0 ? (
-                <p className="text-[10px] text-slate-400 italic">No upcoming stops scheduled.</p>
-              ) : (
-                leadEvents.filter(e => new Date(e.startTime) > new Date()).map(evt => (
-                  <div key={evt._id} className="p-2.5 bg-[#FAF9F6] border border-line rounded-card flex flex-col gap-1">
-                    <span className="text-xs font-bold text-ink truncate block">{evt.title}</span>
-                    <span className="text-[9px] text-slate-500 font-mono font-bold uppercase block">
-                      {new Date(evt.startTime).toLocaleString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                ))
-              )}
             </div>
           </Card>
 

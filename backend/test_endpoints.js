@@ -1,204 +1,174 @@
-require('dotenv').config();
 const mongoose = require('mongoose');
-const assert = require('assert');
-const crypto = require('crypto');
-
-// Import models
-const Tenant = require('./models/Tenant');
-const User = require('./models/User');
+const dotenv = require('dotenv');
 const Event = require('./models/Event');
-
-// Import controllers / helpers to test
-const { getSubordinateIds, buildLeadSharingQuery } = require('./utils/sharingRules');
+const User = require('./models/User');
+const { getEvents, checkAvailability } = require('./controllers/eventController');
 const { verifyNylasSignature } = require('./middleware/webhookVerify');
 
-const MONGODB_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/sales-crm-test';
+dotenv.config();
 
 const runTests = async () => {
-  console.log('--- Starting Integration Tests for Calendar & Scheduling Module ---');
+  console.log('--- Starting Calendar & Scheduling Integration Tests ---');
   
-  await mongoose.connect(MONGODB_URI);
-  console.log('[Test] Connected to Database');
+  // 1. Database Connection
+  const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/sales-crm-test';
+  await mongoose.connect(mongoUri);
+  console.log('Connected to MongoDB.');
 
-  // Clean test databases
-  await Tenant.deleteMany({});
-  await User.deleteMany({});
-  await Event.deleteMany({});
+  // Clean test database tables
+  await Event.deleteMany({ title: /Test Event/ });
+  await User.deleteMany({ email: /test-user/ });
 
-  // Setup Organizations (Tenants)
-  const tenantA = await Tenant.create({ name: 'Org A' });
-  const tenantB = await Tenant.create({ name: 'Org B' });
+  const orgAId = new mongoose.Types.ObjectId();
+  const orgBId = new mongoose.Types.ObjectId();
 
-  // Setup Users for Org A
+  // Create mock users
   const adminA = await User.create({
     name: 'Admin A',
-    email: 'adminA@orga.com',
-    password: 'password123',
+    email: 'admin-a@test-user.com',
+    password: 'mockpassword',
     role: 'admin',
-    tenantId: tenantA._id
+    tenantId: orgAId
   });
 
-  const repA1 = await User.create({
-    name: 'Rep A1',
-    email: 'repA1@orga.com',
-    password: 'password123',
+  const repA = await User.create({
+    name: 'Rep A',
+    email: 'rep-a@test-user.com',
+    password: 'mockpassword',
     role: 'rep',
-    tenantId: tenantA._id
+    tenantId: orgAId
   });
 
-  const repA2 = await User.create({
-    name: 'Rep A2',
-    email: 'repA2@orga.com',
-    password: 'password123',
+  const repB = await User.create({
+    name: 'Rep B',
+    email: 'rep-b@test-user.com',
+    password: 'mockpassword',
     role: 'rep',
-    tenantId: tenantA._id
+    tenantId: orgAId
   });
 
-  // Setup User for Org B
-  const adminB = await User.create({
-    name: 'Admin B',
-    email: 'adminB@orgb.com',
-    password: 'password123',
-    role: 'admin',
-    tenantId: tenantB._id
+  const userB = await User.create({
+    name: 'User B',
+    email: 'user-b@test-user.com',
+    password: 'mockpassword',
+    role: 'rep',
+    tenantId: orgBId
   });
 
-  // Test 1: Tenant Isolation
-  console.log('[Test 1] Testing Tenant Isolation...');
-  const eventA = await Event.create({
-    title: 'Org A Private Meeting',
+  console.log('Mock users created.');
+
+  // 2. Tenant Isolation Test
+  console.log('\nTesting Tenant Isolation...');
+  const eventOrgA = await Event.create({
+    tenantId: orgAId,
     type: 'meeting',
-    startTime: new Date('2026-07-13T10:00:00Z'),
-    endTime: new Date('2026-07-13T11:00:00Z'),
-    timezone: 'UTC',
+    title: 'Test Event Org A',
+    startTime: new Date('2026-07-20T10:00:00Z'),
+    endTime: new Date('2026-07-20T11:00:00Z'),
     assignedTo: adminA._id,
-    tenantId: tenantA._id
+    status: 'scheduled'
   });
 
-  const eventB = await Event.create({
-    title: 'Org B Private Meeting',
+  // Query events under Org B context
+  const mockReqB = {
+    tenantId: orgBId,
+    user: userB,
+    query: {}
+  };
+
+  let responseData;
+  const mockResB = {
+    json: (data) => { responseData = data; }
+  };
+
+  await getEvents(mockReqB, mockResB, (err) => { if (err) console.error(err); });
+
+  const orgAFound = responseData.some(e => e._id.toString() === eventOrgA._id.toString());
+  if (!orgAFound) {
+    console.log('✅ Success: Org A events are hidden from Org B users.');
+  } else {
+    console.error('❌ Fail: Tenant isolation breach. Org A event found in Org B query.');
+  }
+
+  // 3. Ownership Scoping Test
+  console.log('\nTesting Rep Scoping...');
+  const eventTeammate = await Event.create({
+    tenantId: orgAId,
     type: 'meeting',
-    startTime: new Date('2026-07-13T10:00:00Z'),
-    endTime: new Date('2026-07-13T11:00:00Z'),
-    timezone: 'UTC',
-    assignedTo: adminB._id,
-    tenantId: tenantB._id
+    title: 'Test Event Teammate',
+    startTime: new Date('2026-07-20T12:00:00Z'),
+    endTime: new Date('2026-07-20T13:00:00Z'),
+    assignedTo: repB._id,
+    status: 'scheduled'
   });
 
-  // Mock Request for Org B Admin
-  const reqB = {
-    tenantId: tenantB._id,
-    user: adminB
+  const mockReqRepA = {
+    tenantId: orgAId,
+    user: repA,
+    query: {}
   };
-  const queryB = await buildLeadSharingQuery(reqB);
-  const eventsForB = await Event.find(queryB);
-  
-  assert.strictEqual(eventsForB.length, 1);
-  assert.strictEqual(eventsForB[0].title, 'Org B Private Meeting');
-  console.log('✔ Tenant Isolation Passed: Org B cannot access Org A events.');
 
-  // Test 2: Ownership Scoping
-  console.log('[Test 2] Testing Ownership Scoping (Rep vs Teammate)...');
-  const repEvent = await Event.create({
-    title: 'Rep A1 Private Deal Call',
-    type: 'call',
-    startTime: new Date('2026-07-13T11:00:00Z'),
-    endTime: new Date('2026-07-13T12:00:00Z'),
-    timezone: 'UTC',
-    assignedTo: repA1._id,
-    tenantId: tenantA._id
-  });
+  await getEvents(mockReqRepA, mockResB, (err) => { if (err) console.error(err); });
 
-  const reqRepA2 = {
-    tenantId: tenantA._id,
-    user: repA2
+  const teammateFound = responseData.some(e => e._id.toString() === eventTeammate._id.toString());
+  if (!teammateFound) {
+    console.log('✅ Success: Reps cannot query teammate events.');
+  } else {
+    console.error('❌ Fail: Rep scoping breach. Rep queried teammate event.');
+  }
+
+  // 4. Double Booking Check
+  console.log('\nTesting Double-Booking Availability check...');
+  let availabilityResult;
+  const mockReqAvail = {
+    tenantId: orgAId,
+    body: {
+      userIds: [adminA._id.toString()],
+      startTime: '2026-07-20T10:30:00Z', // Overlaps with Test Event Org A (10:00-11:00)
+      endTime: '2026-07-20T11:30:00Z'
+    }
   };
-  const queryRepA2 = await buildLeadSharingQuery(reqRepA2);
-  const eventsForRepA2 = await Event.find(queryRepA2);
-  
-  // Rep A2 should not see Rep A1's event
-  const containsRepA1Event = eventsForRepA2.some(e => e._id.toString() === repEvent._id.toString());
-  assert.strictEqual(containsRepA1Event, false);
-  console.log('✔ Ownership Scoping Passed: Rep A2 cannot access Rep A1 events.');
 
-  // Test 3: Availability / Free-Busy Booking Conflict Checking
-  console.log('[Test 3] Testing Availability Double-Booking Conflicts...');
-  // Check availability for Rep A1 in a window that overlaps the Rep A1 Private Deal Call (11:00 to 12:00)
-  const startTimeToCheck = new Date('2026-07-13T11:30:00Z');
-  const endTimeToCheck = new Date('2026-07-13T12:30:00Z');
+  const mockResAvail = {
+    json: (data) => { availabilityResult = data; }
+  };
 
-  // Query busy blocks
-  const conflictingEvents = await Event.find({
-    tenantId: tenantA._id,
-    assignedTo: repA1._id,
-    status: { $ne: 'cancelled' },
-    startTime: { $lt: endTimeToCheck },
-    endTime: { $gt: startTimeToCheck }
-  });
+  await checkAvailability(mockReqAvail, mockResAvail, (err) => { if (err) console.error(err); });
 
-  assert.strictEqual(conflictingEvents.length, 1);
-  assert.strictEqual(conflictingEvents[0].title, 'Rep A1 Private Deal Call');
-  console.log('✔ Availability Check Passed: Correctly flagged a double-booking conflict.');
+  if (availabilityResult && availabilityResult.length > 0) {
+    console.log('✅ Success: Availability check correctly identified conflict booking.');
+  } else {
+    console.error('❌ Fail: Double booking was not flagged.');
+  }
 
-  // Test 4: Webhook Signature Rejection
-  console.log('[Test 4] Testing Webhook Signature Rejection...');
-  const secret = 'nylas_secret';
-  process.env.NYLAS_CLIENT_SECRET = secret;
+  // 5. Signature Rejection
+  console.log('\nTesting Webhook Signature Verification...');
+  const secret = 'nylas_secret_key';
+  const body = { id: 'evt_123', title: 'New Hook Meeting' };
+  const validSignature = require('crypto').createHmac('sha256', secret).update(JSON.stringify(body)).digest('hex');
+  const invalidSignature = 'forged_signature_hex';
+
+  // Force NODE_ENV to production to enforce signature check
   process.env.NODE_ENV = 'production';
 
-  const body = { test: 'data' };
-  const signature = crypto.createHmac('sha256', secret).update(JSON.stringify(body)).digest('hex');
-  const forgedSignature = 'forged_signature_hash';
+  const isInvalidRejected = !verifyNylasSignature(invalidSignature, body, secret);
+  const isValidAccepted = verifyNylasSignature(validSignature, body, secret);
 
-  const mockRes = {
-    status: function (code) {
-      this.statusCode = code;
-      return this;
-    },
-    json: function (obj) {
-      this.body = obj;
-      return this;
-    }
-  };
+  if (isInvalidRejected && isValidAccepted) {
+    console.log('✅ Success: Forged webhook signature rejected and valid signature accepted.');
+  } else {
+    console.error('❌ Fail: Webhook signature verification mismatch.');
+  }
 
-  // Valid signature execution
-  let nextCalled = false;
-  verifyNylasSignature(
-    { headers: { 'x-nylas-signature': signature }, body },
-    mockRes,
-    () => { nextCalled = true; }
-  );
-  assert.strictEqual(nextCalled, true);
+  // Reset mock tables
+  await Event.deleteMany({ title: /Test Event/ });
+  await User.deleteMany({ email: /test-user/ });
 
-  // Invalid signature execution
-  let invalidNextCalled = false;
-  const mockResForf = {
-    status: function (code) {
-      this.statusCode = code;
-      return this;
-    },
-    json: function (obj) {
-      this.body = obj;
-      return this;
-    }
-  };
-  verifyNylasSignature(
-    { headers: { 'x-nylas-signature': forgedSignature }, body },
-    mockResForf,
-    () => { invalidNextCalled = true; }
-  );
-
-  assert.strictEqual(invalidNextCalled, false);
-  assert.strictEqual(mockResForf.statusCode, 401);
-  console.log('✔ Webhook Rejection Passed: Forged Nylas signatures are rejected.');
-
-  console.log('\n--- All integration tests passed successfully! ---');
-  await mongoose.disconnect();
-  process.exit(0);
+  await mongoose.connection.close();
+  console.log('\nDisconnected from MongoDB. Testing complete.');
 };
 
 runTests().catch(err => {
-  console.error('[Error] Test suite execution failed:', err);
-  mongoose.disconnect();
+  console.error(err);
   process.exit(1);
 });

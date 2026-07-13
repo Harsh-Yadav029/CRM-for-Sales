@@ -54,6 +54,7 @@ app.use('/api/', apiLimiter);
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/leads', require('./routes/leadRoutes'));
 app.use('/api/tasks', require('./routes/taskRoutes'));
+app.use('/api/events', require('./routes/eventRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/communication', require('./routes/communicationRoutes'));
 app.use('/api/custom-fields', require('./routes/customFieldRoutes'));
@@ -75,7 +76,6 @@ app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/api/audits', require('./routes/auditRoutes'));
 app.use('/api/apikeys', require('./routes/apiKeyRoutes'));
 app.use('/api/stripe', require('./routes/stripeRoutes'));
-app.use('/api/events', require('./routes/eventRoutes'));
 
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');

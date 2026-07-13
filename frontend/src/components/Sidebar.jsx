@@ -83,14 +83,14 @@ const Sidebar = () => {
           {!collapsed && <span>Tasks</span>}
         </NavLink>
 
-        <NavLink to="/calendar" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Calendar">
-          <Calendar size={16} className="shrink-0" />
-          {!collapsed && <span>Calendar</span>}
-        </NavLink>
-
         <NavLink to="/reports" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Reports">
           <BarChart3 size={16} className="shrink-0" />
           {!collapsed && <span>Reports</span>}
+        </NavLink>
+
+        <NavLink to="/calendar" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Calendar">
+          <Calendar size={16} className="shrink-0" />
+          {!collapsed && <span>Calendar</span>}
         </NavLink>
 
         <NavLink to="/settings" className={({ isActive }) => `${linkClass(isActive)} ${activeBar(isActive)}`} title="Settings">

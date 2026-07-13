@@ -1,34 +1,26 @@
 const Event = require('../models/Event');
-const Lead = require('../models/Lead');
-const Contact = require('../models/Contact');
-const Company = require('../models/Company');
 const { buildLeadSharingQuery } = require('../utils/sharingRules');
 const { pushEventToExternalCalendar } = require('../services/nylasCalendarSync');
 
-// Get all events scoped by role, tenant, and optional date range
+// @desc    Get all calendar events inside optional date range matching tenant/role scoping
+// @route   GET /api/events
+// @access  Private
 const getEvents = async (req, res, next) => {
   try {
-    const baseQuery = await buildLeadSharingQuery(req);
-    const query = { ...baseQuery };
+    // buildLeadSharingQuery returns filters on { tenantId, assignedTo }
+    const query = await buildLeadSharingQuery(req);
 
-    // Support ?from=&to= date range query
-    if (req.query.from || req.query.to) {
-      query.startTime = {};
-      if (req.query.from) {
-        query.startTime.$gte = new Date(req.query.from);
-      }
-      if (req.query.to) {
-        query.startTime.$lte = new Date(req.query.to);
-      }
+    if (req.query.from && req.query.to) {
+      query.startTime = { $gte: new Date(req.query.from) };
+      query.endTime = { $lte: new Date(req.query.to) };
     }
 
-    if (req.query.type) {
-      query.type = req.query.type;
+    if (req.query.assignedTo) {
+      query.assignedTo = req.query.assignedTo;
     }
 
     const events = await Event.find(query)
       .populate('assignedTo', 'name email')
-      .populate('participants.userId', 'name email')
       .sort({ startTime: 1 });
 
     res.json(events);
@@ -37,12 +29,13 @@ const getEvents = async (req, res, next) => {
   }
 };
 
-// Get event by ID
+// @desc    Get single event by ID
+// @route   GET /api/events/:id
+// @access  Private
 const getEventById = async (req, res, next) => {
   try {
     const event = await Event.findOne({ _id: req.params.id, tenantId: req.tenantId })
-      .populate('assignedTo', 'name email')
-      .populate('participants.userId', 'name email');
+      .populate('assignedTo', 'name email');
 
     if (!event) {
       res.status(404);
@@ -55,7 +48,9 @@ const getEventById = async (req, res, next) => {
   }
 };
 
-// Create a new event
+// @desc    Create new event (validates start/end and optional relatedTo target record)
+// @route   POST /api/events
+// @access  Private
 const createEvent = async (req, res, next) => {
   const {
     type,
@@ -65,6 +60,7 @@ const createEvent = async (req, res, next) => {
     endTime,
     timezone,
     relatedTo,
+    assignedTo,
     participants,
     location,
     conferenceLink,
@@ -75,112 +71,113 @@ const createEvent = async (req, res, next) => {
   } = req.body;
 
   try {
-    // Basic date validation
-    if (new Date(startTime) >= new Date(endTime)) {
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    if (start >= end) {
       res.status(400);
-      return next(new Error('Start time must be before end time'));
+      return next(new Error('startTime must be before endTime'));
     }
 
-    // Related record validation
-    if (relatedTo && relatedTo.recordId) {
-      let recordExists = false;
-      const recId = relatedTo.recordId;
-
+    // Verify relatedTo reference belongs to correct tenant context
+    if (relatedTo && relatedTo.module && relatedTo.recordId) {
+      let model;
       if (relatedTo.module === 'Lead' || relatedTo.module === 'Deal') {
-        const lead = await Lead.findOne({ _id: recId, tenantId: req.tenantId });
-        if (lead) recordExists = true;
+        model = require('../models/Lead');
       } else if (relatedTo.module === 'Contact') {
-        const contact = await Contact.findOne({ _id: recId, tenantId: req.tenantId });
-        if (contact) recordExists = true;
+        model = require('../models/Contact');
       } else if (relatedTo.module === 'Account') {
-        const company = await Company.findOne({ _id: recId, tenantId: req.tenantId });
-        if (company) recordExists = true;
+        model = require('../models/Company');
       }
 
-      if (!recordExists) {
-        res.status(400);
-        return next(new Error(`Related ${relatedTo.module} record does not exist or belongs to another tenant`));
+      if (model) {
+        const record = await model.findOne({ _id: relatedTo.recordId, tenantId: req.tenantId });
+        if (!record) {
+          res.status(400);
+          return next(new Error(`Related ${relatedTo.module} record not found in this organization`));
+        }
       }
     }
 
-    const eventData = {
+    // Fallback: If no assignedTo target is selected, assign to self
+    const finalAssignedTo = assignedTo || req.user._id;
+
+    const event = await Event.create({
       tenantId: req.tenantId,
       type,
       title,
       description,
-      startTime,
-      endTime,
-      timezone,
+      startTime: start,
+      endTime: end,
+      timezone: timezone || 'UTC',
       relatedTo,
-      assignedTo: req.body.assignedTo || req.user._id,
+      assignedTo: finalAssignedTo,
       participants: participants || [],
-      location,
-      conferenceLink,
+      location: location || '',
+      conferenceLink: conferenceLink || '',
       colorTag: colorTag || 'neutral',
-      recurrence,
-      reminders,
+      recurrence: recurrence || { frequency: 'none' },
+      reminders: reminders || [],
       status: status || 'scheduled'
-    };
+    });
 
-    const newEvent = new Event(eventData);
-    await newEvent.save();
+    // Invoke external Nylas sync background task
+    try {
+      await pushEventToExternalCalendar(event);
+    } catch (syncErr) {
+      console.error('Nylas external calendar push error (ignored for lifecycle):', syncErr);
+    }
 
-    // Push to Nylas external calendar
-    await pushEventToExternalCalendar(newEvent);
-
-    res.status(201).json(newEvent);
+    res.status(201).json(event);
   } catch (error) {
     next(error);
   }
 };
 
-// Update an event
+// @desc    Update calendar event (stripping tenantId to protect tenant borders)
+// @route   PUT /api/events/:id
+// @access  Private
 const updateEvent = async (req, res, next) => {
+  const updates = { ...req.body };
+  delete updates.tenantId;
+
   try {
     const event = await Event.findOne({ _id: req.params.id, tenantId: req.tenantId });
+
     if (!event) {
       res.status(404);
       return next(new Error('Event not found'));
     }
 
-    // Strip tenantId to enforce isolation
-    const updates = { ...req.body };
-    delete updates.tenantId;
-
-    if (updates.startTime && updates.endTime) {
-      if (new Date(updates.startTime) >= new Date(updates.endTime)) {
-        res.status(400);
-        return next(new Error('Start time must be before end time'));
-      }
+    // Role gate check: Only assignee or admin/manager privilege can alter event
+    const isOwner = event.assignedTo.toString() === req.user._id.toString();
+    const isPrivileged = ['admin', 'manager'].includes(req.user.role);
+    if (!isOwner && !isPrivileged) {
+      res.status(403);
+      return next(new Error('Access denied: Unauthorized operation'));
     }
 
-    // Validate relatedTo if updated
-    if (updates.relatedTo && updates.relatedTo.recordId) {
-      let recordExists = false;
-      const recId = updates.relatedTo.recordId;
+    if (updates.startTime) updates.startTime = new Date(updates.startTime);
+    if (updates.endTime) updates.endTime = new Date(updates.endTime);
 
-      if (updates.relatedTo.module === 'Lead' || updates.relatedTo.module === 'Deal') {
-        const lead = await Lead.findOne({ _id: recId, tenantId: req.tenantId });
-        if (lead) recordExists = true;
-      } else if (updates.relatedTo.module === 'Contact') {
-        const contact = await Contact.findOne({ _id: recId, tenantId: req.tenantId });
-        if (contact) recordExists = true;
-      } else if (updates.relatedTo.module === 'Account') {
-        const company = await Company.findOne({ _id: recId, tenantId: req.tenantId });
-        if (company) recordExists = true;
-      }
-
-      if (!recordExists) {
+    if (updates.startTime || updates.endTime) {
+      const finalStart = updates.startTime || event.startTime;
+      const finalEnd = updates.endTime || event.endTime;
+      if (finalStart >= finalEnd) {
         res.status(400);
-        return next(new Error(`Related ${updates.relatedTo.module} record does not exist or belongs to another tenant`));
+        return next(new Error('startTime must be before endTime'));
       }
     }
 
     Object.assign(event, updates);
     await event.save();
 
-    // Sync updates back to external calendar
-    await pushEventToExternalCalendar(event);
+    // Re-push to external Nylas calendar
+    try {
+      await pushEventToExternalCalendar(event);
+    } catch (syncErr) {
+      console.error('Nylas external calendar update error (ignored for lifecycle):', syncErr);
+    }
 
     res.json(event);
   } catch (error) {
@@ -188,29 +185,37 @@ const updateEvent = async (req, res, next) => {
   }
 };
 
-// Delete an event
+// @desc    Delete calendar event
+// @route   DELETE /api/events/:id
+// @access  Private
 const deleteEvent = async (req, res, next) => {
   try {
     const event = await Event.findOne({ _id: req.params.id, tenantId: req.tenantId });
+
     if (!event) {
       res.status(404);
       return next(new Error('Event not found'));
     }
 
-    // Role-gate: rep can only delete their own; admins/managers can delete any within tenant
-    if (req.user.role === 'rep' && event.assignedTo.toString() !== req.user._id.toString()) {
+    // Role-gated to admin/manager for events they don't assign to themselves; assignees can always delete their own
+    const isOwner = event.assignedTo.toString() === req.user._id.toString();
+    const isPrivileged = ['admin', 'manager'].includes(req.user.role);
+    if (!isOwner && !isPrivileged) {
       res.status(403);
-      return next(new Error('Unauthorized to delete this event'));
+      return next(new Error('Access denied: Unauthorized operation'));
     }
 
-    await event.deleteOne();
-    res.json({ message: 'Event deleted successfully' });
+    await Event.deleteOne({ _id: req.params.id });
+
+    res.json({ message: 'Event successfully removed' });
   } catch (error) {
     next(error);
   }
 };
 
-// Check availability (Busy blocks checking)
+// @desc    Check free/busy availability of team members
+// @route   POST /api/events/availability
+// @access  Private
 const checkAvailability = async (req, res, next) => {
   const { userIds, startTime, endTime } = req.body;
 
@@ -220,49 +225,43 @@ const checkAvailability = async (req, res, next) => {
       return next(new Error('Please provide userIds (Array), startTime, and endTime'));
     }
 
-    // Query active non-cancelled events for the specified users overlapping the target window
-    const overlappingEvents = await Event.find({
+    const start = new Date(startTime);
+    const end = new Date(endTime);
+
+    // Query overlapping events: status !== cancelled
+    const overlapEvents = await Event.find({
       tenantId: req.tenantId,
       assignedTo: { $in: userIds },
       status: { $ne: 'cancelled' },
-      startTime: { $lt: new Date(endTime) },
-      endTime: { $gt: new Date(startTime) }
+      startTime: { $lt: end },
+      endTime: { $gt: start }
     }).select('assignedTo startTime endTime title');
 
-    const busyBlocks = overlappingEvents.map(evt => ({
-      userId: evt.assignedTo,
-      startTime: evt.startTime,
-      endTime: evt.endTime,
-      title: evt.title
-    }));
-
-    res.json(busyBlocks);
+    res.json(overlapEvents);
   } catch (error) {
     next(error);
   }
 };
 
-// Get team calendar
+// @desc    Get team calendar view for managers/admins only
+// @route   GET /api/events/team
+// @access  Private (Admin / Manager only)
 const getTeamCalendar = async (req, res, next) => {
   try {
-    // Reuses the manager-scope logic already in buildLeadSharingQuery
-    const baseQuery = await buildLeadSharingQuery(req);
-    const query = { ...baseQuery };
+    if (!['admin', 'manager'].includes(req.user.role)) {
+      res.status(403);
+      return next(new Error('Access denied: privileged route'));
+    }
 
-    // Support ?from=&to= date range query
-    if (req.query.from || req.query.to) {
-      query.startTime = {};
-      if (req.query.from) {
-        query.startTime.$gte = new Date(req.query.from);
-      }
-      if (req.query.to) {
-        query.startTime.$lte = new Date(req.query.to);
-      }
+    const query = await buildLeadSharingQuery(req);
+
+    if (req.query.from && req.query.to) {
+      query.startTime = { $gte: new Date(req.query.from) };
+      query.endTime = { $lte: new Date(req.query.to) };
     }
 
     const events = await Event.find(query)
       .populate('assignedTo', 'name email')
-      .populate('participants.userId', 'name email')
       .sort({ startTime: 1 });
 
     res.json(events);

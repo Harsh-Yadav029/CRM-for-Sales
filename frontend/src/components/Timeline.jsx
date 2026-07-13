@@ -13,7 +13,9 @@ const TimelineItem = ({ item }) => {
       case 'call': return <Phone size={12} />;
       case 'sms': return <MessageSquare size={12} />;
       case 'task': return <CheckSquare size={12} />;
-      case 'meeting': return <Calendar size={12} />;
+      case 'meeting':
+      case 'event':
+        return <Calendar size={12} />;
       default: return <FileText size={12} />;
     }
   };

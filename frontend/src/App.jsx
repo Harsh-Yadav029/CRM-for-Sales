@@ -53,7 +53,7 @@ const ProtectedLayout = ({ children }) => {
     '/invoices': 'Invoice Ledger',
     '/developer-portal': 'Developer Portal',
     '/billing': 'Subscription Billing',
-    '/calendar': 'My Calendar'
+    '/calendar': 'Calendar & Meetings'
   };
   let title = titles[location.pathname] || 'Dashboard';
   if (location.pathname.startsWith('/leads/')) title = 'Lead Profile';
@@ -99,9 +99,9 @@ function App() {
           <Route path="/developer-portal" element={<ProtectedLayout><DeveloperPortal /></ProtectedLayout>} />
           <Route path="/billing" element={<ProtectedLayout><Billing /></ProtectedLayout>} />
           <Route path="/billing/callback" element={<BillingCallback />} />
-          <Route path="/calendar" element={<ProtectedLayout><Calendar /></ProtectedLayout>} />
           <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
           <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
+          <Route path="/calendar" element={<ProtectedLayout><Calendar /></ProtectedLayout>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>

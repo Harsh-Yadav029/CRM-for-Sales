@@ -11,11 +11,9 @@ const {
 } = require('../controllers/communicationController');
 const { protect } = require('../middleware/authMiddleware');
 
-const { verifyNylasSignature } = require('../middleware/webhookVerify');
-
 // Public Webhook routes (called by Nylas & Twilio servers directly, bypassing JWT checks)
 router.get('/webhooks/nylas', nylasChallenge);
-router.post('/webhooks/nylas', verifyNylasSignature, nylasWebhook);
+router.post('/webhooks/nylas', nylasWebhook);
 router.post('/webhooks/twilio', twilioWebhook);
 
 // Protected client-side routes (used by logged-in users session)

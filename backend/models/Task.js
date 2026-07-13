@@ -12,28 +12,80 @@ const taskSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    description: {
+      type: String,
+      default: ''
+    },
     dueDate: {
       type: Date,
       required: true
     },
-    completed: {
-      type: Boolean,
-      default: false
+    priority: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium'
+    },
+    relatedTo: {
+      module: {
+        type: String,
+        enum: ['Lead', 'Contact', 'Deal', 'Account'],
+        required: false
+      },
+      recordId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: false
+      }
     },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
     },
-    leadId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Lead',
-      default: null
+    recurrence: {
+      frequency: {
+        type: String,
+        enum: ['none', 'daily', 'weekly', 'monthly'],
+        default: 'none'
+      },
+      interval: {
+        type: Number,
+        default: 1
+      },
+      endDate: {
+        type: Date,
+        required: false
+      }
+    },
+    reminders: [
+      {
+        minutesBefore: { type: Number, required: true },
+        channel: { type: String, enum: ['email', 'push'], required: true }
+      }
+    ],
+    status: {
+      type: String,
+      enum: ['open', 'completed'],
+      default: 'open'
+    },
+    // Keep completed for backwards compatibility with parts of code using completed boolean
+    completed: {
+      type: Boolean,
+      default: false
     }
   },
   {
     timestamps: true
   }
 );
+
+// Synchronize completed field and status field on save
+taskSchema.pre('save', function (next) {
+  if (this.isModified('status')) {
+    this.completed = this.status === 'completed';
+  } else if (this.isModified('completed')) {
+    this.status = this.completed ? 'completed' : 'open';
+  }
+  next();
+});
 
 module.exports = mongoose.model('Task', taskSchema);

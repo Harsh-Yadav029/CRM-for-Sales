@@ -43,7 +43,8 @@ const ProtectedLayout = ({ children }) => {
     '/': 'Home',
     '/leads': 'Lead Management',
     '/deals': 'Deal Pipeline',
-    '/tasks': 'Task Manager',
+    '/tasks': 'Activities Command',
+    '/activities': 'Activities Command',
     '/settings': 'System Settings',
     '/reports': 'Reports & Analytics',
     '/accounts': 'Accounts & Companies',
@@ -91,6 +92,7 @@ function App() {
           <Route path="/leads/:id" element={<ProtectedLayout><LeadDetails /></ProtectedLayout>} />
           <Route path="/deals" element={<ProtectedLayout><Deals /></ProtectedLayout>} />
           <Route path="/tasks" element={<ProtectedLayout><Tasks /></ProtectedLayout>} />
+          <Route path="/activities" element={<ProtectedLayout><Tasks /></ProtectedLayout>} />
           <Route path="/accounts" element={<ProtectedLayout><Accounts /></ProtectedLayout>} />
           <Route path="/contacts" element={<ProtectedLayout><Contacts /></ProtectedLayout>} />
           <Route path="/products" element={<ProtectedLayout><Products /></ProtectedLayout>} />

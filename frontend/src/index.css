@@ -2,30 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background-color: #f9f9f9;
-  color: #1a1c1c;
-  font-family: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
+  background-color: #0a0f1d;
+  color: #f1f5f9;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   background-image: 
-    linear-gradient(to right, #eeeeee 1px, transparent 1px),
-    linear-gradient(to bottom, #eeeeee 1px, transparent 1px);
-  background-size: 24px 24px;
+    linear-gradient(to right, rgba(99, 102, 241, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99, 102, 241, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #f9f9f9; }
-::-webkit-scrollbar-thumb { background: #dadada; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #bfbebe; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0a0f1d; }
+::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #334155; }
 
-::selection { background: #ffe08c; color: #241a00; }
+::selection { background: rgba(99, 102, 241, 0.3); color: #ffffff; }
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  border-color: #745b00 !important;
-  box-shadow: 0 0 0 3px rgba(116, 91, 0, 0.15);
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
 .material-symbols-outlined {
@@ -35,29 +37,31 @@ input:focus, select:focus, textarea:focus {
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(209, 197, 173, 0.6);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .glass-effect {
-  background: rgba(249, 249, 249, 0.8);
-  backdrop-filter: blur(12px);
+  background: rgba(10, 15, 29, 0.7);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .blueprint-bg {
   background-image: 
-    linear-gradient(to right, #eeeeee 1px, transparent 1px),
-    linear-gradient(to bottom, #eeeeee 1px, transparent 1px);
+    linear-gradient(to right, rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
   background-size: 24px 24px;
 }
 
 .block-shadow {
-  box-shadow: 4px 4px 0px 0px #745b00;
+  box-shadow: 4px 4px 0px 0px #6366f1;
 }
 
 .block-shadow-black {
-  box-shadow: 4px 4px 0px 0px #1a1c1c;
+  box-shadow: 4px 4px 0px 0px #020617;
 }
 
 .hide-scrollbar::-webkit-scrollbar {
@@ -75,7 +79,7 @@ input:focus, select:focus, textarea:focus {
   background: transparent;
 }
 .custom-scroll::-webkit-scrollbar-thumb {
-  background: #c3c6d7;
+  background: #334155;
   border-radius: 10px;
 }
 

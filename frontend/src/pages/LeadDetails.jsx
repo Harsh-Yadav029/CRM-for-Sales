@@ -13,9 +13,9 @@ const STAGES = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiat
 
 const stageColor = (s, active, currentStatus) => {
   if (currentStatus === 'Lost' && s === 'Lost') return 'bg-error text-white border-error';
-  if (s === 'Won') return active ? 'bg-secondary text-white border-secondary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low';
-  if (s === 'Lost') return active ? 'bg-error text-white border-error' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low';
-  return active ? 'bg-primary text-white border-primary' : 'border-outline-variant text-on-surface-variant hover:bg-surface-container-low';
+  if (s === 'Won') return active ? 'bg-secondary text-white border-secondary' : 'border-slate-800 text-on-surface-variant hover:bg-slate-800';
+  if (s === 'Lost') return active ? 'bg-error text-white border-error' : 'border-slate-800 text-on-surface-variant hover:bg-slate-800';
+  return active ? 'bg-primary text-white border-primary' : 'border-slate-800 text-on-surface-variant hover:bg-slate-800';
 };
 
 const LeadDetails = () => {
@@ -190,7 +190,7 @@ const LeadDetails = () => {
       <div className="flex items-center gap-3">
         <button
           onClick={() => navigate('/leads')}
-          className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container rounded-xl transition-all"
+          className="p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-slate-800 rounded-xl transition-all"
         >
           <span className="material-symbols-outlined">arrow_back</span>
         </button>
@@ -201,23 +201,23 @@ const LeadDetails = () => {
       </div>
 
       {/* Profile Header Details Section */}
-      <div className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+      <div className="w-full bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-xl">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
             <div className="relative">
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border border-primary/20 bg-surface-container flex items-center justify-center text-primary font-bold text-lg uppercase shrink-0">
+              <div className="w-16 h-16 md:w-20 md:h-20 rounded-full border border-primary/20 bg-slate-950/50 flex items-center justify-center text-primary font-bold text-lg uppercase shrink-0">
                 {lead.name.slice(0, 2)}
               </div>
-              <div className="absolute bottom-0.5 right-0.5 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
+              <div className="absolute bottom-0.5 right-0.5 w-4 h-4 bg-emerald-500 border-2 border-slate-900 rounded-full"></div>
             </div>
             <div>
               <h2 className="text-lg md:text-xl font-bold text-on-surface leading-tight">{lead.name}</h2>
               <p className="text-xs md:text-sm text-on-surface-variant mt-0.5">{lead.company} • {lead.source}</p>
               <div className="flex gap-2 mt-2">
-                <span className="bg-secondary-container text-on-secondary-container px-3 py-0.5 rounded-full font-bold text-[10px]">
+                <span className="bg-primary/20 text-primary border border-primary/25 px-3 py-0.5 rounded-full font-bold text-[10px]">
                   High Priority
                 </span>
-                <span className="bg-surface-container-high text-on-surface-variant px-3 py-0.5 rounded-full font-bold text-[10px]">
+                <span className="bg-slate-950/50 border border-slate-800 text-on-surface-variant px-3 py-0.5 rounded-full font-bold text-[10px]">
                   {lead.status} Stage
                 </span>
               </div>
@@ -227,21 +227,21 @@ const LeadDetails = () => {
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setShowCallModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl font-bold text-xs shadow-sm transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-xl font-bold text-xs shadow-lg shadow-primary/20 transition-all"
             >
               <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>call</span>
               Call Client
             </button>
             <button
               onClick={() => setShowEmailModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 border border-outline-variant hover:bg-surface-container-low text-primary rounded-xl font-bold text-xs transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 border border-slate-800 hover:bg-slate-800 text-primary rounded-xl font-bold text-xs transition-all"
             >
               <span className="material-symbols-outlined text-sm">mail</span>
               Send Email
             </button>
             <button
               onClick={() => setShowSMSModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 border border-outline-variant hover:bg-surface-container-low text-primary rounded-xl font-bold text-xs transition-all"
+              className="flex items-center gap-1.5 px-4 py-2 border border-slate-800 hover:bg-slate-800 text-primary rounded-xl font-bold text-xs transition-all"
             >
               <span className="material-symbols-outlined text-sm">chat</span>
               Message
@@ -251,7 +251,7 @@ const LeadDetails = () => {
       </div>
 
       {/* Pipeline Stage buttons trail */}
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+      <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-xl">
         <h3 className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-4">Pipeline Stage progression</h3>
         <div className="flex items-center gap-2 flex-wrap">
           {STAGES.map((s, i) => (
@@ -270,24 +270,24 @@ const LeadDetails = () => {
       <div className="w-full flex flex-col lg:flex-row items-start gap-6">
         {/* Sidebar details */}
         <aside className="w-full lg:w-1/3 flex flex-col gap-4">
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
-            <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Deal Value</h3>
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-xl">
+            <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Expected Revenue</h3>
             <div className="text-2xl font-extrabold text-on-surface">{fmt(lead.expectedRevenue)}</div>
             <p className="text-[10px] text-on-surface-variant mt-1">Expected Revenue Projection</p>
           </div>
           
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm space-y-3">
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
             <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Company Info</h3>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary shrink-0">
+              <div className="w-10 h-10 rounded-lg bg-slate-950/50 border border-slate-800 flex items-center justify-center text-primary shrink-0">
                 <span className="material-symbols-outlined">corporate_fare</span>
               </div>
               <div className="min-w-0">
                 <div className="text-xs font-bold text-on-surface truncate">{lead.company}</div>
-                <div className="text-[10px] text-on-surface-variant truncate">Cloud Infrastructure Client</div>
+                <div className="text-[10px] text-on-surface-variant truncate">Linked Account</div>
               </div>
             </div>
-            <div className="space-y-1.5 pt-2 border-t border-outline-variant/60">
+            <div className="space-y-1.5 pt-2 border-t border-slate-800">
               <div className="flex justify-between text-xs font-medium">
                 <span className="text-on-surface-variant">Client Source</span>
                 <span className="text-on-surface">{lead.source}</span>
@@ -299,9 +299,9 @@ const LeadDetails = () => {
             </div>
           </div>
 
-          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 shadow-sm">
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-5 shadow-xl">
             <h3 className="text-xs font-bold text-primary uppercase tracking-wider mb-3">Engagement Score</h3>
-            <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-slate-850 rounded-full overflow-hidden">
               <div className="h-full bg-secondary w-[85%] rounded-full"></div>
             </div>
             <div className="flex justify-between mt-2">
@@ -312,18 +312,18 @@ const LeadDetails = () => {
         </aside>
 
         {/* Tabbed view details */}
-        <div className="w-full lg:w-2/3 bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+        <div className="w-full lg:w-2/3 bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
           {/* Tab buttons */}
-          <div className="flex border-b border-outline-variant bg-surface-container-low/30">
+          <div className="flex border-b border-slate-800 bg-slate-950/20">
             <button
               onClick={() => setActiveTab('details')}
-              className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'details' ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-on-surface-variant hover:bg-surface-container-low'}`}
+              className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'details' ? 'border-primary text-primary bg-slate-900/40 shadow-sm' : 'border-transparent text-on-surface-variant hover:bg-slate-900/20'}`}
             >
               Details
             </button>
             <button
               onClick={() => setActiveTab('history')}
-              className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'history' ? 'border-primary text-primary bg-white shadow-sm' : 'border-transparent text-on-surface-variant hover:bg-surface-container-low'}`}
+              className={`flex-1 py-3 text-center text-xs font-bold border-b-2 transition-all ${activeTab === 'history' ? 'border-primary text-primary bg-slate-900/40 shadow-sm' : 'border-transparent text-on-surface-variant hover:bg-slate-900/20'}`}
             >
               History Timeline ({sortedTimeline.length})
             </button>
@@ -335,12 +335,12 @@ const LeadDetails = () => {
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">Professional Email</label>
+                    <label className="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase tracking-wider">Professional Email</label>
                     <div className="text-xs md:text-sm font-semibold text-on-surface flex items-center gap-1.5">
                       <span className="truncate">{lead.email}</span>
                       <button 
                         onClick={handleCopyEmail}
-                        className="p-1 hover:bg-surface-container rounded text-outline hover:text-primary transition-all"
+                        className="p-1 hover:bg-slate-800 rounded text-slate-500 hover:text-primary transition-all"
                         title="Copy to Clipboard"
                       >
                         <span className="material-symbols-outlined text-sm">{copied ? 'done' : 'content_copy'}</span>
@@ -348,28 +348,28 @@ const LeadDetails = () => {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">Direct Phone</label>
+                    <label className="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase tracking-wider">Direct Phone</label>
                     <div className="text-xs md:text-sm font-semibold text-on-surface">{lead.phone}</div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">Lead Source</label>
+                    <label className="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase tracking-wider">Lead Source</label>
                     <div className="text-xs md:text-sm font-semibold text-on-surface">{lead.source}</div>
                   </div>
                   <div>
-                    <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">Timezone</label>
+                    <label className="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase tracking-wider">Timezone</label>
                     <div className="text-xs md:text-sm font-semibold text-on-surface">IST (UTC+5:30)</div>
                   </div>
                 </div>
 
                 {customFieldDefinitions.length > 0 && (
                   <>
-                    <hr className="border-outline-variant/60" />
+                    <hr className="border-slate-800" />
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {customFieldDefinitions.map((field) => {
                         const val = lead.customFields?.[field.fieldName];
                         return (
                           <div key={field._id}>
-                            <label className="block text-[10px] font-extrabold text-outline mb-1 uppercase tracking-wider">
+                            <label className="block text-[10px] font-extrabold text-slate-500 mb-1 uppercase tracking-wider">
                               {field.fieldName}
                             </label>
                             <div className="text-xs md:text-sm font-semibold text-on-surface">
@@ -382,17 +382,17 @@ const LeadDetails = () => {
                   </>
                 )}
 
-                <hr className="border-outline-variant/60" />
+                <hr className="border-slate-800" />
 
                 {/* Add Internal Notes section */}
                 <div className="space-y-3">
-                  <label className="block text-[10px] font-extrabold text-outline uppercase tracking-wider">Internal Notes</label>
+                  <label className="block text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Internal Notes</label>
                   <form onSubmit={addNote} className="flex gap-2">
                     <input
                       value={noteText}
                       onChange={(e) => setNoteText(e.target.value)}
                       placeholder="Add a new note to this profile..."
-                      className="flex-1 border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-low text-on-surface outline-none focus:border-primary transition-all"
+                      className="flex-1 border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 text-on-surface outline-none focus:border-primary transition-all"
                     />
                     <button
                       type="submit"
@@ -408,9 +408,9 @@ const LeadDetails = () => {
                       <p className="text-xs text-on-surface-variant/70 italic text-center py-4">No internal notes added yet.</p>
                     ) : (
                       lead.notes.filter(n => !n.type || n.type === 'note').slice().reverse().map((note, idx) => (
-                        <div key={idx} className="p-3 bg-surface-container-low/40 rounded-xl border border-outline-variant/60">
+                        <div key={idx} className="p-3 bg-slate-950/40 rounded-xl border border-slate-800">
                           <p className="text-xs text-on-surface font-medium leading-relaxed">{note.text}</p>
-                          <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-outline-variant/30 text-[9px] font-bold text-on-surface-variant uppercase">
+                          <div className="flex justify-between items-center mt-2.5 pt-2 border-t border-slate-850 text-[9px] font-bold text-on-surface-variant uppercase">
                             <span>By: {note.addedBy?.name || 'System'}</span>
                             <span>{new Date(note.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                           </div>

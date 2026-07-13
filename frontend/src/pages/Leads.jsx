@@ -11,14 +11,14 @@ const SOURCES = ['Website', 'Referral', 'Social Media', 'Cold Call', 'Email Camp
 
 const statusColor = (s) =>
   ({
-    New: 'bg-primary-container/10 text-primary border border-primary-container/20',
-    Contacted: 'bg-surface-container-high text-on-surface border border-outline-variant',
-    'Demo Scheduled': 'bg-surface-container-highest text-primary font-bold border border-primary/20',
+    New: 'bg-primary/10 text-primary border border-primary/20',
+    Contacted: 'bg-slate-800 text-on-surface border border-slate-700',
+    'Demo Scheduled': 'bg-slate-800 text-primary font-bold border border-primary/20',
     'Proposal Sent': 'bg-tertiary-container/30 text-tertiary border border-tertiary-fixed-dim',
     Negotiation: 'bg-secondary-container/20 text-secondary border border-secondary-fixed-dim',
-    Won: 'bg-secondary-container text-on-secondary-container font-semibold',
-    Lost: 'bg-error-container text-on-error-container font-semibold'
-  }[s] || 'bg-surface-container-low text-on-surface-variant border border-outline-variant');
+    Won: 'bg-secondary-container/20 text-secondary border border-secondary/30 font-semibold',
+    Lost: 'bg-error-container/20 text-error border border-error/30 font-semibold'
+  }[s] || 'bg-slate-900 text-on-surface-variant border border-slate-800');
 
 const calculateScore = (status) => {
   const scores = {
@@ -207,7 +207,7 @@ const Leads = () => {
         </div>
         <button
           onClick={openCreate}
-          className="bg-on-surface text-white font-bold text-xs uppercase px-6 py-3 flex items-center gap-2 hover:bg-primary transition-all block-shadow-black"
+          className="bg-primary text-white font-bold text-xs uppercase px-6 py-3 rounded-xl flex items-center gap-2 hover:brightness-110 transition-all shadow-lg shadow-primary/20"
         >
           <span className="material-symbols-outlined text-sm">add</span>
           Capture New Lead
@@ -217,13 +217,13 @@ const Leads = () => {
       {/* Search and Filters Section */}
       <section className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-xl">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={16} />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" size={16} />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="SEARCH PROJECTS, CLIENTS, OR LEAD SCORES..."
-            className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border-2 border-on-surface focus:ring-0 focus:border-primary font-bold text-xs uppercase placeholder:text-outline/50 transition-all text-on-surface"
+            className="w-full pl-12 pr-4 py-3 bg-slate-900/60 border border-slate-800 focus:border-primary rounded-xl font-bold text-xs uppercase placeholder:text-slate-655 transition-all text-on-surface"
           />
         </div>
         
@@ -231,7 +231,7 @@ const Leads = () => {
         <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
           <button
             onClick={() => setStatusFilter('')}
-            className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap border-2 ${statusFilter === '' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-on-surface text-on-surface hover:bg-surface-container-high'}`}
+            className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap rounded-xl border ${statusFilter === '' ? 'bg-primary text-white border-primary shadow-sm' : 'bg-slate-900 border-slate-800 text-on-surface hover:bg-slate-800'}`}
           >
             All Leads
           </button>
@@ -239,7 +239,7 @@ const Leads = () => {
             <button
               key={stage}
               onClick={() => setStatusFilter(stage)}
-              className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap border-2 ${statusFilter === stage ? 'bg-primary text-white border-primary shadow-sm' : 'bg-surface border-on-surface text-on-surface hover:bg-surface-container-high'}`}
+              className={`px-4 py-2 text-xs font-bold uppercase transition-all whitespace-nowrap rounded-xl border ${statusFilter === stage ? 'bg-primary text-white border-primary shadow-sm' : 'bg-slate-900 border-slate-800 text-on-surface hover:bg-slate-800'}`}
             >
               {stage}
             </button>
@@ -247,7 +247,7 @@ const Leads = () => {
           
           <button
             onClick={() => setShowImportModal(true)}
-            className="flex items-center gap-1 border-2 border-dashed border-outline-variant hover:bg-surface-container-low text-primary text-xs font-bold px-4 py-2 transition-all uppercase whitespace-nowrap ml-2"
+            className="flex items-center gap-1 border border-dashed border-slate-700 hover:bg-slate-800 text-primary text-xs font-bold rounded-xl px-4 py-2 transition-all uppercase whitespace-nowrap ml-2"
           >
             Import CSV
           </button>
@@ -263,7 +263,7 @@ const Leads = () => {
             <CardSkeleton />
           </div>
         ) : leads.length === 0 ? (
-          <div className="text-center py-16 border-2 border-dashed border-outline-variant text-xs text-on-surface-variant italic bg-white uppercase font-bold tracking-wide">
+          <div className="text-center py-16 border border-dashed border-slate-800 rounded-2xl text-xs text-on-surface-variant italic bg-slate-900/40 uppercase font-bold tracking-wide">
             No leads found matching criteria.
           </div>
         ) : (
@@ -276,16 +276,20 @@ const Leads = () => {
               return (
                 <div 
                   key={l._id} 
-                  className="bg-surface-container-lowest border border-outline-variant p-6 hover:border-on-surface transition-all flex flex-col group relative"
+                  className="bg-slate-900/60 backdrop-blur-md border border-slate-800 rounded-2xl p-6 hover:border-slate-700 transition-all flex flex-col group relative overflow-hidden shadow-xl"
                 >
                   <div className="absolute top-0 left-0 w-full h-1 bg-primary transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
                   
                   <div className="flex justify-between items-start mb-6">
-                    <div className="h-14 w-14 bg-surface-container flex items-center justify-center border border-outline-variant">
+                    <div className="h-14 w-14 bg-slate-950/40 rounded-xl flex items-center justify-center border border-slate-800">
                       <span className="material-symbols-outlined text-on-surface text-2xl">{industryIcon}</span>
                     </div>
                     <div className="flex flex-col items-end gap-1.5">
-                      <span className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider ${l.status === 'Won' ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface-container-high border border-outline-variant text-on-surface-variant'}`}>
+                      <span className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-lg ${
+                        l.status === 'Won' ? 'bg-secondary/15 text-secondary border border-secondary/20' : 
+                        l.status === 'Lost' ? 'bg-error/15 text-error border border-error/20' :
+                        'bg-slate-950/50 border border-slate-800 text-on-surface-variant'
+                      }`}>
                         {l.status}
                       </span>
                       <div className="flex items-center gap-0.5 text-primary">
@@ -306,7 +310,7 @@ const Leads = () => {
                   </div>
 
                   <div className="mt-auto space-y-4">
-                    <div className="w-full bg-surface-variant h-1 overflow-hidden">
+                    <div className="w-full bg-slate-800 h-1 rounded-full overflow-hidden">
                       <div className="bg-primary h-full transition-all duration-1000" style={{ width: `${score}%` }}></div>
                     </div>
                     
@@ -318,13 +322,13 @@ const Leads = () => {
                     <div className="grid grid-cols-2 gap-2 mt-4">
                       <Link 
                         to={`/leads/${l._id}`}
-                        className="border-2 border-on-surface py-2 text-center text-[10px] font-bold uppercase hover:bg-on-surface hover:text-white transition-all flex items-center justify-center"
+                        className="border border-slate-850 bg-slate-950/40 rounded-xl py-2.5 text-center text-[10px] font-bold uppercase hover:bg-slate-800 transition-all flex items-center justify-center"
                       >
                         Details
                       </Link>
                       <button 
                         onClick={() => openEdit(l)}
-                        className="bg-on-surface text-white py-2 text-[10px] font-bold uppercase hover:bg-primary hover:border-primary transition-all flex items-center justify-center"
+                        className="bg-primary text-white rounded-xl py-2.5 text-[10px] font-bold uppercase hover:brightness-110 transition-all flex items-center justify-center"
                       >
                         Update
                       </button>
@@ -333,7 +337,7 @@ const Leads = () => {
                     {user?.role === 'admin' && (
                       <button 
                         onClick={() => handleDelete(l._id)}
-                        className="w-full border border-error/20 text-error hover:bg-error-container hover:border-error-container py-1.5 text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1"
+                        className="w-full border border-red-950/40 text-red-400 hover:bg-red-950/20 hover:border-red-900/40 py-1.5 rounded-xl text-[9px] font-bold uppercase transition-all flex items-center justify-center gap-1"
                       >
                         <span className="material-symbols-outlined text-xs">delete</span>
                         Remove Lead
@@ -350,14 +354,14 @@ const Leads = () => {
       {/* Modal Dialog Form */}
       {showModal && (
         <div 
-          className="fixed inset-0 bg-on-background/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" 
           onClick={() => setShowModal(false)}
         >
           <div 
-            className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-y-auto max-h-[90vh] border border-outline-variant" 
+            className="bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh]" 
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low sticky top-0 z-10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-850 bg-slate-900/50 sticky top-0 z-10">
               <h3 className="font-bold text-sm md:text-base text-on-surface">{editing ? 'Edit Lead Profile' : 'Add New Prospect'}</h3>
               <button 
                 onClick={() => setShowModal(false)} 
@@ -376,7 +380,7 @@ const Leads = () => {
                     onChange={(e) => setForm({ ...form, name: e.target.value })} 
                     required 
                     placeholder="E.g., Jordan Davis"
-                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                   />
                 </div>
                 <div className="col-span-2 md:col-span-1">
@@ -386,7 +390,7 @@ const Leads = () => {
                     onChange={(e) => setForm({ ...form, company: e.target.value })} 
                     required 
                     placeholder="E.g., Quantum Systems"
-                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                   />
                 </div>
                 <div className="col-span-2 md:col-span-1">
@@ -397,7 +401,7 @@ const Leads = () => {
                     onChange={(e) => setForm({ ...form, email: e.target.value })} 
                     required 
                     placeholder="name@company.com"
-                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                   />
                 </div>
                 <div className="col-span-2 md:col-span-1">
@@ -407,7 +411,7 @@ const Leads = () => {
                     onChange={(e) => setForm({ ...form, phone: e.target.value })} 
                     required 
                     placeholder="+1 (555) 019-2834"
-                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                   />
                 </div>
                 <div>
@@ -415,7 +419,7 @@ const Leads = () => {
                   <select 
                     value={form.source} 
                     onChange={(e) => setForm({ ...form, source: e.target.value })} 
-                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                   >
                     {SOURCES.map((s) => <option key={s}>{s}</option>)}
                   </select>
@@ -426,7 +430,7 @@ const Leads = () => {
                     type="number" 
                     value={form.expectedRevenue} 
                     onChange={(e) => setForm({ ...form, expectedRevenue: Number(e.target.value) })} 
-                    className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                    className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                   />
                 </div>
                 {editing && (
@@ -435,7 +439,7 @@ const Leads = () => {
                     <select 
                       value={form.status} 
                       onChange={(e) => setForm({ ...form, status: e.target.value })} 
-                      className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                     >
                       {STATUS.map((s) => <option key={s}>{s}</option>)}
                     </select>
@@ -447,7 +451,7 @@ const Leads = () => {
                     <select 
                       value={form.assignedTo} 
                       onChange={(e) => setForm({ ...form, assignedTo: e.target.value })} 
-                      className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                      className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                     >
                       <option value="">Unassigned</option>
                       {salespeople.map((s) => <option key={s._id} value={s._id}>{s.name}</option>)}
@@ -457,7 +461,7 @@ const Leads = () => {
 
                 {/* Phase 2: Dynamic Custom Fields inputs inside lead modal */}
                 {customFieldDefinitions.length > 0 && (
-                  <div className="col-span-2 border-t border-outline-variant/60 pt-4 mt-2">
+                  <div className="col-span-2 border-t border-slate-800 pt-4 mt-2">
                     <h4 className="text-xs font-bold text-on-surface mb-3 flex items-center gap-1.5">
                       <span className="material-symbols-outlined text-sm">dashboard_customize</span>
                       Custom Lead Parameters
@@ -478,7 +482,7 @@ const Leads = () => {
                                   [field.fieldName]: e.target.value
                                 }
                               })}
-                              className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                              className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                             >
                               <option value="">Select option</option>
                               {field.options.map((opt) => <option key={opt} value={opt}>{opt}</option>)}
@@ -494,7 +498,7 @@ const Leads = () => {
                                   [field.fieldName]: field.fieldType === 'number' ? Number(e.target.value) : e.target.value
                                 }
                               })}
-                              className="w-full border border-outline-variant rounded-xl py-2 px-3 text-xs bg-surface-container-lowest focus:border-primary transition-colors text-on-surface"
+                              className="w-full border border-slate-800 rounded-xl py-2 px-3 text-xs bg-slate-950/50 focus:border-primary transition-colors text-on-surface"
                             />
                           )}
                         </div>
@@ -504,11 +508,11 @@ const Leads = () => {
                 )}
               </div>
               
-              <div className="flex justify-end gap-3 pt-4 border-t border-outline-variant/60 sticky bottom-0 bg-white">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800 sticky bottom-0 bg-slate-900">
                 <button 
                   type="button" 
                   onClick={() => setShowModal(false)} 
-                  className="px-4 py-2 border border-outline-variant rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container-low"
+                  className="px-4 py-2 border border-slate-800 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-slate-800"
                 >
                   Cancel
                 </button>

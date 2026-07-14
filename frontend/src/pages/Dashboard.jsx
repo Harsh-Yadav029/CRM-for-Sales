@@ -280,11 +280,11 @@ const Dashboard = () => {
               </div>
               <div className="flex gap-3 text-[9px] font-bold uppercase text-slate-500 font-mono">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
+                  <span className="w-2 h-2 bg-ink rounded-full"></span>
                   <span>Pipeline</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 bg-amber-500 rounded-full"></span>
+                  <span className="w-2 h-2 bg-gold rounded-full"></span>
                   <span>Won</span>
                 </div>
               </div>
@@ -300,12 +300,12 @@ const Dashboard = () => {
                   <AreaChart data={revenueData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
                     <defs>
                       <linearGradient id="colorPipeline" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.12}/>
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#121212" stopOpacity={0.12}/>
+                        <stop offset="95%" stopColor="#121212" stopOpacity={0}/>
                       </linearGradient>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.12}/>
-                        <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#E3A62F" stopOpacity={0.12}/>
+                        <stop offset="95%" stopColor="#E3A62F" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="#F1F3F6" vertical={false} />
@@ -322,7 +322,7 @@ const Dashboard = () => {
                       type="monotone" 
                       dataKey="pipeline" 
                       name="Pipeline" 
-                      stroke="#6366f1" 
+                      stroke="#121212" 
                       strokeWidth={2.5}
                       fillOpacity={1} 
                       fill="url(#colorPipeline)" 
@@ -331,7 +331,7 @@ const Dashboard = () => {
                       type="monotone" 
                       dataKey="revenue" 
                       name="Won" 
-                      stroke="#f59e0b" 
+                      stroke="#E3A62F" 
                       strokeWidth={2.5}
                       fillOpacity={1} 
                       fill="url(#colorRevenue)" 

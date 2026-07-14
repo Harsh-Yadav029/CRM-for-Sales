@@ -285,10 +285,35 @@ const Leads = () => {
                     </div>
                   </div>
 
-                  <div className="h-px bg-line my-4"></div>
+                  <div className="h-px bg-line/60 my-4"></div>
 
                   <div className="space-y-3 mt-auto">
                     <div className="flex justify-between items-center text-[10px] font-mono font-bold text-slate-400">
+                      <span>Category</span>
+                      <span className="text-ink font-sans font-bold">{l.serviceCategory || 'Other'}</span>
+                    </div>
+
+                    {l.showroomBookingSlot && (
+                      <div className="flex justify-between items-center text-[10px] font-mono font-bold text-slate-400">
+                        <span>Showroom</span>
+                        <span className="text-gold font-sans font-bold">
+                          {new Date(l.showroomBookingSlot).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex justify-between items-center text-[10px] font-mono font-bold text-slate-400">
+                      <span>Drawings</span>
+                      <span className={`font-sans font-bold ${
+                        l.designDrawingStatus === 'Approved' ? 'text-emerald-600' :
+                        l.designDrawingStatus === 'Rejected' ? 'text-danger' :
+                        l.designDrawingStatus === 'In Progress' ? 'text-amber-600' : 'text-slate-650'
+                      }`}>
+                        {l.designDrawingStatus || 'Pending'}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center text-[10px] font-mono font-bold text-slate-400 border-t border-line/40 pt-2">
                       <span>Priority</span>
                       <span className="text-ink">{priority}</span>
                     </div>

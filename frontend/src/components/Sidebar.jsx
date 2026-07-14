@@ -27,7 +27,8 @@ import {
   MoreHorizontal,
   FolderClosed,
   Layers,
-  LogOut
+  LogOut,
+  MessageSquare
 } from 'lucide-react';
 
 /* ───────────────────────────────────────────────
@@ -38,9 +39,7 @@ const SALES_ITEMS = [
   { label: 'Contacts',   to: '/contacts',  icon: UserCircle },
   { label: 'Accounts',   to: '/accounts',  icon: Building2 },
   { label: 'Deals',      to: '/deals',     icon: Briefcase },
-  { label: 'Forecasts',  to: '/reports',   icon: TrendingUp },
-  { label: 'Documents',  to: '/quotes',    icon: FileText },
-  { label: 'Campaigns',  to: '/products',  icon: Megaphone },
+  { label: 'Comm Hub',   to: '/communication-hub', icon: MessageSquare },
 ];
 
 const ACTIVITIES_ITEMS = [

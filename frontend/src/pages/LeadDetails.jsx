@@ -396,18 +396,36 @@ const LeadDetails = () => {
       </div>
 
       {/* Pipeline Progression Stops */}
-      <Card variant="flat" className="p-6 bg-white">
+      <Card variant="flat" className="p-6 bg-white overflow-x-auto">
         <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider mb-4">Pipeline Stage progression</h3>
-        <div className="flex items-center gap-2 flex-wrap select-none">
-          {STAGES.map((s, i) => (
-            <button
-              key={s}
-              onClick={() => updateStatus(s)}
-              className={`px-4 py-2 rounded-full border text-[10px] uppercase font-bold tracking-wide transition-all shadow-sm ${stageColor(s, i <= stageIdx || lead.status === s, lead.status)}`}
-            >
-              {s}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 select-none min-w-max pb-1">
+          {STAGES.map((s, i) => {
+            const isCompleted = i <= stageIdx;
+            const isCurrent = lead.status === s;
+            
+            let btnClass = "border border-line/60 text-slate-500 hover:bg-gold-soft hover:text-ink";
+            if (isCurrent) {
+              if (s === 'Won') btnClass = "bg-gold border-gold text-ink shadow-sm";
+              else if (s === 'Lost') btnClass = "bg-danger border-danger text-white shadow-sm";
+              else btnClass = "bg-ink border-ink text-white shadow-sm";
+            } else if (isCompleted) {
+              btnClass = "bg-gold-soft border-gold/30 text-[#705d00]";
+            }
+
+            return (
+              <React.Fragment key={s}>
+                <button
+                  onClick={() => updateStatus(s)}
+                  className={`px-3 py-1.5 rounded-btn text-[9px] uppercase font-extrabold tracking-wider transition-premium ${btnClass}`}
+                >
+                  {s}
+                </button>
+                {i < STAGES.length - 1 && (
+                  <span className="text-slate-300 font-mono text-xs select-none">→</span>
+                )}
+              </React.Fragment>
+            );
+          })}
         </div>
       </Card>
 

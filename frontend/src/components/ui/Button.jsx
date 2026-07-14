@@ -10,7 +10,7 @@ const Button = ({
   icon: Icon,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center gap-2 font-sans font-semibold text-xs transition-all duration-200 focus:outline-none rounded-btn py-3 px-5 select-none active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none';
+  const baseClasses = 'inline-flex items-center justify-center gap-2 font-sans font-semibold text-xs transition-premium focus:outline-none rounded-btn py-3 px-5 select-none active:scale-[0.95] disabled:opacity-50 disabled:pointer-events-none';
 
   const variants = {
     primary: 'bg-gold hover:bg-gold/90 text-ink shadow-sm',

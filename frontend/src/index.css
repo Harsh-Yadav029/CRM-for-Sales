@@ -38,3 +38,14 @@ input:focus, select:focus, textarea:focus {
 .custom-scroll::-webkit-scrollbar-track { background: transparent; }
 .custom-scroll::-webkit-scrollbar-thumb { background: #E7E2D8; border-radius: 10px; }
 .custom-scroll::-webkit-scrollbar-thumb:hover { background: #E3A62F; }
+
+/* Premium transitions & Apple smoothness */
+.transition-premium {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.bg-glass {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}

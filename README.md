@@ -1,32 +1,33 @@
-# SalesPro CRM (Zoho CRM Enterprise Upgrade)
+# WalkThePlan CRM (Dedicated VR Studio CRM)
 
-SalesPro is a premium, high-density Customer Relationship Management (CRM) application built on the MERN stack. Designed with a clean, light-blue corporate design system, it mirrors major enterprise solutions like Zoho CRM with custom bento-widget layouts, interactive Kanban deal pipelines, communications logging, custom layout builders, and automation workflow engines.
+WalkThePlan CRM is a premium, high-density Customer Relationship Management (CRM) application custom-tailored for **WalkThePlan**, a virtual reality architectural walkthrough studio. Built on the MERN stack (MongoDB, Express, React, Node.js), it employs an Apple-inspired minimalist design system utilizing signature brand color tokens (Gold `#E3A62F`, Ink `#121212`, and Soft Light Paper `#FAF9F6`).
 
 ---
 
 ## Key Features
 
-### 📞 Phase 1: Multi-Channel Communication Hub
-* **Click-to-Call Simulator**: Live VoIP call simulation inside the browser tracking connected timers, call summaries, and posting logs on disconnect.
-* **Email Composer**: Outbound email drafting interface (simulated SendGrid/Nylas) mapping email subjects and body directly to the lead timeline.
-* **Unified History Timeline**: Polymorphic timeline rendering call, email, task, and note cards with distinct visual indicators and relative timestamps.
+### 🕶️ 1. VR Architectural Customizations
+* **Specialized Fields**: Leads support service interest categories (`Interior VR`, `Elevation VR`, `Full-Scale 3D`, `Plan Conversion`, `Other`), Showroom Booking slots, and Design Drawing status (`Pending`, `In Progress`, `Approved`, `Rejected`).
+* **Timeline Integration**: Automated and client notes show up with custom badges visually distinguishing "Website Intake (Automated)" entries.
 
-### ⚙️ Phase 2: Custom Layouts & Dynamic Fields
-* **Admin Layout Builder**: Settings portal allowing administrators to define custom inputs (Text, Number, Dropdown Selectors, or Dates).
-* **Dynamic Modals**: Creation and edit forms automatically fetch defined custom fields and render the correct inputs dynamically.
-* **Custom Fields Grid**: Saves dynamic key-value parameters to a Mongoose Map schema, rendering values under the details tab.
+### 📞 2. Multi-Channel Communication Hub
+* **Click-to-Call Widget**: Simulated browser VoIP client tracking timers, status results, and logs.
+* **Email Composer**: Outbound email simulator supporting drafts powered by the AI Compass Assistant.
+* **Timeline Feed**: Chronological activity tracker plotting email logs, calls, and tasks on the prospect profile.
 
-### ⚡ Phase 3: Sales Automation & Workflows
-* **Trigger-Action Rules Engine**: Hooked into database creations and updates.
-* **Automated Tasks**: Status updates (e.g. lead moves to "Proposal Sent") automatically schedule tasks with deadlines assigned to the owner.
-* **Automated Emails**: Automatically dispatches and logs template email copies parsing custom placeholders like `{name}` and `{company}`.
+### 🌐 3. Public Website Lead Intake
+* **Intake Endpoint**: Publicly accessible webhook (`POST /api/v1/intake/lead`) receiving direct submissions from `walktheplan.in`.
+* **Spam & Abuse Defense**: Cryptographic secret keys, honeypot inputs, and IP rate limiters (20 submissions/hour/IP).
+* **30-Day Duplicate Check**: Detects recent repeat inquiries by email/phone and appends messages to existing timelines rather than spawning duplicate records.
+* **Notification Fan-out**: Fans out in-app alerts and Socket.io broadcasts to all active Admins and Managers.
 
-### 📊 Phase 4: Advanced BI Reports & CSV Import
-* **Interactive Recharts Dashboard**:
-  - *Lead Source Share*: Donut chart illustrating marketing channel acquisition shares.
-  - *Revenue Projection*: Dual bar chart comparing projected expected revenue vs closed-won revenues.
-  - *Executive Leaderboard*: High-density grid monitoring assigned volumes, conversion rates, and closed deal valuations per salesperson.
-* **CSV Import Wizard**: Step-by-step file loader allowing client-side CSV parsing, visual column header mapping, and batch inserts.
+### 📅 4. Unified Calendar & Scheduling
+* **Calendar Views**: Interactive month, week, and day grid views matching brand tokens.
+* **Natural Language Parsing**: "Smart Add" bar parsing text like `"Call Priya tomorrow 3 PM"` to draft events via `chrono-node`.
+* **Free-Busy checks**: Scans participant schedules to flag time conflict warnings.
+
+### 🤝 5. Deals Pipeline Kanban
+* Drag-and-drop opportunity boards mapping expected deal values, and visual charts monitoring performance metrics.
 
 ---
 
@@ -34,17 +35,22 @@ SalesPro is a premium, high-density Customer Relationship Management (CRM) appli
 
 ```bash
 ├── backend/
-│   ├── controllers/         # MERN REST controllers (leads, workflows, reports, etc.)
-│   ├── models/              # Mongoose DB schemas (Lead, Task, Workflow, CustomField)
-│   ├── routes/              # Express API endpoints mapping
-│   ├── utils/               # Automation engine trigger logic
-│   └── server.js            # Node main server file
+│   ├── config/             # Database connection setups (MongoDB, Redis)
+│   ├── controllers/        # Express request controllers (Leads, Events, AI Compass)
+│   ├── middleware/         # Auth verify, RBAC scoping, rate limiters, and audits
+│   ├── models/             # Mongoose schemas (Lead, Event, Notification, User)
+│   ├── routes/             # REST route endpoints mapping
+│   ├── services/           # Calendar sync integrations (Nylas Calendar)
+│   ├── utils/              # Socket room publishers, sharing rule scoping helpers
+│   ├── server.js           # Server boot file
+│   └── test_endpoints.js   # Automated integration test suite
+│
 ├── frontend/
 │   ├── src/
-│   │   ├── components/      # Reusable sidebar, navbar, and import modals
-│   │   ├── pages/           # Dashboard, Leads, Deals (Kanban), Tasks, Reports, Settings
-│   │   └── App.jsx          # Route registry and app layouts
-└── CRM_API_Postman_Collection.json   # Ready-to-import Postman API Collection
+│   │   ├── components/     # Navbar, Sidebar, Timeline, composers, and bottom navs
+│   │   ├── context/        # React global context states (Auth, Voice Assistant)
+│   │   ├── pages/          # Dashboard, Leads, Calendar, Deals, Invoices, Settings
+│   │   └── App.jsx         # App router registry
 ```
 
 ---
@@ -53,15 +59,19 @@ SalesPro is a premium, high-density Customer Relationship Management (CRM) appli
 
 ### Prerequisites
 * **Node.js** (v18+)
-* **MongoDB Atlas** database connection string.
+* **MongoDB Atlas** connection string
+* **Redis** (local or Cloud instance URL)
 
 ### 1. Configuration Setup
 Create a `.env` file inside the `backend/` directory:
 ```env
 PORT=5000
 MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/crm
+REDIS_URL=redis://default:password@host:port
 JWT_SECRET=your_jwt_secret_key
 NODE_ENV=development
+WEBSITE_INTAKE_SECRET=your_intake_secret_token
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ### 2. Run the Backend Server
@@ -84,14 +94,8 @@ npm run dev
 
 ## API Testing & Verification
 
-### Automated CLI Test Runner
-Verify all endpoint connections, database writes, and automation triggers end-to-end:
+Verify the system endpoints, scoping rules, double-booking checks, Nylas signatures, and lead intake webhook validations:
 ```bash
 cd backend
 node test_endpoints.js
 ```
-
-### Postman Verification
-Import the pre-configured [CRM_API_Postman_Collection.json](CRM_API_Postman_Collection.json) located in the project root:
-1. Run **Login User** (uses `admin@company.com` / `password123` or your credentials) to auto-extract the JWT authorization header.
-2. Run bulk lead creations, log calls, add custom layout builders, and query reports data.

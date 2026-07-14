@@ -43,9 +43,9 @@ const Deals = () => {
         id: 'software',
         name: 'Enterprise Opportunities',
         columns: [
-          { id: 'qualified', title: 'QUALIFIED LEADS', topBorder: 'border-t-[3px] border-indigo-400', statuses: ['New'], defaultDropStatus: 'New' },
-          { id: 'contacted', title: 'CONTACTED', topBorder: 'border-t-[3px] border-slate-400', statuses: ['Contacted', 'Demo Scheduled'], defaultDropStatus: 'Contacted' },
-          { id: 'proposal', title: 'PROPOSAL MADE', topBorder: 'border-t-[3px] border-[#705d00]', statuses: ['Proposal Sent', 'Negotiation', 'Won'], defaultDropStatus: 'Proposal Sent' }
+          { id: 'qualified', title: 'QUALIFIED LEADS', topBorder: 'border-t-[3px] border-ink', statuses: ['New'], defaultDropStatus: 'New' },
+          { id: 'contacted', title: 'CONTACTED', topBorder: 'border-t-[3px] border-line', statuses: ['Contacted', 'Demo Scheduled'], defaultDropStatus: 'Contacted' },
+          { id: 'proposal', title: 'PROPOSAL MADE', topBorder: 'border-t-[3px] border-gold', statuses: ['Proposal Sent', 'Negotiation', 'Won'], defaultDropStatus: 'Proposal Sent' }
         ]
       }
     ];
@@ -144,9 +144,9 @@ const Deals = () => {
   );
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#fafafa] font-sans">
+    <div className="flex flex-col h-screen overflow-hidden bg-paper font-sans">
       {/* Top Header Search Bar */}
-      <header className="h-16 bg-white border-b border-slate-100 px-8 flex items-center justify-between shrink-0">
+      <header className="h-16 bg-white border-b border-line px-8 flex items-center justify-between shrink-0">
         <div className="relative w-80">
           <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
           <input
@@ -154,7 +154,7 @@ const Deals = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search opportunities..."
-            className="w-full bg-[#f4f4f5] pl-10 pr-4 py-2 rounded-full text-xs font-medium placeholder:text-slate-400 border-none focus:ring-1 focus:ring-gold/30 focus:outline-none"
+            className="w-full bg-[#FAF9F6] pl-10 pr-4 py-2 rounded-full text-xs font-medium placeholder:text-slate-400 border border-line focus:ring-1 focus:ring-gold/30 focus:outline-none transition-premium"
           />
         </div>
       </header>
@@ -163,12 +163,12 @@ const Deals = () => {
       <div className="flex-1 flex flex-col overflow-hidden px-8 py-6">
         {/* Breadcrumbs & Title */}
         <div className="mb-6 shrink-0">
-          <div className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
+          <div className="text-[11px] font-medium text-slate-450 flex items-center gap-1">
             <span>Sales</span>
             <span className="text-slate-350">/</span>
-            <span className="text-slate-500 font-semibold">Opportunities</span>
+            <span className="text-slate-500 font-bold uppercase tracking-wider font-mono">Opportunities</span>
           </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 mt-1.5 tracking-tight font-sans">Deal Pipeline</h2>
+          <h2 className="text-2xl font-black text-ink mt-1.5 tracking-tight font-display uppercase">Deal Pipeline</h2>
         </div>
 
         {/* Board Columns Canvas */}
@@ -186,23 +186,23 @@ const Deals = () => {
                   onDrop={(e) => handleDrop(e, column.id)}
                 >
                   {/* Column Header Card */}
-                  <div className={`bg-white rounded-xl border border-slate-100 ${column.topBorder} p-4 shadow-sm mb-4 shrink-0`}>
+                  <div className={`bg-white rounded-card border border-line/60 ${column.topBorder} p-5 shadow-card mb-4 shrink-0`}>
                     <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-black text-slate-900 tracking-wider font-sans uppercase">
+                      <span className="text-[11px] font-black text-ink tracking-wider font-sans uppercase">
                         {column.title}
                       </span>
-                      <span className="text-[10px] font-bold bg-[#f1f1f2] text-slate-700 w-5 h-5 rounded flex items-center justify-center font-label">
+                      <span className="text-[10px] font-bold bg-gold-soft text-[#705d00] w-5 h-5 rounded flex items-center justify-center font-label">
                         {columnLeads.length}
                       </span>
                     </div>
-                    <div className="text-lg font-extrabold text-slate-900 mt-2 tracking-tight">
+                    <div className="text-lg font-black font-mono text-ink mt-2 tracking-tight">
                       {fmt(columnValue)}
                     </div>
                     
                     {/* Add Deal Button */}
                     <button
                       onClick={() => navigate('/leads')}
-                      className="w-full mt-3 border border-dashed border-slate-200 hover:border-slate-300 rounded-lg py-2 text-[11px] font-bold text-slate-500 hover:text-slate-700 bg-white transition-all flex items-center justify-center gap-1.5"
+                      className="w-full mt-3 border border-dashed border-line/60 hover:border-gold/30 rounded-btn py-2 text-[11px] font-bold text-slate-500 hover:text-ink hover:bg-gold-soft bg-white transition-premium flex items-center justify-center gap-1.5"
                     >
                       <span>+ Add Deal</span>
                     </button>
@@ -217,7 +217,7 @@ const Deals = () => {
                           key={lead._id}
                           draggable
                           onDragStart={(e) => handleDragStart(e, lead._id)}
-                          className={`bg-white border border-slate-100 rounded-xl p-5 shadow-sm hover:shadow-md transition-all duration-200 cursor-grab active:cursor-grabbing group relative ${updatingId === lead._id ? 'opacity-50 pointer-events-none' : ''}`}
+                          className={`bg-white border border-line/60 rounded-card p-5 shadow-card hover:shadow-card-hover hover:-translate-y-0.5 transition-premium cursor-grab active:cursor-grabbing group relative ${updatingId === lead._id ? 'opacity-50 pointer-events-none' : ''}`}
                         >
                           <div className="flex justify-between items-center mb-3">
                             <span className={priority.class}>{priority.label}</span>

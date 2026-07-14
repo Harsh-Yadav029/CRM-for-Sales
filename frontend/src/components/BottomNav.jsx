@@ -25,9 +25,9 @@ const BottomNav = () => {
         <span className="material-symbols-outlined text-[20px]">handshake</span>
         <span>Deals</span>
       </NavLink>
-      <NavLink to="/tasks" className={({ isActive }) => linkClass(isActive)}>
-        <span className="material-symbols-outlined text-[20px]">assignment</span>
-        <span>Tasks</span>
+      <NavLink to="/calendar" className={({ isActive }) => linkClass(isActive)}>
+        <span className="material-symbols-outlined text-[20px]">calendar_month</span>
+        <span>Calendar</span>
       </NavLink>
       <NavLink to="/settings" className={({ isActive }) => linkClass(isActive)}>
         <span className="material-symbols-outlined text-[20px]">settings</span>

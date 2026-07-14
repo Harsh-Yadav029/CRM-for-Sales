@@ -65,9 +65,9 @@ const Navbar = ({ title }) => {
         <div className="flex items-center gap-2">
           {/* Calendar scheduler option */}
           <button 
-            onClick={() => navigate('/tasks')}
+            onClick={() => navigate('/calendar')}
             className="p-2 text-slate-400 hover:text-ink hover:bg-[#F1F3F6] rounded-lg transition-all"
-            title="Schedule Tasks & Meetings"
+            title="Calendar"
           >
             <Calendar size={16} />
           </button>

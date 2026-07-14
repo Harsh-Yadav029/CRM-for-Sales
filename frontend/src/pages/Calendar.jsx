@@ -365,7 +365,7 @@ const Calendar = () => {
           <div className="relative">
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-1 bg-[#3A57E8] text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-[#2F46BD] transition-all"
+              className="flex items-center gap-1 bg-gold text-ink px-4 py-1.5 rounded-lg text-xs font-bold shadow hover:bg-gold/90 transition-all"
             >
               <span>Create</span>
               <span className="text-[10px] opacity-80">▼</span>
@@ -411,7 +411,7 @@ const Calendar = () => {
               <div className="flex flex-col h-full min-w-[700px]">
                 {/* All-Day Bar */}
                 <div className="flex border-b border-line select-none shrink-0">
-                  <div className="w-24 px-4 py-2 border-r border-line bg-[#16A34A] text-white text-[10px] font-bold flex items-center justify-center">
+                  <div className="w-24 px-4 py-2 border-r border-line bg-ink text-[#FAF9F6] text-[10px] font-bold flex items-center justify-center">
                     All-Day (0)
                   </div>
                   <div className="flex-1 bg-stripes-gray h-9" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #f3f4f6, #f3f4f6 10px, #ffffff 10px, #ffffff 20px)' }}></div>

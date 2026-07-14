@@ -125,6 +125,13 @@ const Sidebar = () => {
           >
             <BarChart3 size={18} />
           </NavLink>
+          <NavLink to="/calendar" title="Calendar"
+            className={({ isActive: a }) =>
+              `p-2.5 rounded-lg transition-all ${a ? 'bg-gold/15 text-gold' : 'text-white/40 hover:text-white hover:bg-white/5'}`
+            }
+          >
+            <CalendarDays size={18} />
+          </NavLink>
 
           <div className="w-8 border-t border-white/8 my-2" />
 
@@ -202,6 +209,17 @@ const Sidebar = () => {
               <BarChart3 size={14} className="text-teal-400" />
             </span>
             <span>Reports</span>
+          </NavLink>
+
+          <NavLink to="/calendar"
+            className={({ isActive: a }) =>
+              `${linkBase} ${a ? linkActive + ' ' + activeBarClass : linkIdle}`
+            }
+          >
+            <span className="w-6 h-6 rounded-md bg-gold/15 flex items-center justify-center shrink-0">
+              <CalendarDays size={14} className="text-gold" />
+            </span>
+            <span>Calendar</span>
           </NavLink>
         </div>
 

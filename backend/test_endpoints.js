@@ -147,7 +147,144 @@ const runTests = async () => {
     console.error('❌ Fail: Webhook signature verification mismatch.');
   }
 
+  // 5. Public Website Lead Intake Tests
+  console.log('\nTesting Public Lead Intake integration...');
+  process.env.WEBSITE_INTAKE_SECRET = 'test_intake_secret_123';
+
+  // Helper mock request and response factories
+  const createMockRes = () => {
+    let statusCode = 200;
+    let responseData = null;
+    return {
+      status(code) {
+        statusCode = code;
+        return this;
+      },
+      json(data) {
+        responseData = data;
+        return this;
+      },
+      sendStatus(code) {
+        statusCode = code;
+        return this;
+      },
+      getStatusCode() { return statusCode; },
+      getResponseData() { return responseData; }
+    };
+  };
+
+  const { handleLeadIntake } = require('./controllers/leadIntakeController');
+  const Lead = require('./models/Lead');
+  const Notification = require('./models/Notification');
+
+  // Clean mock leads/notifications before run
+  await Lead.deleteMany({ email: /intake/ });
+  await Notification.deleteMany({ title: 'New website inquiry' });
+
+  // Test Case A: Missing or invalid secret key
+  const mockReqA = {
+    headers: { 'x-intake-secret': 'invalid_secret' },
+    body: { name: 'Test Intake User', email: 'testA@intake.walktheplan.in' }
+  };
+  const mockResA = createMockRes();
+  let errorObjA = null;
+  await handleLeadIntake(mockReqA, mockResA, (err) => { errorObjA = err; });
+
+  if (mockResA.getStatusCode() === 401 || errorObjA) {
+    console.log('✅ Success: Reject unauthorized requests with 401.');
+  } else {
+    console.error('❌ Fail: Failed to reject request with invalid secret key.', mockResA.getStatusCode());
+  }
+
+  // Test Case B: Honeypot trigger
+  const mockReqB = {
+    headers: { 'x-intake-secret': 'test_intake_secret_123' },
+    body: { name: 'Bot User', email: 'bot@intake.walktheplan.in', website_hp: 'honey_value' }
+  };
+  const mockResB = createMockRes();
+  await handleLeadIntake(mockReqB, mockResB, (err) => { if (err) console.error(err); });
+
+  const leadB = await Lead.findOne({ email: 'bot@intake.walktheplan.in' });
+  if (mockResB.getStatusCode() === 200 && !leadB) {
+    console.log('✅ Success: Silent discard of honeypot requests (returned 200 without creating lead).');
+  } else {
+    console.error('❌ Fail: Honeypot check failed. Lead created:', !!leadB);
+  }
+
+  // Test Case C: Valid new lead creation
+  const mockReqC = {
+    headers: { 'x-intake-secret': 'test_intake_secret_123' },
+    body: {
+      name: 'Priya Sharma',
+      email: 'priya@intake.walktheplan.in',
+      phone: '9876543210',
+      message: 'Looking for Elevation VR services.',
+      serviceInterest: 'Elevation VR'
+    }
+  };
+  const mockResC = createMockRes();
+  await handleLeadIntake(mockReqC, mockResC, (err) => { if (err) console.error(err); });
+
+  const leadC = await Lead.findOne({ email: 'priya@intake.walktheplan.in' });
+  if (leadC && leadC.serviceCategory === 'Elevation VR' && leadC.notes[0].addedBySystem === true) {
+    console.log('✅ Success: New lead correctly mapped and logged with system note.');
+  } else {
+    console.error('❌ Fail: Valid lead creation failed.');
+  }
+
+  // Test Case D: Duplicate query within 30 days
+  const mockReqD = {
+    headers: { 'x-intake-secret': 'test_intake_secret_123' },
+    body: {
+      name: 'Priya Sharma',
+      email: 'priya@intake.walktheplan.in',
+      phone: '9876543210',
+      message: 'Also interested in Interior VR options.',
+      serviceInterest: 'Interior VR'
+    }
+  };
+  const mockResD = createMockRes();
+  await handleLeadIntake(mockReqD, mockResD, (err) => { if (err) console.error(err); });
+
+  const leadDList = await Lead.find({ email: 'priya@intake.walktheplan.in' });
+  if (leadDList.length === 1 && leadDList[0].notes.length === 2) {
+    console.log('✅ Success: Duplicate request appended to existing lead timeline instead of creating a second lead.');
+  } else {
+    console.error('❌ Fail: Duplicate check failed. Leads count:', leadDList.length, 'Notes count:', leadDList[0]?.notes.length);
+  }
+
+  // Test Case E: Idempotency double submit block
+  const mockReqE = {
+    headers: { 'x-intake-secret': 'test_intake_secret_123' },
+    body: {
+      name: 'Priya Sharma',
+      email: 'priya@intake.walktheplan.in',
+      phone: '9876543210',
+      message: 'Also interested in Interior VR options.',
+      serviceInterest: 'Interior VR'
+    }
+  };
+  const mockResE = createMockRes();
+  await handleLeadIntake(mockReqE, mockResE, (err) => { if (err) console.error(err); });
+
+  const leadEList = await Lead.find({ email: 'priya@intake.walktheplan.in' });
+  if (leadEList[0].notes.length === 2) {
+    console.log('✅ Success: Blocked immediate double-submit (idempotency check passed).');
+  } else {
+    console.error('❌ Fail: Idempotency check failed. Notes count should be 2, but got:', leadEList[0]?.notes.length);
+  }
+
+  // Test Case F: Notification loops verify
+  const notificationsCount = await Notification.countDocuments({ title: 'New website inquiry' });
+  if (notificationsCount > 0) {
+    console.log(`✅ Success: Notifications fanned out individually (${notificationsCount} created).`);
+  } else {
+    console.error('❌ Fail: Notification loop failed to create any notifications.');
+  }
+
   // Reset mock tables
+  await Lead.deleteMany({ email: /intake/ });
+  await Notification.deleteMany({ title: 'New website inquiry' });
   await Event.deleteMany({ title: /Test Event/ });
   await User.deleteMany({ email: /test-user/ });
 

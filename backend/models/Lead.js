@@ -9,7 +9,13 @@ const noteSchema = new mongoose.Schema(
     addedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true
+      required: function () {
+        return !this.addedBySystem;
+      }
+    },
+    addedBySystem: {
+      type: Boolean,
+      default: false
     },
     type: {
       type: String,

@@ -238,13 +238,16 @@ const LeadDetails = () => {
 
   // Timeline processing using recordActivities
   const notesTimeline = (lead.notes || []).map((n) => {
+    const isSystem = n.addedBySystem;
+    const userLabel = isSystem ? 'System' : (n.addedBy?.name || 'System');
     if (n.type === 'email') {
       return {
         type: 'email',
         title: n.subject || 'Email Sent',
         desc: n.text,
         status: n.status,
-        user: n.addedBy?.name || 'System',
+        user: userLabel,
+        addedBySystem: isSystem,
         date: new Date(n.createdAt),
         icon: 'mail'
       };
@@ -255,7 +258,8 @@ const LeadDetails = () => {
         desc: n.text,
         duration: n.duration,
         status: n.status,
-        user: n.addedBy?.name || 'System',
+        user: userLabel,
+        addedBySystem: isSystem,
         date: new Date(n.createdAt),
         icon: 'call'
       };
@@ -264,7 +268,8 @@ const LeadDetails = () => {
         type: 'sms',
         title: n.text.includes('[Inbound SMS]') ? 'Inbound SMS Received' : 'Outbound SMS Sent',
         desc: n.text.replace(/\[Inbound SMS\]\s*|\[Outbound SMS\]\s*/g, ''),
-        user: n.addedBy?.name || 'System',
+        user: userLabel,
+        addedBySystem: isSystem,
         date: new Date(n.createdAt),
         icon: 'chat'
       };
@@ -273,7 +278,8 @@ const LeadDetails = () => {
         type: 'note',
         title: 'Note Added',
         desc: n.text,
-        user: n.addedBy?.name || 'System',
+        user: userLabel,
+        addedBySystem: isSystem,
         date: new Date(n.createdAt),
         icon: 'description'
       };

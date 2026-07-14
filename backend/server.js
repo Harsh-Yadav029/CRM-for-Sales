@@ -81,6 +81,8 @@ app.use('/api/report-builder', require('./routes/reportBuilderRoutes'));
 app.use('/api/forecast', require('./routes/forecastRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/api/audits', require('./routes/auditRoutes'));
+app.use('/api/v1/intake', require('./routes/leadIntakeRoutes'));
+app.use('/api/intake', require('./routes/leadIntakeRoutes'));
 
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');

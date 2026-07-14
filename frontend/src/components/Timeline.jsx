@@ -84,7 +84,11 @@ const TimelineItem = ({ item }) => {
         )}
 
         <div className="mt-4 border-t border-line pt-2 flex items-center justify-between text-[9px] font-extrabold uppercase tracking-wider text-slate-500 font-mono">
-          <span>Action by: {item.user}</span>
+          {item.addedBySystem ? (
+            <span className="bg-gold-soft text-[#705d00] px-2 py-0.5 rounded border border-gold/25 font-bold">Website Intake (Automated)</span>
+          ) : (
+            <span>Action by: {item.user}</span>
+          )}
         </div>
       </div>
     </div>

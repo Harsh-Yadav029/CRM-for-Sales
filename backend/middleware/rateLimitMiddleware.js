@@ -13,4 +13,14 @@ const authRateLimiter = rateLimit({
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
-module.exports = { authRateLimiter };
+const intakeRateLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 20, // Limit each IP to 20 requests per window
+  message: {
+    message: 'Too many lead submissions from this IP. Please try again after an hour.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+module.exports = { authRateLimiter, intakeRateLimiter };

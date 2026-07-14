@@ -70,4 +70,9 @@ const cacheMiddleware = (durationSeconds = 300) => {
   };
 };
 
+cacheMiddleware.redisClient = redisClient;
+Object.defineProperty(cacheMiddleware, 'isRedisReady', {
+  get: () => isRedisReady
+});
+
 module.exports = cacheMiddleware;

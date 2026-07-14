@@ -2,7 +2,7 @@ const Company = require('../models/Company');
 
 const getCompanies = async (req, res, next) => {
   try {
-    const companies = await Company.find({ tenantId: req.tenantId }).populate('assignedTo', 'name email');
+    const companies = await Company.find({}).populate('assignedTo', 'name email');
     res.json(companies);
   } catch (error) {
     next(error);
@@ -13,7 +13,6 @@ const createCompany = async (req, res, next) => {
   try {
     const { name, industry, website, phone, address, assignedTo } = req.body;
     const company = await Company.create({
-      tenantId: req.tenantId,
       name,
       industry,
       website,
@@ -30,7 +29,7 @@ const createCompany = async (req, res, next) => {
 const updateCompany = async (req, res, next) => {
   try {
     const company = await Company.findOneAndUpdate(
-      { _id: req.params.id, tenantId: req.tenantId },
+      { _id: req.params.id },
       req.body,
       { new: true, runValidators: true }
     );
@@ -46,7 +45,7 @@ const updateCompany = async (req, res, next) => {
 
 const deleteCompany = async (req, res, next) => {
   try {
-    const company = await Company.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
+    const company = await Company.findOneAndDelete({ _id: req.params.id });
     if (!company) {
       res.status(404);
       return next(new Error('Company not found'));

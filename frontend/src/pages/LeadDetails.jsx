@@ -533,6 +533,20 @@ const LeadDetails = () => {
                 <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Assigned Executive</span>
                 <span className="text-xs font-bold text-ink mt-0.5">{lead.assignedTo?.name || 'Unassigned'}</span>
               </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Service Category</span>
+                <span className="text-xs font-bold text-ink mt-0.5">{lead.serviceCategory || '—'}</span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Showroom Booking Slot</span>
+                <span className="text-xs font-bold text-ink mt-0.5">
+                  {lead.showroomBookingSlot ? new Date(lead.showroomBookingSlot).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
+                </span>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-bold text-slate-400 uppercase font-mono">Design Drawing Status</span>
+                <span className="text-xs font-bold text-ink mt-0.5">{lead.designDrawingStatus || '—'}</span>
+              </div>
             </div>
           </Card>
 
@@ -746,11 +760,11 @@ const LeadDetails = () => {
         </div>
       )}
 
-      {/* Floating Zia AI Chat Trigger Button */}
+      {/* Floating Compass AI Chat Trigger Button */}
       <button
         onClick={() => setAiOpen(true)}
         className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-gold hover:bg-gold/90 text-ink flex items-center justify-center shadow-card-hover transition-all hover:scale-110 z-40 border border-gold/30"
-        title="Consult Zia AI"
+        title="Consult Compass AI"
       >
         <Bot size={22} className="stroke-[2.5]" />
       </button>

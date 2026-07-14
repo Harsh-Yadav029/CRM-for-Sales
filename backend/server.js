@@ -36,9 +36,6 @@ app.use(
   })
 );
 
-// Stripe webhook requires raw body payload for cryptographic signature verification
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), require('./controllers/stripeController').handleWebhook);
-
 app.use(express.json({
   verify: (req, res, buf) => {
     req.rawBody = buf;
@@ -79,16 +76,11 @@ app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/quotes', require('./routes/quoteRoutes'));
 app.use('/api/invoices', require('./routes/invoiceRoutes'));
 app.use('/api/pipelines', require('./routes/pipelineRoutes'));
-app.use('/api/assignment-rules', require('./routes/assignmentRuleRoutes'));
-app.use('/api/quotas', require('./routes/quotaRoutes'));
-app.use('/api/blueprints', require('./routes/blueprintRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/report-builder', require('./routes/reportBuilderRoutes'));
 app.use('/api/forecast', require('./routes/forecastRoutes'));
 app.use('/api/ai', require('./routes/aiRoutes'));
 app.use('/api/audits', require('./routes/auditRoutes'));
-app.use('/api/apikeys', require('./routes/apiKeyRoutes'));
-app.use('/api/stripe', require('./routes/stripeRoutes'));
 
 app.get('/api/health', (req, res) => {
   const mongoose = require('mongoose');

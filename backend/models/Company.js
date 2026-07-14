@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 
 const companySchema = new mongoose.Schema(
   {
-    tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant',
-      required: true
-    },
     name: {
       type: String,
       required: true,
@@ -40,7 +35,7 @@ const companySchema = new mongoose.Schema(
 );
 
 // Performance compound index
-companySchema.index({ tenantId: 1, name: 1 });
+companySchema.index({ name: 1 });
 
 // Full text search index
 companySchema.index({ 

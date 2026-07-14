@@ -8,7 +8,7 @@ const { verifyNylasSignature } = require('./middleware/webhookVerify');
 dotenv.config();
 
 const runTests = async () => {
-  console.log('--- Starting Calendar & Scheduling Integration Tests ---');
+  console.log('--- Starting Walk the Plan CRM Integration Tests ---');
   
   // 1. Database Connection
   const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/sales-crm-test';
@@ -19,16 +19,12 @@ const runTests = async () => {
   await Event.deleteMany({ title: /Test Event/ });
   await User.deleteMany({ email: /test-user/ });
 
-  const orgAId = new mongoose.Types.ObjectId();
-  const orgBId = new mongoose.Types.ObjectId();
-
-  // Create mock users
+  // Create mock users (No tenantId)
   const adminA = await User.create({
     name: 'Admin A',
     email: 'admin-a@test-user.com',
     password: 'mockpassword',
-    role: 'admin',
-    tenantId: orgAId
+    role: 'admin'
   });
 
   const repA = await User.create({
@@ -36,7 +32,7 @@ const runTests = async () => {
     email: 'rep-a@test-user.com',
     password: 'mockpassword',
     role: 'rep',
-    tenantId: orgAId
+    reportsTo: adminA._id
   });
 
   const repB = await User.create({
@@ -44,87 +40,78 @@ const runTests = async () => {
     email: 'rep-b@test-user.com',
     password: 'mockpassword',
     role: 'rep',
-    tenantId: orgAId
-  });
-
-  const userB = await User.create({
-    name: 'User B',
-    email: 'user-b@test-user.com',
-    password: 'mockpassword',
-    role: 'rep',
-    tenantId: orgBId
+    reportsTo: adminA._id
   });
 
   console.log('Mock users created.');
 
-  // 2. Tenant Isolation Test
-  console.log('\nTesting Tenant Isolation...');
-  const eventOrgA = await Event.create({
-    tenantId: orgAId,
+  // 2. Data Visibility & Ownership Scoping Test
+  console.log('\nTesting Ownership Scoping & Visibility...');
+  
+  const eventRepA = await Event.create({
     type: 'meeting',
-    title: 'Test Event Org A',
+    title: 'Test Event Rep A',
     startTime: new Date('2026-07-20T10:00:00Z'),
     endTime: new Date('2026-07-20T11:00:00Z'),
-    assignedTo: adminA._id,
+    assignedTo: repA._id,
     status: 'scheduled'
   });
 
-  // Query events under Org B context
-  const mockReqB = {
-    tenantId: orgBId,
-    user: userB,
-    query: {}
-  };
-
-  let responseData;
-  const mockResB = {
-    json: (data) => { responseData = data; }
-  };
-
-  await getEvents(mockReqB, mockResB, (err) => { if (err) console.error(err); });
-
-  const orgAFound = responseData.some(e => e._id.toString() === eventOrgA._id.toString());
-  if (!orgAFound) {
-    console.log('✅ Success: Org A events are hidden from Org B users.');
-  } else {
-    console.error('❌ Fail: Tenant isolation breach. Org A event found in Org B query.');
-  }
-
-  // 3. Ownership Scoping Test
-  console.log('\nTesting Rep Scoping...');
-  const eventTeammate = await Event.create({
-    tenantId: orgAId,
+  const eventRepB = await Event.create({
     type: 'meeting',
-    title: 'Test Event Teammate',
+    title: 'Test Event Rep B',
     startTime: new Date('2026-07-20T12:00:00Z'),
     endTime: new Date('2026-07-20T13:00:00Z'),
     assignedTo: repB._id,
     status: 'scheduled'
   });
 
+  // Query events under Rep A context (should only see Rep A's events)
   const mockReqRepA = {
-    tenantId: orgAId,
     user: repA,
     query: {}
   };
 
-  await getEvents(mockReqRepA, mockResB, (err) => { if (err) console.error(err); });
+  let responseData;
+  const mockRes = {
+    json: (data) => { responseData = data; }
+  };
 
-  const teammateFound = responseData.some(e => e._id.toString() === eventTeammate._id.toString());
-  if (!teammateFound) {
-    console.log('✅ Success: Reps cannot query teammate events.');
+  await getEvents(mockReqRepA, mockRes, (err) => { if (err) console.error(err); });
+
+  const foundOwnEvent = responseData.some(e => e._id.toString() === eventRepA._id.toString());
+  const foundTeammateEvent = responseData.some(e => e._id.toString() === eventRepB._id.toString());
+
+  if (foundOwnEvent && !foundTeammateEvent) {
+    console.log('✅ Success: Rep A can only see their own assigned events.');
   } else {
-    console.error('❌ Fail: Rep scoping breach. Rep queried teammate event.');
+    console.error('❌ Fail: Rep scoping breach. Own event found:', foundOwnEvent, 'Teammate event found:', foundTeammateEvent);
   }
 
-  // 4. Double Booking Check
+  // Query events under Admin A context (should see both events)
+  const mockReqAdmin = {
+    user: adminA,
+    query: {}
+  };
+
+  await getEvents(mockReqAdmin, mockRes, (err) => { if (err) console.error(err); });
+
+  const adminFoundA = responseData.some(e => e._id.toString() === eventRepA._id.toString());
+  const adminFoundB = responseData.some(e => e._id.toString() === eventRepB._id.toString());
+
+  if (adminFoundA && adminFoundB) {
+    console.log('✅ Success: Admin can see all team member events.');
+  } else {
+    console.error('❌ Fail: Admin visibility constraint error.');
+  }
+
+  // 3. Double Booking Check
   console.log('\nTesting Double-Booking Availability check...');
   let availabilityResult;
   const mockReqAvail = {
-    tenantId: orgAId,
     body: {
-      userIds: [adminA._id.toString()],
-      startTime: '2026-07-20T10:30:00Z', // Overlaps with Test Event Org A (10:00-11:00)
+      userIds: [repA._id.toString()],
+      startTime: '2026-07-20T10:30:00Z', // Overlaps with Test Event Rep A (10:00-11:00)
       endTime: '2026-07-20T11:30:00Z'
     }
   };
@@ -141,7 +128,7 @@ const runTests = async () => {
     console.error('❌ Fail: Double booking was not flagged.');
   }
 
-  // 5. Signature Rejection
+  // 4. Webhook Signature Verification
   console.log('\nTesting Webhook Signature Verification...');
   const secret = 'nylas_secret_key';
   const body = { id: 'evt_123', title: 'New Hook Meeting' };

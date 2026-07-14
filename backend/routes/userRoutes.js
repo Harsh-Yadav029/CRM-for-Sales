@@ -5,12 +5,10 @@ const {
   updateUserStatus, 
   createInvite, 
   getInvites, 
-  exportTenantData, 
-  deactivateTenant 
+  exportOrgData 
 } = require('../controllers/userController');
 const { protect } = require('../middleware/authMiddleware');
 const { checkRole } = require('../middleware/rbacMiddleware');
-const { checkUserLimit } = require('../middleware/subscriptionMiddleware');
 
 router.use(protect);
 
@@ -21,13 +19,10 @@ router.route('/:id/status')
   .put(checkRole(['admin']), updateUserStatus);
 
 router.route('/invites')
-  .post(checkUserLimit, checkRole(['admin']), createInvite)
+  .post(checkRole(['admin']), createInvite)
   .get(checkRole(['admin', 'manager']), getInvites);
 
 router.route('/export-data')
-  .get(checkRole(['admin']), exportTenantData);
-
-router.route('/deactivate-tenant')
-  .post(checkRole(['admin']), deactivateTenant);
+  .get(checkRole(['admin']), exportOrgData);
 
 module.exports = router;

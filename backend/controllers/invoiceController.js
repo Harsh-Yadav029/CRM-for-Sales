@@ -2,7 +2,7 @@ const Invoice = require('../models/Invoice');
 
 const getInvoices = async (req, res, next) => {
   try {
-    const invoices = await Invoice.find({ tenantId: req.tenantId })
+    const invoices = await Invoice.find({})
       .populate('companyId', 'name')
       .populate('quoteId', 'title total')
       .populate('items.productId', 'name price sku');
@@ -16,7 +16,6 @@ const createInvoice = async (req, res, next) => {
   try {
     const { companyId, quoteId, invoiceNumber, items, status, dueDate } = req.body;
     const invoice = await Invoice.create({
-      tenantId: req.tenantId,
       companyId,
       quoteId,
       invoiceNumber,
@@ -33,7 +32,7 @@ const createInvoice = async (req, res, next) => {
 const updateInvoice = async (req, res, next) => {
   try {
     const invoice = await Invoice.findOneAndUpdate(
-      { _id: req.params.id, tenantId: req.tenantId },
+      { _id: req.params.id },
       req.body,
       { new: true, runValidators: true }
     );
@@ -49,7 +48,7 @@ const updateInvoice = async (req, res, next) => {
 
 const deleteInvoice = async (req, res, next) => {
   try {
-    const invoice = await Invoice.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
+    const invoice = await Invoice.findOneAndDelete({ _id: req.params.id });
     if (!invoice) {
       res.status(404);
       return next(new Error('Invoice not found'));

@@ -1,8 +1,6 @@
 const Lead = require('../models/Lead');
 const User = require('../models/User');
 const { buildLeadSharingQuery } = require('../utils/sharingRules');
-const { assignLeadToRepresentative } = require('../utils/assignmentEngine');
-const { validateBlueprintTransition } = require('../utils/blueprintEngine');
 const { enqueueAutomationJob } = require('../utils/automationQueue');
 const { emitTenantEvent } = require('../utils/socket');
 
@@ -43,7 +41,7 @@ const getLeads = async (req, res, next) => {
 };
 
 const createLead = async (req, res, next) => {
-  const { name, company, email, phone, source, status, expectedRevenue, assignedTo } = req.body;
+  const { name, company, email, phone, source, status, expectedRevenue, assignedTo, serviceCategory, showroomBookingSlot, designDrawingStatus } = req.body;
 
   try {
     if (!name || !company || !email || !phone) {
@@ -51,10 +49,9 @@ const createLead = async (req, res, next) => {
       return next(new Error('Please fill in name, company, email, and phone'));
     }
 
-    let finalAssignedTo = assignedTo || null;
+    const finalAssignedTo = assignedTo || req.user._id;
 
     const leadData = {
-      tenantId: req.tenantId,
       name,
       company,
       email,
@@ -63,19 +60,17 @@ const createLead = async (req, res, next) => {
       status: status || 'New',
       expectedRevenue: expectedRevenue || 0,
       assignedTo: finalAssignedTo,
+      serviceCategory: serviceCategory || 'Interior VR',
+      showroomBookingSlot: showroomBookingSlot || null,
+      designDrawingStatus: designDrawingStatus || 'Pending',
       customFields: req.body.customFields || {},
       notes: []
     };
 
-    if (!finalAssignedTo) {
-      const assignedId = await assignLeadToRepresentative(leadData);
-      leadData.assignedTo = assignedId || null;
-    }
-
     const lead = await Lead.create(leadData);
 
-    // Broadcast live event to tenant room
-    emitTenantEvent(lead.tenantId.toString(), 'lead_created', lead);
+    // Broadcast live event to organization
+    emitTenantEvent('walktheplan', 'lead_created', lead);
 
     // Enqueue automation task to run in background
     await enqueueAutomationJob('RUN_AUTOMATION', { leadId: lead._id }, req.user._id);
@@ -88,7 +83,7 @@ const createLead = async (req, res, next) => {
 
 const getLeadById = async (req, res, next) => {
   try {
-    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId })
+    const lead = await Lead.findOne({ _id: req.params.id })
       .populate('assignedTo', 'name email')
       .populate('notes.addedBy', 'name');
 
@@ -105,23 +100,14 @@ const getLeadById = async (req, res, next) => {
 
 const updateLead = async (req, res, next) => {
   try {
-    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const lead = await Lead.findOne({ _id: req.params.id });
 
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
     }
 
-    // Blueprint Guided Transition Check
-    if (req.body.status !== undefined) {
-      const validation = await validateBlueprintTransition(lead, req.body.status, req.tenantId);
-      if (!validation.isValid) {
-        res.status(400);
-        return next(new Error(validation.message));
-      }
-    }
-
-    const fieldsToUpdate = ['name', 'company', 'email', 'phone', 'source', 'expectedRevenue'];
+    const fieldsToUpdate = ['name', 'company', 'email', 'phone', 'source', 'expectedRevenue', 'serviceCategory', 'showroomBookingSlot', 'designDrawingStatus'];
     
     fieldsToUpdate.forEach((field) => {
       if (req.body[field] !== undefined) {
@@ -143,8 +129,8 @@ const updateLead = async (req, res, next) => {
 
     const updatedLead = await lead.save();
     
-    // Broadcast live event to tenant room
-    emitTenantEvent(updatedLead.tenantId.toString(), 'lead_updated', updatedLead);
+    // Broadcast live event to organization
+    emitTenantEvent('walktheplan', 'lead_updated', updatedLead);
 
     // Enqueue automation task to run in background
     await enqueueAutomationJob('RUN_AUTOMATION', { leadId: updatedLead._id }, req.user._id);
@@ -157,15 +143,15 @@ const updateLead = async (req, res, next) => {
 
 const deleteLead = async (req, res, next) => {
   try {
-    const lead = await Lead.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
+    const lead = await Lead.findOneAndDelete({ _id: req.params.id });
 
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
     }
 
-    // Broadcast live delete event to tenant room
-    emitTenantEvent(lead.tenantId.toString(), 'lead_deleted', { id: lead._id });
+    // Broadcast live delete event to organization
+    emitTenantEvent('walktheplan', 'lead_deleted', { id: lead._id });
 
     res.json({ message: 'Lead removed successfully' });
   } catch (error) {
@@ -177,7 +163,7 @@ const assignLead = async (req, res, next) => {
   const { assignedTo } = req.body;
 
   try {
-    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const lead = await Lead.findOne({ _id: req.params.id });
 
     if (!lead) {
       res.status(404);
@@ -185,18 +171,18 @@ const assignLead = async (req, res, next) => {
     }
 
     if (assignedTo) {
-      const user = await User.findOne({ _id: assignedTo, tenantId: req.tenantId });
+      const user = await User.findOne({ _id: assignedTo });
       if (!user) {
         res.status(400);
-        return next(new Error('Assigned user not found in this organization'));
+        return next(new Error('Assigned user not found'));
       }
     }
 
     lead.assignedTo = assignedTo || null;
     const updatedLead = await lead.save();
 
-    // Broadcast live event to tenant room
-    emitTenantEvent(updatedLead.tenantId.toString(), 'lead_updated', updatedLead);
+    // Broadcast live event to organization
+    emitTenantEvent('walktheplan', 'lead_updated', updatedLead);
 
     res.json(updatedLead);
   } catch (error) {
@@ -208,7 +194,7 @@ const updateLeadStatus = async (req, res, next) => {
   const { status } = req.body;
 
   try {
-    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const lead = await Lead.findOne({ _id: req.params.id });
 
     if (!lead) {
       res.status(404);
@@ -220,18 +206,11 @@ const updateLeadStatus = async (req, res, next) => {
       return next(new Error('Status is required'));
     }
 
-    // Blueprint Guided Transition Check
-    const validation = await validateBlueprintTransition(lead, status, req.tenantId);
-    if (!validation.isValid) {
-      res.status(400);
-      return next(new Error(validation.message));
-    }
-
     lead.status = status;
     const updatedLead = await lead.save();
     
-    // Broadcast live event to tenant room
-    emitTenantEvent(updatedLead.tenantId.toString(), 'lead_updated', updatedLead);
+    // Broadcast live event to organization
+    emitTenantEvent('walktheplan', 'lead_updated', updatedLead);
 
     // Enqueue automation task to run in background
     await enqueueAutomationJob('RUN_AUTOMATION', { leadId: updatedLead._id }, req.user._id);
@@ -246,7 +225,7 @@ const addLeadNote = async (req, res, next) => {
   const { text } = req.body;
 
   try {
-    const lead = await Lead.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const lead = await Lead.findOne({ _id: req.params.id });
 
     if (!lead) {
       res.status(404);
@@ -269,8 +248,8 @@ const addLeadNote = async (req, res, next) => {
       .populate('assignedTo', 'name email')
       .populate('notes.addedBy', 'name');
 
-    // Broadcast live event to tenant room
-    emitTenantEvent(updatedLead.tenantId.toString(), 'lead_updated', updatedLead);
+    // Broadcast live event to organization
+    emitTenantEvent('walktheplan', 'lead_updated', updatedLead);
 
     res.status(201).json(updatedLead);
   } catch (error) {
@@ -297,10 +276,9 @@ const importLeads = async (req, res, next) => {
         continue;
       }
 
-      let finalAssignedTo = l.assignedTo || null;
+      const finalAssignedTo = l.assignedTo || req.user._id;
       
       const leadData = {
-        tenantId: req.tenantId,
         name: l.name,
         company: l.company,
         email: l.email,
@@ -309,14 +287,12 @@ const importLeads = async (req, res, next) => {
         status: l.status || 'New',
         expectedRevenue: l.expectedRevenue || 0,
         assignedTo: finalAssignedTo,
+        serviceCategory: l.serviceCategory || 'Interior VR',
+        showroomBookingSlot: l.showroomBookingSlot || null,
+        designDrawingStatus: l.designDrawingStatus || 'Pending',
         customFields: l.customFields || {},
         notes: []
       };
-
-      if (!finalAssignedTo) {
-        finalAssignedTo = await assignLeadToRepresentative(leadData);
-        leadData.assignedTo = finalAssignedTo;
-      }
 
       validLeads.push(leadData);
     }
@@ -333,7 +309,7 @@ const importLeads = async (req, res, next) => {
 
     // Enqueue automations & Emit socket events
     for (const createdLead of createdLeads) {
-      emitTenantEvent(createdLead.tenantId.toString(), 'lead_created', createdLead);
+      emitTenantEvent('walktheplan', 'lead_created', createdLead);
       await enqueueAutomationJob('RUN_AUTOMATION', { leadId: createdLead._id }, req.user._id);
     }
 

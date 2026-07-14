@@ -5,7 +5,7 @@ const AuditLog = require('../models/AuditLog');
 // @access  Private (Admin only)
 const getAuditLogs = async (req, res, next) => {
   try {
-    const logs = await AuditLog.find({ tenantId: req.tenantId })
+    const logs = await AuditLog.find({})
       .populate('userId', 'name email')
       .sort({ createdAt: -1 });
     res.json(logs);

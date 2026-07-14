@@ -26,12 +26,6 @@ const participantSchema = new mongoose.Schema({
 
 const eventSchema = new mongoose.Schema(
   {
-    tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant',
-      required: true,
-      index: true
-    },
     type: {
       type: String,
       enum: ['meeting', 'call', 'internal'],
@@ -159,6 +153,6 @@ const eventSchema = new mongoose.Schema(
 );
 
 // Performance compound index matching query patterns
-eventSchema.index({ tenantId: 1, assignedTo: 1, startTime: 1 });
+eventSchema.index({ assignedTo: 1, startTime: 1 });
 
 module.exports = mongoose.model('Event', eventSchema);

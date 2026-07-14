@@ -5,7 +5,7 @@ const Event = require('../models/Event');
 
 const getStats = async (req, res, next) => {
   try {
-    const query = { tenantId: req.user.tenantId };
+    const query = {};
     if (req.user.role === 'sales') {
       query.assignedTo = req.user._id;
     }
@@ -68,7 +68,6 @@ const getStats = async (req, res, next) => {
 
     // Today's Meetings (Calendar Events)
     const meetingsQuery = {
-      tenantId: req.user.tenantId,
       startTime: { $gte: today, $lte: endOfToday },
       status: { $ne: 'cancelled' }
     };

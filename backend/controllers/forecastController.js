@@ -1,5 +1,4 @@
 const Lead = require('../models/Lead');
-const Quota = require('../models/Quota');
 
 // Define stage conversion weights (probabilities)
 const stageProbabilityMap = {
@@ -12,7 +11,7 @@ const stageProbabilityMap = {
   'Lost': 0.00
 };
 
-// @desc    Calculate quarterly sales targets against closed won + weighted pipelines
+// @desc    Calculate sales projections against closed won + weighted pipelines
 // @route   GET /api/forecast
 // @access  Private
 const getSalesForecast = async (req, res, next) => {
@@ -20,32 +19,26 @@ const getSalesForecast = async (req, res, next) => {
   const quarter = parseInt(req.query.quarter) || Math.floor((new Date().getMonth() + 3) / 3);
 
   try {
-    const scope = { tenantId: req.tenantId };
-
-    // 1. Calculate Quota Target & Closed Attainment
-    const quotas = await Quota.find({ ...scope, year, quarter });
-    const totalQuotaTarget = quotas.reduce((sum, q) => sum + q.targetAmount, 0);
-    const closedWonQuotaAttained = quotas.reduce((sum, q) => sum + q.attainedAmount, 0);
-
-    // 2. Fetch all leads/deals in the pipeline
-    const leads = await Lead.find(scope);
+    // Fetch all leads/deals in the pipeline
+    const leads = await Lead.find({});
     
     let totalWeightedPipeline = 0;
     let totalUnweightedPipeline = 0;
+    let closedWonQuotaAttained = 0;
 
     leads.forEach(lead => {
-      // Skip already closed won/lost leads if they are counted in quota direct metrics
-      if (lead.status === 'Won' || lead.status === 'Lost') return;
-
-      const probability = stageProbabilityMap[lead.status] || 0.10; // Default to 10%
       const expectedRevenue = lead.expectedRevenue || 0;
-
-      totalUnweightedPipeline += expectedRevenue;
-      totalWeightedPipeline += expectedRevenue * probability;
+      
+      if (lead.status === 'Won') {
+        closedWonQuotaAttained += expectedRevenue;
+      } else if (lead.status !== 'Lost') {
+        const probability = stageProbabilityMap[lead.status] || 0.10; // Default to 10%
+        totalUnweightedPipeline += expectedRevenue;
+        totalWeightedPipeline += expectedRevenue * probability;
+      }
     });
 
     const totalProjectedForecast = closedWonQuotaAttained + totalWeightedPipeline;
-    const gapToTarget = Math.max(0, totalQuotaTarget - totalProjectedForecast);
 
     res.json({
       period: {
@@ -53,13 +46,13 @@ const getSalesForecast = async (req, res, next) => {
         quarter
       },
       metrics: {
-        totalQuotaTarget,
+        totalQuotaTarget: 0,
         closedWonQuotaAttained,
         totalUnweightedPipeline,
         totalWeightedPipeline,
         totalProjectedForecast,
-        gapToTarget,
-        attainmentPercentage: totalQuotaTarget > 0 ? Number(((totalProjectedForecast / totalQuotaTarget) * 100).toFixed(2)) : 100
+        gapToTarget: 0,
+        attainmentPercentage: 100
       }
     });
   } catch (error) {

@@ -20,11 +20,6 @@ const invoiceItemSchema = new mongoose.Schema({
 
 const invoiceSchema = new mongoose.Schema(
   {
-    tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant',
-      required: true
-    },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Company',
@@ -71,7 +66,6 @@ invoiceSchema.pre('save', function (next) {
   next();
 });
 
-// Enforce unique invoice number scope per tenant
-invoiceSchema.index({ tenantId: 1, invoiceNumber: 1 }, { unique: true });
+invoiceSchema.index({ invoiceNumber: 1 }, { unique: true });
 
 module.exports = mongoose.model('Invoice', invoiceSchema);

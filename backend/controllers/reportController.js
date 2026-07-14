@@ -6,7 +6,7 @@ const Lead = require('../models/Lead');
 const getReportAnalytics = async (req, res, next) => {
   try {
     // Crucial: Tenant scoping applied
-    const leads = await Lead.find({ tenantId: req.tenantId }).populate('assignedTo', 'name');
+    const leads = await Lead.find({}).populate('assignedTo', 'name');
 
     // 1. Lead count by Source
     const sourceMap = {};
@@ -74,7 +74,7 @@ const getReportAnalytics = async (req, res, next) => {
 // @access  Private
 const exportCSV = async (req, res, next) => {
   try {
-    const leads = await Lead.find({ tenantId: req.tenantId }).populate('assignedTo', 'name');
+    const leads = await Lead.find({}).populate('assignedTo', 'name');
     
     // Compile executive performance metrics
     const execMap = {};
@@ -109,7 +109,7 @@ const exportCSV = async (req, res, next) => {
 // @access  Private
 const exportPDF = async (req, res, next) => {
   try {
-    const leads = await Lead.find({ tenantId: req.tenantId }).populate('assignedTo', 'name');
+    const leads = await Lead.find({}).populate('assignedTo', 'name');
 
     const totalLeads = leads.length;
     const totalWon = leads.filter(l => l.status === 'Won').length;
@@ -131,7 +131,7 @@ const exportPDF = async (req, res, next) => {
       <body>
         <h1>Walk The Plan CRM - Performance Report</h1>
         <div class="summary-card">
-          <p><strong>Tenant ID:</strong> ${req.tenantId}</p>
+          <p><strong>Organization:</strong> Walk the Plan</p>
           <p><strong>Report Generated:</strong> ${new Date().toLocaleDateString()}</p>
           <p><strong>Total Leads:</strong> ${totalLeads}</p>
           <p><strong>Closed Won:</strong> ${totalWon}</p>

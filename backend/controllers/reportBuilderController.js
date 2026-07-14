@@ -27,8 +27,8 @@ const runPivotReport = async (req, res, next) => {
       return next(new Error('groupBy field is required for pivot analytics'));
     }
 
-    // 1. Build initial Match Query (tenant-scoped)
-    const matchStage = { tenantId: new mongoose.Types.ObjectId(req.tenantId) };
+    // 1. Build initial Match Query
+    const matchStage = {};
 
     // Parse additional filters
     if (filters && Array.isArray(filters)) {

@@ -1,7 +1,6 @@
 const crypto = require('crypto');
 const User = require('../models/User');
 const Invite = require('../models/Invite');
-const Tenant = require('../models/Tenant');
 const Lead = require('../models/Lead');
 const Company = require('../models/Company');
 const Contact = require('../models/Contact');
@@ -15,7 +14,7 @@ const Invoice = require('../models/Invoice');
 // @access  Private (Admin/Manager)
 const getUsers = async (req, res, next) => {
   try {
-    const users = await User.find({ tenantId: req.tenantId })
+    const users = await User.find({})
       .populate('reportsTo', 'name email')
       .select('-password');
     res.json(users);
@@ -41,7 +40,7 @@ const updateUserStatus = async (req, res, next) => {
     if (role !== undefined) updates.role = role;
 
     const user = await User.findOneAndUpdate(
-      { _id: req.params.id, tenantId: req.tenantId },
+      { _id: req.params.id },
       updates,
       { new: true, runValidators: true }
     ).select('-password');
@@ -69,18 +68,17 @@ const createInvite = async (req, res, next) => {
       return next(new Error('Invite email is required'));
     }
 
-    // Verify email is not already registered in this tenant
-    const existingUser = await User.findOne({ email, tenantId: req.tenantId });
+    // Verify email is not already registered
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       res.status(400);
-      return next(new Error('User with this email is already registered in your organization'));
+      return next(new Error('User with this email is already registered'));
     }
 
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days expiration
 
     const invite = await Invite.create({
-      tenantId: req.tenantId,
       email,
       role: role || 'rep',
       reportsTo: reportsTo || null,
@@ -109,7 +107,7 @@ const createInvite = async (req, res, next) => {
 // @access  Private (Admin/Manager)
 const getInvites = async (req, res, next) => {
   try {
-    const invites = await Invite.find({ tenantId: req.tenantId })
+    const invites = await Invite.find({})
       .populate('reportsTo', 'name email');
     res.json(invites);
   } catch (error) {
@@ -117,29 +115,26 @@ const getInvites = async (req, res, next) => {
   }
 };
 
-// @desc    Export whole tenant database records as JSON
+// @desc    Export whole database records as JSON
 // @route   GET /api/users/export-data
 // @access  Private (Admin only)
-const exportTenantData = async (req, res, next) => {
+const exportOrgData = async (req, res, next) => {
   try {
-    const scope = { tenantId: req.tenantId };
-
     const [leads, companies, contacts, tasks, products, quotes, invoices] = await Promise.all([
-      Lead.find(scope),
-      Company.find(scope),
-      Contact.find(scope),
-      Task.find(scope),
-      Product.find(scope),
-      Quote.find(scope),
-      Invoice.find(scope)
+      Lead.find({}),
+      Company.find({}),
+      Contact.find({}),
+      Task.find({}),
+      Product.find({}),
+      Quote.find({}),
+      Invoice.find({})
     ]);
 
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename=tenant_export_${req.tenantId}.json`);
+    res.setHeader('Content-Disposition', 'attachment; filename=company_export.json');
 
     res.json({
       exportedAt: new Date(),
-      tenantId: req.tenantId,
       summary: {
         leads: leads.length,
         companies: companies.length,
@@ -164,37 +159,10 @@ const exportTenantData = async (req, res, next) => {
   }
 };
 
-// @desc    Deactivate organization tenant access
-// @route   POST /api/users/deactivate-tenant
-// @access  Private (Admin only)
-const deactivateTenant = async (req, res, next) => {
-  try {
-    // Find tenant settings or update tenant status
-    const tenant = await Tenant.findById(req.tenantId);
-    if (!tenant) {
-      res.status(404);
-      return next(new Error('Tenant organization not found'));
-    }
-
-    // Set setting flag for inactive
-    tenant.settings = tenant.settings || new Map();
-    tenant.settings.set('isActive', false);
-    await tenant.save();
-
-    // Deactivate all users belonging to this tenant
-    await User.updateMany({ tenantId: req.tenantId }, { isActive: false });
-
-    res.json({ message: 'Organization tenant and all member accounts deactivated successfully' });
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   getUsers,
   updateUserStatus,
   createInvite,
   getInvites,
-  exportTenantData,
-  deactivateTenant
+  exportOrgData
 };

@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 
 const contactSchema = new mongoose.Schema(
   {
-    tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant',
-      required: true
-    },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Company',
@@ -48,8 +43,8 @@ const contactSchema = new mongoose.Schema(
 );
 
 // Performance compound index
-contactSchema.index({ tenantId: 1, companyId: 1 });
-contactSchema.index({ tenantId: 1, email: 1 });
+contactSchema.index({ companyId: 1 });
+contactSchema.index({ email: 1 });
 
 // Full text search index
 contactSchema.index({ 

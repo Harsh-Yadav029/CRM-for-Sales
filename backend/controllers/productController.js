@@ -2,7 +2,7 @@ const Product = require('../models/Product');
 
 const getProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({ tenantId: req.tenantId });
+    const products = await Product.find({});
     res.json(products);
   } catch (error) {
     next(error);
@@ -13,7 +13,6 @@ const createProduct = async (req, res, next) => {
   try {
     const { name, sku, price, description, isActive } = req.body;
     const product = await Product.create({
-      tenantId: req.tenantId,
       name,
       sku,
       price,
@@ -29,7 +28,7 @@ const createProduct = async (req, res, next) => {
 const updateProduct = async (req, res, next) => {
   try {
     const product = await Product.findOneAndUpdate(
-      { _id: req.params.id, tenantId: req.tenantId },
+      { _id: req.params.id },
       req.body,
       { new: true, runValidators: true }
     );
@@ -45,7 +44,7 @@ const updateProduct = async (req, res, next) => {
 
 const deleteProduct = async (req, res, next) => {
   try {
-    const product = await Product.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
+    const product = await Product.findOneAndDelete({ _id: req.params.id });
     if (!product) {
       res.status(404);
       return next(new Error('Product not found'));

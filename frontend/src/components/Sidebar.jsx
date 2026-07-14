@@ -302,22 +302,6 @@ const Sidebar = () => {
 
       {/* ── 8. Bottom-pinned Utility Section ── */}
       <div className="border-t border-white/5 px-3 py-3 shrink-0 space-y-0.5">
-        <NavLink to="/billing"
-          className={({ isActive: a }) =>
-            `${linkBase} ${a ? linkActive + ' ' + activeBarClass : linkIdle}`
-          }
-        >
-          <CreditCard size={14} className="shrink-0 text-white/35" />
-          <span>Billing</span>
-        </NavLink>
-        <NavLink to="/developer-portal"
-          className={({ isActive: a }) =>
-            `${linkBase} ${a ? linkActive + ' ' + activeBarClass : linkIdle}`
-          }
-        >
-          <Code2 size={14} className="shrink-0 text-white/35" />
-          <span>Developer Settings</span>
-        </NavLink>
         <button
           onClick={logout}
           className={`${linkBase} text-red-400/60 hover:text-red-400 hover:bg-red-500/5 w-full`}

@@ -34,7 +34,7 @@ const getEvents = async (req, res, next) => {
 // @access  Private
 const getEventById = async (req, res, next) => {
   try {
-    const event = await Event.findOne({ _id: req.params.id, tenantId: req.tenantId })
+    const event = await Event.findOne({ _id: req.params.id })
       .populate('assignedTo', 'name email');
 
     if (!event) {
@@ -79,7 +79,6 @@ const createEvent = async (req, res, next) => {
       return next(new Error('startTime must be before endTime'));
     }
 
-    // Verify relatedTo reference belongs to correct tenant context
     if (relatedTo && relatedTo.module && relatedTo.recordId) {
       let model;
       if (relatedTo.module === 'Lead' || relatedTo.module === 'Deal') {
@@ -91,10 +90,10 @@ const createEvent = async (req, res, next) => {
       }
 
       if (model) {
-        const record = await model.findOne({ _id: relatedTo.recordId, tenantId: req.tenantId });
+        const record = await model.findOne({ _id: relatedTo.recordId });
         if (!record) {
           res.status(400);
-          return next(new Error(`Related ${relatedTo.module} record not found in this organization`));
+          return next(new Error(`Related ${relatedTo.module} record not found`));
         }
       }
     }
@@ -103,7 +102,6 @@ const createEvent = async (req, res, next) => {
     const finalAssignedTo = assignedTo || req.user._id;
 
     const event = await Event.create({
-      tenantId: req.tenantId,
       type,
       title,
       description,
@@ -134,15 +132,11 @@ const createEvent = async (req, res, next) => {
   }
 };
 
-// @desc    Update calendar event (stripping tenantId to protect tenant borders)
-// @route   PUT /api/events/:id
-// @access  Private
 const updateEvent = async (req, res, next) => {
   const updates = { ...req.body };
-  delete updates.tenantId;
 
   try {
-    const event = await Event.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const event = await Event.findOne({ _id: req.params.id });
 
     if (!event) {
       res.status(404);
@@ -190,7 +184,7 @@ const updateEvent = async (req, res, next) => {
 // @access  Private
 const deleteEvent = async (req, res, next) => {
   try {
-    const event = await Event.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const event = await Event.findOne({ _id: req.params.id });
 
     if (!event) {
       res.status(404);
@@ -228,9 +222,7 @@ const checkAvailability = async (req, res, next) => {
     const start = new Date(startTime);
     const end = new Date(endTime);
 
-    // Query overlapping events: status !== cancelled
     const overlapEvents = await Event.find({
-      tenantId: req.tenantId,
       assignedTo: { $in: userIds },
       status: { $ne: 'cancelled' },
       startTime: { $lt: end },

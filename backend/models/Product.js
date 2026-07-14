@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema(
   {
-    tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant',
-      required: true
-    },
     name: {
       type: String,
       required: true,
@@ -36,7 +31,6 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-// Enforce unique SKU scope per tenant
-productSchema.index({ tenantId: 1, sku: 1 }, { unique: true });
+productSchema.index({ sku: 1 }, { unique: true });
 
 module.exports = mongoose.model('Product', productSchema);

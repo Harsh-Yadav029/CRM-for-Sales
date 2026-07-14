@@ -60,6 +60,9 @@ const Leads = () => {
     expectedRevenue: 0,
     status: 'New',
     assignedTo: '',
+    serviceCategory: 'Interior VR',
+    showroomBookingSlot: '',
+    designDrawingStatus: 'Pending',
     customFields: {}
   });
 
@@ -108,6 +111,9 @@ const Leads = () => {
       expectedRevenue: 0,
       status: 'New',
       assignedTo: '',
+      serviceCategory: 'Interior VR',
+      showroomBookingSlot: '',
+      designDrawingStatus: 'Pending',
       customFields: {}
     });
     setShowModal(true);
@@ -131,6 +137,9 @@ const Leads = () => {
       expectedRevenue: l.expectedRevenue || 0,
       status: l.status,
       assignedTo: l.assignedTo?._id || '',
+      serviceCategory: l.serviceCategory || 'Interior VR',
+      showroomBookingSlot: l.showroomBookingSlot ? new Date(l.showroomBookingSlot).toISOString().split('T')[0] : '',
+      designDrawingStatus: l.designDrawingStatus || 'Pending',
       customFields: leadCustomFields
     });
     setShowModal(true);
@@ -386,6 +395,41 @@ const Leads = () => {
                   type="number"
                   value={form.expectedRevenue}
                   onChange={(e) => setForm({ ...form, expectedRevenue: Number(e.target.value) })}
+                />
+
+                <Select
+                  label="Service Category"
+                  id="formServiceCategory"
+                  value={form.serviceCategory}
+                  onChange={(e) => setForm({ ...form, serviceCategory: e.target.value })}
+                  options={[
+                    { value: 'Interior VR', label: 'Interior VR' },
+                    { value: 'Elevation VR', label: 'Elevation VR' },
+                    { value: 'Full-Scale 3D', label: 'Full-Scale 3D' },
+                    { value: 'Plan Conversion', label: 'Plan Conversion' },
+                    { value: 'Other', label: 'Other' }
+                  ]}
+                />
+
+                <Input
+                  label="Showroom Booking Slot"
+                  id="formShowroomBookingSlot"
+                  type="date"
+                  value={form.showroomBookingSlot}
+                  onChange={(e) => setForm({ ...form, showroomBookingSlot: e.target.value })}
+                />
+
+                <Select
+                  label="Design Drawing Status"
+                  id="formDesignDrawingStatus"
+                  value={form.designDrawingStatus}
+                  onChange={(e) => setForm({ ...form, designDrawingStatus: e.target.value })}
+                  options={[
+                    { value: 'Pending', label: 'Pending' },
+                    { value: 'In Progress', label: 'In Progress' },
+                    { value: 'Approved', label: 'Approved' },
+                    { value: 'Rejected', label: 'Rejected' }
+                  ]}
                 />
 
                 {editing && (

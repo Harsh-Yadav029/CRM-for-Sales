@@ -29,7 +29,6 @@ const auditLogMiddleware = (moduleName) => {
 
             const targetId = req.params.id || body?._id;
             const actorId = req.user?._id || null;
-            const tenantId = req.tenantId || null;
 
             // Sanitize sensitive fields (e.g. passwords, secrets) from changes audit
             const changes = { ...req.body };
@@ -37,7 +36,6 @@ const auditLogMiddleware = (moduleName) => {
             delete changes.token;
 
             await AuditLog.create({
-              tenantId,
               userId: actorId,
               action,
               module: moduleName,

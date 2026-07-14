@@ -36,11 +36,6 @@ const noteSchema = new mongoose.Schema(
 
 const leadSchema = new mongoose.Schema(
   {
-    tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant',
-      required: true
-    },
     name: {
       type: String,
       required: true,
@@ -80,6 +75,20 @@ const leadSchema = new mongoose.Schema(
       type: Number,
       default: 0
     },
+    serviceCategory: {
+      type: String,
+      enum: ['Interior VR', 'Elevation VR', 'Full-Scale 3D', 'Plan Conversion', 'Other'],
+      default: 'Interior VR'
+    },
+    showroomBookingSlot: {
+      type: Date,
+      default: null
+    },
+    designDrawingStatus: {
+      type: String,
+      enum: ['Pending', 'In Progress', 'Approved', 'Rejected'],
+      default: 'Pending'
+    },
     customFields: {
       type: Map,
       of: mongoose.Schema.Types.Mixed,
@@ -93,9 +102,9 @@ const leadSchema = new mongoose.Schema(
 );
 
 // Performance compound indexes
-leadSchema.index({ tenantId: 1, createdAt: -1 });
-leadSchema.index({ tenantId: 1, status: 1 });
-leadSchema.index({ tenantId: 1, assignedTo: 1 });
+leadSchema.index({ createdAt: -1 });
+leadSchema.index({ status: 1 });
+leadSchema.index({ assignedTo: 1 });
 
 // Full text search index
 leadSchema.index({ 

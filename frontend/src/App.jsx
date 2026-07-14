@@ -18,9 +18,6 @@ import Contacts from './pages/Contacts';
 import Products from './pages/Products';
 import Quotes from './pages/Quotes';
 import Invoices from './pages/Invoices';
-import DeveloperPortal from './pages/DeveloperPortal';
-import Billing from './pages/Billing';
-import BillingCallback from './pages/BillingCallback';
 import Calendar from './pages/Calendar';
 import { Loader2 } from 'lucide-react';
 import BottomNav from './components/BottomNav';
@@ -53,8 +50,6 @@ const ProtectedLayout = ({ children }) => {
     '/products': 'Product Catalog',
     '/quotes': 'Quotes & Proposals',
     '/invoices': 'Invoice Ledger',
-    '/developer-portal': 'Developer Portal',
-    '/billing': 'Subscription Billing',
     '/calendar': 'Calendar & Meetings'
   };
   let title = titles[location.pathname] || 'Home';
@@ -100,9 +95,6 @@ function App() {
             <Route path="/products" element={<ProtectedLayout><Products /></ProtectedLayout>} />
             <Route path="/quotes" element={<ProtectedLayout><Quotes /></ProtectedLayout>} />
             <Route path="/invoices" element={<ProtectedLayout><Invoices /></ProtectedLayout>} />
-            <Route path="/developer-portal" element={<ProtectedLayout><DeveloperPortal /></ProtectedLayout>} />
-            <Route path="/billing" element={<ProtectedLayout><Billing /></ProtectedLayout>} />
-            <Route path="/billing/callback" element={<BillingCallback />} />
             <Route path="/settings" element={<ProtectedLayout><Settings /></ProtectedLayout>} />
             <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
             <Route path="/calendar" element={<ProtectedLayout><Calendar /></ProtectedLayout>} />

@@ -2,11 +2,6 @@ const mongoose = require('mongoose');
 
 const pipelineSchema = new mongoose.Schema(
   {
-    tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant',
-      required: true
-    },
     name: {
       type: String,
       required: true,
@@ -27,7 +22,6 @@ const pipelineSchema = new mongoose.Schema(
   }
 );
 
-// Enforce unique pipeline names per tenant
-pipelineSchema.index({ tenantId: 1, name: 1 }, { unique: true });
+pipelineSchema.index({ name: 1 }, { unique: true });
 
 module.exports = mongoose.model('Pipeline', pipelineSchema);

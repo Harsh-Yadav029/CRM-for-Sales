@@ -39,9 +39,8 @@ const cacheMiddleware = (durationSeconds = 300) => {
       return next();
     }
 
-    // Tenant-scoped cache key prevents data leakage between organizations
-    const tenantId = req.tenantId || 'public';
-    const cacheKey = `cache:${tenantId}:${req.originalUrl}`;
+    // Scoped cache key for the route
+    const cacheKey = `cache:${req.originalUrl}`;
 
     try {
       const cachedResponse = await redisClient.get(cacheKey);

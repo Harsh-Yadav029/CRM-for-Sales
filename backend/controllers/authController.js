@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const Tenant = require('../models/Tenant');
 const Invite = require('../models/Invite');
 
 const generateToken = (id) => {
@@ -10,7 +9,7 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res, next) => {
-  const { name, email, password, role, tenantName, token } = req.body;
+  const { name, email, password, role, token } = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -20,7 +19,6 @@ const registerUser = async (req, res, next) => {
     }
 
     const userCount = await User.countDocuments({});
-    let tenantId;
     let assignedRole = 'rep';
     let inviteReportsTo = null;
 
@@ -32,7 +30,6 @@ const registerUser = async (req, res, next) => {
         return next(new Error('Invitation token is invalid or has expired'));
       }
       
-      tenantId = invite.tenantId;
       assignedRole = invite.role;
       inviteReportsTo = invite.reportsTo;
       
@@ -40,16 +37,7 @@ const registerUser = async (req, res, next) => {
       invite.status = 'accepted';
       await invite.save();
     } else if (userCount === 0) {
-      // First user is automatically system administrator and creates a root tenant
-      const defaultTenantName = tenantName || 'Default Organization';
-      const emailDomain = email.split('@')[1] || '';
-      
-      const tenant = await Tenant.create({
-        name: defaultTenantName,
-        domain: emailDomain,
-        subscriptionLevel: 'enterprise'
-      });
-      tenantId = tenant._id;
+      // First user is automatically system administrator
       assignedRole = 'admin';
     } else {
       // For subsequent signups
@@ -65,28 +53,13 @@ const registerUser = async (req, res, next) => {
             return next(new Error('Only system administrators can register new accounts'));
           }
           
-          tenantId = requestor.tenantId;
           assignedRole = (role && ['admin', 'manager', 'rep'].includes(role)) ? role : 'rep';
         } catch (err) {
           res.status(401);
           return next(new Error('Not authorized, admin token validation failed'));
         }
       } else {
-        // Self-serve domain lookup or manual registration
-        const emailDomain = email.split('@')[1] || '';
-        let matchingTenant = await Tenant.findOne({ domain: emailDomain });
-        
-        if (matchingTenant) {
-          tenantId = matchingTenant._id;
-        } else {
-          const finalTenantName = tenantName || `${emailDomain.split('.')[0].toUpperCase()} Organization`;
-          const newTenant = await Tenant.create({
-            name: finalTenantName,
-            domain: emailDomain
-          });
-          tenantId = newTenant._id;
-          assignedRole = 'admin'; // First user of a new tenant is the admin
-        }
+        assignedRole = 'rep';
       }
     }
 
@@ -95,7 +68,6 @@ const registerUser = async (req, res, next) => {
       email,
       password,
       role: assignedRole,
-      tenantId,
       reportsTo: inviteReportsTo
     });
 
@@ -104,7 +76,6 @@ const registerUser = async (req, res, next) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      tenantId: user.tenantId,
       token: generateToken(user._id)
     });
   } catch (error) {
@@ -140,7 +111,6 @@ const loginUser = async (req, res, next) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        tenantId: user.tenantId,
         token: generateToken(user._id)
       });
     } else {
@@ -232,8 +202,8 @@ const getUserProfile = async (req, res, next) => {
 
 const getSalespeople = async (req, res, next) => {
   try {
-    // Return all users belonging to this tenant, excluding admin
-    const salespeople = await User.find({ tenantId: req.tenantId }).select('name email role');
+    // Return all users
+    const salespeople = await User.find({}).select('name email role');
     res.json(salespeople);
   } catch (error) {
     next(error);
@@ -275,28 +245,14 @@ const googleLogin = async (req, res, next) => {
 
     let user = await User.findOne({ email });
     if (!user) {
-      const emailDomain = email.split('@')[1] || '';
-      let tenantId;
-      let assignedRole = 'rep';
-
-      let matchingTenant = await Tenant.findOne({ domain: emailDomain });
-      if (matchingTenant) {
-        tenantId = matchingTenant._id;
-      } else {
-        const newTenant = await Tenant.create({
-          name: `${emailDomain.split('.')[0].toUpperCase()} Org`,
-          domain: emailDomain
-        });
-        tenantId = newTenant._id;
-        assignedRole = 'admin';
-      }
+      const userCount = await User.countDocuments({});
+      const assignedRole = userCount === 0 ? 'admin' : 'rep';
 
       user = await User.create({
         name,
         email,
         password: require('crypto').randomBytes(16).toString('hex'),
-        role: assignedRole,
-        tenantId
+        role: assignedRole
       });
     }
 
@@ -305,7 +261,6 @@ const googleLogin = async (req, res, next) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      tenantId: user.tenantId,
       token: generateToken(user._id)
     });
   } catch (error) {

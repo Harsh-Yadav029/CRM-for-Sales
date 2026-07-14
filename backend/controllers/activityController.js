@@ -14,7 +14,7 @@ const computeEventStatus = (event) => {
 };
 
 // Reusable helper to validate relatedTo record exists in the tenant context
-const validateRelatedTo = async (relatedTo, tenantId) => {
+const validateRelatedTo = async (relatedTo) => {
   if (!relatedTo || !relatedTo.module || !relatedTo.recordId) {
     return true; // No relation specified is valid
   }
@@ -28,7 +28,7 @@ const validateRelatedTo = async (relatedTo, tenantId) => {
   }
 
   if (model) {
-    const record = await model.findOne({ _id: relatedTo.recordId, tenantId });
+    const record = await model.findOne({ _id: relatedTo.recordId });
     return !!record;
   }
   return false;
@@ -212,24 +212,23 @@ const createTask = async (req, res, next) => {
       return next(new Error('Title and dueDate are required'));
     }
 
-    // Verify relatedTo record is valid within organizationId
-    const isValidRelation = await validateRelatedTo(relatedTo, req.tenantId);
+    // Verify relatedTo record is valid
+    const isValidRelation = await validateRelatedTo(relatedTo);
     if (!isValidRelation) {
       res.status(400);
-      return next(new Error(`Related ${relatedTo.module} record not found in this organization`));
+      return next(new Error(`Related ${relatedTo.module} record not found`));
     }
 
     const finalAssignedTo = assignedTo || req.user._id;
 
-    // Verify assignee belongs to the organization
-    const userExists = await User.findOne({ _id: finalAssignedTo, tenantId: req.tenantId });
+    // Verify assignee belongs to the system
+    const userExists = await User.findOne({ _id: finalAssignedTo });
     if (!userExists) {
       res.status(400);
-      return next(new Error('Assigned user not found in this organization'));
+      return next(new Error('Assigned user not found'));
     }
 
     const task = await Task.create({
-      tenantId: req.tenantId,
       title,
       description: description || '',
       dueDate: new Date(dueDate),
@@ -252,7 +251,7 @@ const createTask = async (req, res, next) => {
 // @route   PUT /api/tasks/:id
 const updateTask = async (req, res, next) => {
   try {
-    const task = await Task.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const task = await Task.findOne({ _id: req.params.id });
     if (!task) {
       res.status(404);
       return next(new Error('Task not found'));
@@ -267,19 +266,19 @@ const updateTask = async (req, res, next) => {
     const { title, description, dueDate, priority, relatedTo, assignedTo, recurrence, reminders, status, completed } = req.body;
 
     if (relatedTo) {
-      const isValidRelation = await validateRelatedTo(relatedTo, req.tenantId);
+      const isValidRelation = await validateRelatedTo(relatedTo);
       if (!isValidRelation) {
         res.status(400);
-        return next(new Error(`Related ${relatedTo.module} record not found in this organization`));
+        return next(new Error(`Related ${relatedTo.module} record not found`));
       }
       task.relatedTo = relatedTo;
     }
 
     if (assignedTo) {
-      const userExists = await User.findOne({ _id: assignedTo, tenantId: req.tenantId });
+      const userExists = await User.findOne({ _id: assignedTo });
       if (!userExists) {
         res.status(400);
-        return next(new Error('Assigned user not found in this organization'));
+        return next(new Error('Assigned user not found'));
       }
       task.assignedTo = assignedTo;
     }
@@ -311,7 +310,7 @@ const updateTask = async (req, res, next) => {
 // @route   POST /api/tasks/:id/complete
 const completeTask = async (req, res, next) => {
   try {
-    const task = await Task.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const task = await Task.findOne({ _id: req.params.id });
     if (!task) {
       res.status(404);
       return next(new Error('Task not found'));
@@ -354,21 +353,20 @@ const createEvent = async (req, res, next) => {
       return next(new Error('startTime must be before endTime'));
     }
 
-    const isValidRelation = await validateRelatedTo(relatedTo, req.tenantId);
+    const isValidRelation = await validateRelatedTo(relatedTo);
     if (!isValidRelation) {
       res.status(400);
-      return next(new Error(`Related ${relatedTo.module} record not found in this organization`));
+      return next(new Error(`Related ${relatedTo.module} record not found`));
     }
 
     const finalAssignedTo = assignedTo || req.user._id;
-    const userExists = await User.findOne({ _id: finalAssignedTo, tenantId: req.tenantId });
+    const userExists = await User.findOne({ _id: finalAssignedTo });
     if (!userExists) {
       res.status(400);
-      return next(new Error('Assigned user not found in this organization'));
+      return next(new Error('Assigned user not found'));
     }
 
     const event = await Event.create({
-      tenantId: req.tenantId,
       type,
       title,
       description: description || '',
@@ -397,7 +395,7 @@ const createEvent = async (req, res, next) => {
 // @route   PUT /api/events/:id
 const updateEvent = async (req, res, next) => {
   try {
-    const event = await Event.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const event = await Event.findOne({ _id: req.params.id });
     if (!event) {
       res.status(404);
       return next(new Error('Event not found'));
@@ -409,21 +407,20 @@ const updateEvent = async (req, res, next) => {
     }
 
     const updates = { ...req.body };
-    delete updates.tenantId;
 
     if (updates.relatedTo) {
-      const isValidRelation = await validateRelatedTo(updates.relatedTo, req.tenantId);
+      const isValidRelation = await validateRelatedTo(updates.relatedTo);
       if (!isValidRelation) {
         res.status(400);
-        return next(new Error(`Related ${updates.relatedTo.module} record not found in this organization`));
+        return next(new Error(`Related ${updates.relatedTo.module} record not found`));
       }
     }
 
     if (updates.assignedTo) {
-      const userExists = await User.findOne({ _id: updates.assignedTo, tenantId: req.tenantId });
+      const userExists = await User.findOne({ _id: updates.assignedTo });
       if (!userExists) {
         res.status(400);
-        return next(new Error('Assigned user not found in this organization'));
+        return next(new Error('Assigned user not found'));
       }
     }
 
@@ -453,7 +450,7 @@ const updateEvent = async (req, res, next) => {
 // @route   POST /api/events/:id/cancel
 const cancelEvent = async (req, res, next) => {
   try {
-    const event = await Event.findOne({ _id: req.params.id, tenantId: req.tenantId });
+    const event = await Event.findOne({ _id: req.params.id });
     if (!event) {
       res.status(404);
       return next(new Error('Event not found'));

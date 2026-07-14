@@ -2,7 +2,7 @@ const Contact = require('../models/Contact');
 
 const getContacts = async (req, res, next) => {
   try {
-    const contacts = await Contact.find({ tenantId: req.tenantId })
+    const contacts = await Contact.find({})
       .populate('companyId', 'name')
       .populate('assignedTo', 'name email');
     res.json(contacts);
@@ -15,7 +15,6 @@ const createContact = async (req, res, next) => {
   try {
     const { companyId, firstName, lastName, email, phone, title, assignedTo } = req.body;
     const contact = await Contact.create({
-      tenantId: req.tenantId,
       companyId,
       firstName,
       lastName,
@@ -33,7 +32,7 @@ const createContact = async (req, res, next) => {
 const updateContact = async (req, res, next) => {
   try {
     const contact = await Contact.findOneAndUpdate(
-      { _id: req.params.id, tenantId: req.tenantId },
+      { _id: req.params.id },
       req.body,
       { new: true, runValidators: true }
     );
@@ -49,7 +48,7 @@ const updateContact = async (req, res, next) => {
 
 const deleteContact = async (req, res, next) => {
   try {
-    const contact = await Contact.findOneAndDelete({ _id: req.params.id, tenantId: req.tenantId });
+    const contact = await Contact.findOneAndDelete({ _id: req.params.id });
     if (!contact) {
       res.status(404);
       return next(new Error('Contact not found'));

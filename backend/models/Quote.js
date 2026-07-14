@@ -20,11 +20,6 @@ const quoteItemSchema = new mongoose.Schema({
 
 const quoteSchema = new mongoose.Schema(
   {
-    tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant',
-      required: true
-    },
     companyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Company',

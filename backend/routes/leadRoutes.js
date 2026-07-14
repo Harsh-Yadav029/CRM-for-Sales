@@ -13,15 +13,14 @@ const {
 } = require('../controllers/leadController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const audit = require('../middleware/auditMiddleware');
-const { checkLeadLimit } = require('../middleware/subscriptionMiddleware');
 
 router.use(protect);
 
-router.post('/import', checkLeadLimit, audit('Lead'), importLeads);
+router.post('/import', audit('Lead'), importLeads);
 
 router.route('/')
   .get(getLeads)
-  .post(checkLeadLimit, audit('Lead'), createLead);
+  .post(audit('Lead'), createLead);
 
 router.route('/:id')
   .get(getLeadById)

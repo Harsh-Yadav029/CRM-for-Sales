@@ -15,13 +15,11 @@ const initSocket = (httpServer) => {
   });
 
   io.on('connection', (socket) => {
-    const { tenantId, userId } = socket.handshake.query;
+    const { userId } = socket.handshake.query;
 
-    if (tenantId) {
-      // Scope socket session to tenant-specific room
-      socket.join(tenantId);
-      console.log(`[Socket] Client connected to tenant room: ${tenantId}`);
-    }
+    // Scope socket session to single company room
+    socket.join('walktheplan');
+    console.log('[Socket] Client connected to walktheplan room');
 
     if (userId) {
       // Scope socket session to user-specific room (for private in-app alerts)
@@ -44,15 +42,9 @@ const getIO = () => {
   return io;
 };
 
-/**
- * Broadcasts an event to a specific tenant room.
- * @param {string} tenantId - Tenant identifier
- * @param {string} event - Event name
- * @param {Object} payload - Event data
- */
 const emitTenantEvent = (tenantId, event, payload) => {
-  if (io && tenantId) {
-    io.to(tenantId).emit(event, payload);
+  if (io) {
+    io.to('walktheplan').emit(event, payload);
   }
 };
 

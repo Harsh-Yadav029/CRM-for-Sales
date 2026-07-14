@@ -25,10 +25,10 @@ const getSubordinateIds = async (userId) => {
  * @returns {Promise<Object>} Mongoose query filter
  */
 const buildLeadSharingQuery = async (req) => {
-  const query = { tenantId: req.tenantId };
+  const query = {};
   
   if (req.user.role === 'admin') {
-    return query; // Admins see everything within their tenant
+    return query; // Admins see everything
   }
   
   if (req.user.role === 'manager') {

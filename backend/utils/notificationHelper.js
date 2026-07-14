@@ -11,10 +11,9 @@ const { emitUserEvent } = require('./socket');
  * @param {string} [params.link] - Actionable URL link
  * @returns {Promise<Object>} The created Mongoose Notification document
  */
-const createNotification = async ({ tenantId, userId, title, message, link = '' }) => {
+const createNotification = async ({ userId, title, message, link = '' }) => {
   try {
     const notification = await Notification.create({
-      tenantId,
       userId,
       title,
       message,

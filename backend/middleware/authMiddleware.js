@@ -13,8 +13,6 @@ const protect = async (req, res, next) => {
         res.status(401);
         return next(new Error('Not authorized, user not found'));
       }
-      // Bind tenant context
-      req.tenantId = req.user.tenantId ? req.user.tenantId.toString() : null;
       next();
     } catch (error) {
       res.status(401);

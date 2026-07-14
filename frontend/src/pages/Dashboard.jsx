@@ -37,7 +37,6 @@ import {
   CartesianGrid, 
   Legend 
 } from 'recharts';
-import QuotaWidget from '../components/QuotaWidget';
 import AIChatDrawer from '../components/AIChatDrawer';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -443,11 +442,9 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Right Column: Meetings, Today Leads, Action Plan, Quota */}
+        {/* Right Column: Meetings, Today Leads, Action Plan */}
         <div className="lg:col-span-4 space-y-6">
           
-          <QuotaWidget />
-
           {/* Action Plan for Today Checklists */}
           <Card variant="raised" className="p-5 hover:shadow-card-hover transition-all duration-200">
             <div className="flex justify-between items-center mb-4 border-b border-line pb-3">
@@ -571,11 +568,11 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Floating Zia AI Chat Trigger Button */}
+      {/* Floating Compass AI Chat Trigger Button */}
       <button
         onClick={() => setAiOpen(true)}
         className="fixed bottom-6 right-6 h-12 w-12 rounded-full bg-gold hover:bg-gold/90 text-ink flex items-center justify-center shadow-card-hover transition-all hover:scale-110 z-40 border border-gold/30"
-        title="Consult Zia AI"
+        title="Consult Compass AI"
       >
         <Bot size={22} className="stroke-[2.5]" />
       </button>

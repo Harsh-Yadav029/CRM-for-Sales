@@ -46,14 +46,14 @@ const callGemini = async (prompt) => {
 // @access  Private
 const scoreLead = async (req, res, next) => {
   try {
-    const lead = await Lead.findOne({ _id: req.params.leadId, tenantId: req.tenantId });
+    const lead = await Lead.findOne({ _id: req.params.leadId });
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
     }
 
     // 1. Check if we can use real Gemini for prediction
-    const prompt = `You are Zia, an AI sales assistant. Given the following Lead profile, predict the win probability (0-100%) and write a brief explanation.
+    const prompt = `You are Compass, an AI sales assistant. Given the following Lead profile, predict the win probability (0-100%) and write a brief explanation.
 Name: ${lead.name}
 Company: ${lead.company}
 Source: ${lead.source}
@@ -70,7 +70,7 @@ Output your response strictly as valid JSON with keys: "score" (number) and "exp
         return res.json({
           score: parsed.score,
           explanation: parsed.explanation,
-          mode: 'gemini_generative'
+          mode: 'ai_generative'
         });
       } catch (e) {
         console.warn('Failed to parse Gemini JSON response, falling back to heuristics.');
@@ -122,7 +122,7 @@ const draftEmail = async (req, res, next) => {
   const { leadId, instructions } = req.body;
 
   try {
-    const lead = await Lead.findOne({ _id: leadId, tenantId: req.tenantId });
+    const lead = await Lead.findOne({ _id: leadId });
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
@@ -142,7 +142,7 @@ Keep it clean, concise, and do not write placeholders. Return only the email bod
 
     const emailDraft = await callGemini(prompt);
     if (emailDraft) {
-      return res.json({ draft: emailDraft.trim(), mode: 'gemini_generative' });
+      return res.json({ draft: emailDraft.trim(), mode: 'ai_generative' });
     }
 
     // 2. Fallback to heuristic dynamic templates
@@ -169,7 +169,7 @@ Keep it clean, concise, and do not write placeholders. Return only the email bod
 // @access  Private
 const getNextAction = async (req, res, next) => {
   try {
-    const lead = await Lead.findOne({ _id: req.params.leadId, tenantId: req.tenantId });
+    const lead = await Lead.findOne({ _id: req.params.leadId });
     if (!lead) {
       res.status(404);
       return next(new Error('Lead not found'));
@@ -225,7 +225,7 @@ const chatWithAI = async (req, res, next) => {
   try {
     let leadContext = '';
     if (leadId) {
-      const lead = await Lead.findOne({ _id: leadId, tenantId: req.tenantId });
+      const lead = await Lead.findOne({ _id: leadId });
       if (lead) {
         leadContext = `Lead Context:
 - Name: ${lead.name}
@@ -238,7 +238,7 @@ const chatWithAI = async (req, res, next) => {
       }
     }
 
-    const prompt = `You are Zia, the AI sales assistant. Answer the sales representative's query below. Use the provided lead profile context if available.
+    const prompt = `You are Compass, the AI sales assistant. Answer the sales representative's query below. Use the provided lead profile context if available.
 ${leadContext}
 Representative Query: "${message}"
 
@@ -246,15 +246,15 @@ Keep your response clean, professional, and directly actionable. Avoid meta-comm
 
     const responseText = await callGemini(prompt);
     if (responseText) {
-      return res.json({ response: responseText.trim(), mode: 'gemini_generative' });
+      return res.json({ response: responseText.trim(), mode: 'ai_generative' });
     }
 
     // Heuristic Smart Fallbacks
-    let response = "I am Zia, your AI Sales Assistant. Let me know how I can help you analyze leads, draft messages, or review statuses.";
+    let response = "I am Compass, your AI Sales Assistant. Let me know how I can help you analyze leads, draft messages, or review statuses.";
     const queryLower = message.toLowerCase();
     
     if (leadId) {
-      const lead = await Lead.findOne({ _id: leadId, tenantId: req.tenantId });
+      const lead = await Lead.findOne({ _id: leadId });
       if (lead) {
         if (queryLower.includes('summar') || queryLower.includes('info') || queryLower.includes('about')) {
           response = `Here is a summary for ${lead.name} representing ${lead.company}: The lead is currently in the "${lead.status}" stage, with an estimated deal value of ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(lead.expectedRevenue || 0)}. We have logged ${lead.notes?.length || 0} interactions on their timeline.`;

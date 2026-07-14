@@ -5,7 +5,7 @@ import { Send, X, Bot, Sparkles, MessageSquare } from 'lucide-react';
 const AIChatDrawer = ({ isOpen, onClose, leadId }) => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState([
-    { sender: 'ai', text: "Hello! I am Zia, your AI Sales Assistant. Ask me to 'summarize' lead timeline feedback, 'draft an email' pitch, or suggest recommendations." }
+    { sender: 'ai', text: "Hello! I am Compass, your AI Sales Assistant. Ask me to 'summarize' lead timeline feedback, 'draft an email' pitch, or suggest recommendations." }
   ]);
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef(null);
@@ -50,10 +50,10 @@ const AIChatDrawer = ({ isOpen, onClose, leadId }) => {
           </div>
           <div>
             <h3 className="text-xs font-bold text-on-surface uppercase tracking-wider flex items-center gap-1">
-              Zia Assistant
+              Compass Assistant
               <Sparkles size={11} className="text-primary fill-amber-500" />
             </h3>
-            <p className="text-[9px] text-on-surface-variant">Gemini Sales Intelligence</p>
+            <p className="text-[9px] text-on-surface-variant">Compass Sales Intelligence</p>
           </div>
         </div>
 
@@ -107,7 +107,7 @@ const AIChatDrawer = ({ isOpen, onClose, leadId }) => {
         <div className="relative flex items-center bg-surface-container rounded-xl border border-outline-variant/40 px-3 py-2">
           <input
             type="text"
-            placeholder="Ask Zia..."
+            placeholder="Ask Compass..."
             className="w-full bg-transparent text-xs text-on-surface placeholder-slate-600 focus:outline-none pr-8"
             value={message}
             onChange={(e) => setMessage(e.target.value)}

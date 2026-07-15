@@ -42,7 +42,7 @@ const getIO = () => {
   return io;
 };
 
-const emitTenantEvent = (tenantId, event, payload) => {
+const emitCompanyEvent = (event, payload) => {
   if (io) {
     io.to('walktheplan').emit(event, payload);
   }
@@ -63,6 +63,6 @@ const emitUserEvent = (userId, event, payload) => {
 module.exports = {
   initSocket,
   getIO,
-  emitTenantEvent,
+  emitCompanyEvent,
   emitUserEvent
 };

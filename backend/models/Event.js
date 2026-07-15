@@ -152,6 +152,30 @@ const eventSchema = new mongoose.Schema(
   }
 );
 
+// Sync Event startTime back to Lead.showroomBookingSlot if linked to a Lead as a showroom meeting
+eventSchema.pre('save', async function (next) {
+  if (this.isModified('startTime') && this.type === 'meeting' && this.relatedTo && this.relatedTo.module === 'Lead' && this.relatedTo.recordId) {
+    const Lead = mongoose.model('Lead');
+    const lead = await Lead.findById(this.relatedTo.recordId);
+    if (lead) {
+      const newTime = new Date(this.startTime);
+      if (!lead.showroomBookingSlot || lead.showroomBookingSlot.getTime() !== newTime.getTime()) {
+        // Use updateOne to bypass pre-save hooks on Lead and prevent infinite loops
+        await Lead.updateOne(
+          { _id: this.relatedTo.recordId },
+          {
+            $set: {
+              showroomBookingSlot: newTime,
+              showroomMeetingId: this._id
+            }
+          }
+        );
+      }
+    }
+  }
+  next();
+});
+
 // Performance compound index matching query patterns
 eventSchema.index({ assignedTo: 1, startTime: 1 });
 

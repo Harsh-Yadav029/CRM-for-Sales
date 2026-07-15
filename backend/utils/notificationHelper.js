@@ -4,7 +4,6 @@ const { emitUserEvent } = require('./socket');
 /**
  * Creates a database notification and broadcasts it in real-time if the user is online.
  * @param {Object} params - Notification parameters
- * @param {string} params.tenantId - Tenant ID scoping the alert
  * @param {string} params.userId - Recipient user ID
  * @param {string} params.title - Alert header
  * @param {string} params.message - Alert content

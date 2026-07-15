@@ -95,6 +95,11 @@ const leadSchema = new mongoose.Schema(
       enum: ['Pending', 'In Progress', 'Approved', 'Rejected'],
       default: 'Pending'
     },
+    showroomMeetingId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Event',
+      default: null
+    },
     customFields: {
       type: Map,
       of: mongoose.Schema.Types.Mixed,
@@ -106,6 +111,50 @@ const leadSchema = new mongoose.Schema(
     timestamps: true
   }
 );
+
+// Auto-create/update showroom meeting Event when showroomBookingSlot is modified
+leadSchema.pre('save', async function (next) {
+  if (this.isModified('showroomBookingSlot')) {
+    const Event = mongoose.model('Event');
+    if (this.showroomBookingSlot) {
+      const newStart = new Date(this.showroomBookingSlot);
+      const newEnd = new Date(newStart.getTime() + 60 * 60 * 1000); // 1 hour duration
+
+      if (this.showroomMeetingId) {
+        // Use updateOne to bypass pre-save hooks on Event and prevent infinite loops
+        await Event.updateOne(
+          { _id: this.showroomMeetingId },
+          {
+            $set: {
+              startTime: newStart,
+              endTime: newEnd
+            }
+          }
+        );
+      } else {
+        // Create new Event
+        const newStart = new Date(this.showroomBookingSlot);
+        const newEnd = new Date(newStart.getTime() + 60 * 60 * 1000);
+        const newEvent = await Event.create({
+          type: 'meeting',
+          title: `Showroom Meeting - ${this.name}`,
+          startTime: newStart,
+          endTime: newEnd,
+          relatedTo: { module: 'Lead', recordId: this._id },
+          assignedTo: this.assignedTo || (await mongoose.model('User').findOne({}))?._id
+        });
+        this.showroomMeetingId = newEvent._id;
+      }
+    } else {
+      // Slot set to null - delete the event if it exists
+      if (this.showroomMeetingId) {
+        await Event.deleteOne({ _id: this.showroomMeetingId });
+        this.showroomMeetingId = null;
+      }
+    }
+  }
+  next();
+});
 
 // Performance compound indexes
 leadSchema.index({ createdAt: -1 });

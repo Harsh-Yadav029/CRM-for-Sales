@@ -2,7 +2,7 @@ const Lead = require('../models/Lead');
 const User = require('../models/User');
 const { buildLeadSharingQuery } = require('../utils/sharingRules');
 const { enqueueAutomationJob } = require('../utils/automationQueue');
-const { emitTenantEvent } = require('../utils/socket');
+const { emitCompanyEvent } = require('../utils/socket');
 
 const getLeads = async (req, res, next) => {
   try {
@@ -70,7 +70,7 @@ const createLead = async (req, res, next) => {
     const lead = await Lead.create(leadData);
 
     // Broadcast live event to organization
-    emitTenantEvent('walktheplan', 'lead_created', lead);
+    emitCompanyEvent('lead_created', lead);
 
     // Enqueue automation task to run in background
     await enqueueAutomationJob('RUN_AUTOMATION', { leadId: lead._id }, req.user._id);
@@ -130,7 +130,7 @@ const updateLead = async (req, res, next) => {
     const updatedLead = await lead.save();
     
     // Broadcast live event to organization
-    emitTenantEvent('walktheplan', 'lead_updated', updatedLead);
+    emitCompanyEvent('lead_updated', updatedLead);
 
     // Enqueue automation task to run in background
     await enqueueAutomationJob('RUN_AUTOMATION', { leadId: updatedLead._id }, req.user._id);
@@ -150,8 +150,8 @@ const deleteLead = async (req, res, next) => {
       return next(new Error('Lead not found'));
     }
 
-    // Broadcast live delete event to organization
-    emitTenantEvent('walktheplan', 'lead_deleted', { id: lead._id });
+    // Broadcast live event to organization
+    emitCompanyEvent('lead_deleted', { id: lead._id });
 
     res.json({ message: 'Lead removed successfully' });
   } catch (error) {
@@ -182,7 +182,7 @@ const assignLead = async (req, res, next) => {
     const updatedLead = await lead.save();
 
     // Broadcast live event to organization
-    emitTenantEvent('walktheplan', 'lead_updated', updatedLead);
+    emitCompanyEvent('lead_updated', updatedLead);
 
     res.json(updatedLead);
   } catch (error) {
@@ -210,7 +210,7 @@ const updateLeadStatus = async (req, res, next) => {
     const updatedLead = await lead.save();
     
     // Broadcast live event to organization
-    emitTenantEvent('walktheplan', 'lead_updated', updatedLead);
+    emitCompanyEvent('lead_updated', updatedLead);
 
     // Enqueue automation task to run in background
     await enqueueAutomationJob('RUN_AUTOMATION', { leadId: updatedLead._id }, req.user._id);
@@ -249,7 +249,7 @@ const addLeadNote = async (req, res, next) => {
       .populate('notes.addedBy', 'name');
 
     // Broadcast live event to organization
-    emitTenantEvent('walktheplan', 'lead_updated', updatedLead);
+    emitCompanyEvent('lead_updated', updatedLead);
 
     res.status(201).json(updatedLead);
   } catch (error) {
@@ -309,7 +309,7 @@ const importLeads = async (req, res, next) => {
 
     // Enqueue automations & Emit socket events
     for (const createdLead of createdLeads) {
-      emitTenantEvent('walktheplan', 'lead_created', createdLead);
+      emitCompanyEvent('lead_created', createdLead);
       await enqueueAutomationJob('RUN_AUTOMATION', { leadId: createdLead._id }, req.user._id);
     }
 

@@ -7,7 +7,7 @@ const { pushEventToExternalCalendar } = require('../services/nylasCalendarSync')
 // @access  Private
 const getEvents = async (req, res, next) => {
   try {
-    // buildLeadSharingQuery returns filters on { tenantId, assignedTo }
+    // buildLeadSharingQuery returns role-based filters on { assignedTo } (admin sees all, manager sees subordinates, rep sees own)
     const query = await buildLeadSharingQuery(req);
 
     if (req.query.from && req.query.to) {

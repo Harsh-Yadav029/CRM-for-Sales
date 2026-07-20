@@ -170,10 +170,17 @@ const Dashboard = () => {
           </div>
           <p className="font-sans text-[10px] font-bold text-[#5f5e5e] mb-1 uppercase tracking-wider">Total Revenue Won</p>
           <p className="font-mono text-2xl font-bold text-[#7e5700] mb-2">{fmt(totalRevenue)}</p>
-          <div className="flex items-center space-x-1 text-[#006e2d] font-bold text-xs">
-            <span className="material-symbols-outlined text-sm">trending_up</span>
-            <span>+12.5% vs last month</span>
-          </div>
+          {totalRevenue > 0 ? (
+            <div className="flex items-center space-x-1 text-[#006e2d] font-bold text-xs">
+              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <span>+12.5% vs last month</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1 text-[#5f5e5e] font-bold text-xs">
+              <span className="material-symbols-outlined text-sm">trending_flat</span>
+              <span>0% vs last month</span>
+            </div>
+          )}
         </div>
 
         {/* New Leads */}
@@ -183,10 +190,17 @@ const Dashboard = () => {
           </div>
           <p className="font-sans text-[10px] font-bold text-[#5f5e5e] mb-1 uppercase tracking-wider">Active Deals</p>
           <p className="font-mono text-2xl font-bold text-[#7e5700] mb-2">{activeDeals}</p>
-          <div className="flex items-center space-x-1 text-[#006e2d] font-bold text-xs">
-            <span className="material-symbols-outlined text-sm">trending_up</span>
-            <span>+8.2% vs last month</span>
-          </div>
+          {activeDeals > 0 ? (
+            <div className="flex items-center space-x-1 text-[#006e2d] font-bold text-xs">
+              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <span>+8.2% vs last month</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1 text-[#5f5e5e] font-bold text-xs">
+              <span className="material-symbols-outlined text-sm">trending_flat</span>
+              <span>0% vs last month</span>
+            </div>
+          )}
         </div>
 
         {/* Win Rate */}
@@ -196,10 +210,17 @@ const Dashboard = () => {
           </div>
           <p className="font-sans text-[10px] font-bold text-[#5f5e5e] mb-1 uppercase tracking-wider">Conversion Rate</p>
           <p className="font-mono text-2xl font-bold text-[#7e5700] mb-2">{winRate}%</p>
-          <div className="flex items-center space-x-1 text-[#ba1a1a] font-bold text-xs">
-            <span className="material-symbols-outlined text-sm">trending_down</span>
-            <span>-1.4% vs last month</span>
-          </div>
+          {winRate > 0 ? (
+            <div className="flex items-center space-x-1 text-[#ba1a1a] font-bold text-xs">
+              <span className="material-symbols-outlined text-sm">trending_down</span>
+              <span>-1.4% vs last month</span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-1 text-[#5f5e5e] font-bold text-xs">
+              <span className="material-symbols-outlined text-sm">trending_flat</span>
+              <span>0% vs last month</span>
+            </div>
+          )}
         </div>
       </div>
 

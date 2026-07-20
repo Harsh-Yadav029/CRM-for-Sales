@@ -22,14 +22,12 @@ const {
   resetPasswordSchema 
 } = require('../validators/authValidator');
 
-// Apply rate limiting to all auth endpoints
-router.use(authRateLimiter);
-
-router.post('/register', validate(registerSchema), registerUser);
-router.post('/login', validate(loginSchema), loginUser);
-router.post('/forgot-password', validate(forgotPasswordSchema), forgotPassword);
-router.post('/reset-password', validate(resetPasswordSchema), resetPassword);
-router.post('/google-login', googleLogin);
+// Apply rate limiting only to sensitive authentication endpoints
+router.post('/register', authRateLimiter, validate(registerSchema), registerUser);
+router.post('/login', authRateLimiter, validate(loginSchema), loginUser);
+router.post('/forgot-password', authRateLimiter, validate(forgotPasswordSchema), forgotPassword);
+router.post('/reset-password', authRateLimiter, validate(resetPasswordSchema), resetPassword);
+router.post('/google-login', authRateLimiter, googleLogin);
 router.post('/refresh', refreshAccessToken);
 router.post('/logout', logoutUser);
 

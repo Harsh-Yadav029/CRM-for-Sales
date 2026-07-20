@@ -61,19 +61,8 @@ const Login = () => {
       localStorage.setItem('user', JSON.stringify(data));
       window.location.href = '/';
     } catch (err) {
-      console.warn("Firebase Auth failed or is unconfigured. Running Google Sandbox Login...");
-      try {
-        const { data } = await api.post('/api/auth/google-login', { 
-          idToken: 'mock_google_id_token',
-          email: 'google-sandbox@company.com',
-          name: 'Google Sandbox Admin'
-        });
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data));
-        window.location.href = '/';
-      } catch (innerErr) {
-        setError(innerErr.response?.data?.message || 'Google Authentication failed.');
-      }
+      console.error("Google Auth error:", err);
+      setError(err.response?.data?.message || 'Google Authentication failed.');
     } finally {
       setLoading(false);
     }

@@ -47,7 +47,6 @@ const Sidebar = () => {
         </div>
         <div>
           <h1 className="font-display text-sm font-black text-[#7e5700] uppercase tracking-wide">Walk The Plan</h1>
-          <p className="text-[10px] text-[#5f5e5e] font-bold uppercase tracking-wider font-mono">Compass AI</p>
         </div>
       </div>
 

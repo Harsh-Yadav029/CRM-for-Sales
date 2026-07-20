@@ -49,7 +49,7 @@ const handleOutboundCall = async (req, res, next) => {
 
     const dial = response.dial({
       record: 'record-from-answer',
-      callerId: process.env.TWILIO_NUMBER || '+1234567890',
+      callerId: process.env.TWILIO_NUMBER || process.env.TWILIO_PHONE_NUMBER || '+1234567890',
       statusCallback: statusCallbackUrl,
       statusCallbackMethod: 'POST',
       recordingStatusCallback: recordingCallbackUrl,

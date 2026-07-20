@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const AuditLog = require('../models/AuditLog');
 
 /**
@@ -35,13 +36,15 @@ const auditLogMiddleware = (moduleName) => {
             delete changes.password;
             delete changes.token;
 
+            const validTargetId = targetId && mongoose.isValidObjectId(targetId) ? targetId : null;
+
             await AuditLog.create({
-              userId: actorId,
+              changedBy: actorId,
               action,
-              module: moduleName,
-              targetId: targetId || null,
-              changes: req.method === 'DELETE' ? { deleted: true } : changes,
-              ipAddress: req.ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress
+              resourceType: moduleName,
+              targetId: validTargetId,
+              newValue: req.method === 'DELETE' ? { deleted: true } : changes,
+              oldValue: null
             });
           }
         } catch (err) {

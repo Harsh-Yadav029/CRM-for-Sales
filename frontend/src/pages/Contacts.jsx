@@ -198,16 +198,9 @@ const Contacts = () => {
                 <h3 className="mt-4 text-sm font-display font-black text-ink uppercase tracking-tight leading-snug">
                   {cont.firstName} {cont.lastName}
                 </h3>
-                <p className="text-[10px] text-gold font-bold font-mono uppercase tracking-wider mt-1">{cont.title || 'Representative'}</p>
 
                 {/* Sub details stack - NO icons row, clean stacked texts */}
                 <div className="mt-4 space-y-2.5 border-t border-line pt-3.5 text-xs">
-                  {cont.companyId && (
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider font-mono">Company</span>
-                      <span className="font-semibold text-ink mt-0.5 truncate">{cont.companyId?.name || 'Linked Account'}</span>
-                    </div>
-                  )}
                   <div className="flex flex-col">
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider font-mono">Email</span>
                     <span className="font-medium text-slate-600 mt-0.5 truncate">{cont.email}</span>
@@ -270,14 +263,6 @@ const Contacts = () => {
               </div>
 
               <Input
-                label="Job Title"
-                id="formTitle"
-                placeholder="e.g. Chief Purchasing Officer"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-              />
-
-              <Input
                 label="Email Address *"
                 id="formEmail"
                 type="email"
@@ -293,17 +278,6 @@ const Contacts = () => {
                 placeholder="e.g. +91 98765 43210"
                 value={form.phone}
                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-
-              <Select
-                label="Associated Company"
-                id="formCompany"
-                value={form.companyId}
-                onChange={(e) => setForm({ ...form, companyId: e.target.value })}
-                options={[
-                  { value: '', label: 'None (Individual Contact)' },
-                  ...companies.map(c => ({ value: c._id, label: c.name }))
-                ]}
               />
 
               {(user?.role === 'admin' || user?.role === 'manager') && (

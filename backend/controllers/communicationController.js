@@ -1,8 +1,22 @@
 const crypto = require('crypto');
 const twilio = require('twilio');
+const Nylas = require('nylas');
 const Lead = require('../models/Lead');
 const WebhookEvent = require('../models/WebhookEvent');
 const { isDuplicateEvent, verifyNylasSignature, verifyTwilioSignature } = require('../middleware/webhookVerify');
+
+let nylasClient = null;
+if (process.env.NYLAS_API_KEY) {
+  try {
+    const NylasConfig = Nylas.default || Nylas;
+    nylasClient = new NylasConfig({
+      apiKey: process.env.NYLAS_API_KEY,
+      apiUri: 'https://api.us.nylas.com'
+    });
+  } catch (err) {
+    console.error('Failed to initialize Nylas SDK client:', err.message);
+  }
+}
 
 // @desc    Send outgoing email to a lead & log to timeline
 // @route   POST /api/communication/email
@@ -38,12 +52,33 @@ const sendEmail = async (req, res, next) => {
 
     await lead.save();
 
+    // Send real email via Nylas if configured
+    let dispatchedReal = false;
+    if (nylasClient && process.env.NYLAS_GRANT_ID) {
+      try {
+        await nylasClient.messages.send({
+          identifier: process.env.NYLAS_GRANT_ID,
+          requestBody: {
+            to: [{ email: lead.email, name: lead.name || 'Lead' }],
+            subject: subject,
+            body: body
+          }
+        });
+        dispatchedReal = true;
+        console.log(`[Nylas] Real email sent to ${lead.email} using Grant ID.`);
+      } catch (nylasErr) {
+        console.error('[Nylas] Outbound email dispatch failed:', nylasErr.message);
+      }
+    }
+
     const updatedLead = await Lead.findById(leadId)
       .populate('assignedTo', 'name email')
       .populate('notes.addedBy', 'name');
 
     res.status(201).json({
-      message: 'Email dispatched successfully (Simulated)',
+      message: dispatchedReal 
+        ? 'Email dispatched successfully via Nylas' 
+        : 'Email dispatched successfully (Simulated)',
       lead: updatedLead
     });
   } catch (error) {

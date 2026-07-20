@@ -53,7 +53,7 @@ const Leads = () => {
   
   const [form, setForm] = useState({
     name: '',
-    company: '',
+    company: 'Individual',
     email: '',
     phone: '',
     source: 'Website',
@@ -104,7 +104,7 @@ const Leads = () => {
     setEditing(null);
     setForm({
       name: '',
-      company: '',
+      company: 'Individual',
       email: '',
       phone: '',
       source: 'Website',
@@ -379,16 +379,7 @@ const Leads = () => {
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-                <Input
-                  label="Company Name"
-                  id="formCompany"
-                  placeholder="Quantum Systems"
-                  required
-                  value={form.company}
-                  onChange={(e) => setForm({ ...form, company: e.target.value })}
-                />
-                <Input
+                />                <Input
                   label="Email Address"
                   id="formEmail"
                   type="email"

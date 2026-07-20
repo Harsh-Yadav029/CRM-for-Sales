@@ -12,12 +12,12 @@ const auditLogSchema = new mongoose.Schema(
     },
     targetId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true
+      required: false
     },
     changedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true
+      required: false
     },
     oldValue: {
       type: mongoose.Schema.Types.Mixed,

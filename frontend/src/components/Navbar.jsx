@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { Search, Bell, Calendar, User } from 'lucide-react';
+import { Search, Bell, Calendar, User, HelpCircle, Settings } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 
 const Navbar = ({ title }) => {
-  const { user } = { user: JSON.parse(localStorage.getItem('user')) }; // Fallback/direct read or context
+  const { user } = { user: JSON.parse(localStorage.getItem('user')) };
   const { user: authUser } = useAuth();
   const activeUser = authUser || user;
   
@@ -29,106 +29,74 @@ const Navbar = ({ title }) => {
   }, []);
 
   return (
-    <header className="w-full h-16 sticky top-0 z-40 bg-white border-b border-line flex items-center justify-between px-6 transition-all duration-200">
-      {/* Left section: Branding on mobile, Page Title on desktop */}
-      <div className="flex items-center gap-3">
-        {/* Mobile branding */}
-        <div className="flex md:hidden items-center gap-2">
-          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center shadow-md">
-            <img src="/1.png" alt="Walk The Plan Logo" className="w-full h-full object-cover" />
-          </div>
-          <h1 className="font-display text-ink uppercase font-black text-xs tracking-wider">Walk The Plan</h1>
-        </div>
-        
-        {/* Desktop Title */}
-        <h1 className="hidden md:block text-base font-display font-black text-ink uppercase tracking-tight">
-          {title || 'Home'}
-        </h1>
+    <header className="w-full h-16 bg-white border-b border-[#e7e2d8] flex justify-between items-center px-8 sticky top-0 z-40 select-none">
+      {/* Search Input Bar (Capsule style) */}
+      <div 
+        onClick={() => setIsSearchOpen(true)}
+        className="flex items-center bg-[#f8f3e9] border border-[#e7e2d8] rounded-full px-4 py-1.5 w-96 cursor-pointer hover:brightness-98 transition-all"
+      >
+        <Search size={16} className="text-[#5f5e5e] mr-2" />
+        <span className="text-xs text-[#5f5e5e] font-medium">Search contacts, leads, or deals...</span>
       </div>
 
-      {/* Right section: Search & Actions */}
-      <div className="flex items-center gap-4 relative">
-        <div 
-          onClick={() => setIsSearchOpen(true)}
-          className="flex items-center bg-[#F1F3F6] border border-transparent hover:border-line rounded-lg px-3 py-1.5 w-44 sm:w-60 cursor-pointer transition-all select-none"
-        >
-          <div className="flex items-center gap-2 text-slate-400">
-            <Search size={14} className="stroke-[2.5]" />
-            <span className="text-[11px] font-bold text-slate-500/80">Search records</span>
-          </div>
+      <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+
+      {/* Right User Actions */}
+      <div className="flex items-center space-x-6">
+        <div className="flex items-center space-x-4 text-[#5f5e5e]">
+          <button 
+            onClick={() => setShowNotifications(!showNotifications)} 
+            className="hover:text-[#7e5700] transition-colors relative"
+          >
+            <Bell size={18} />
+            {notifications.length > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#e3a62f] border border-white" />
+            )}
+          </button>
+          <button onClick={() => navigate('/calendar')} className="hover:text-[#7e5700] transition-colors">
+            <Calendar size={18} />
+          </button>
+          <button onClick={() => navigate('/settings')} className="hover:text-[#7e5700] transition-colors">
+            <Settings size={18} />
+          </button>
         </div>
 
-        {/* Global Search Overlay */}
-        <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-
-        {/* Action icons */}
-        <div className="flex items-center gap-2">
-          {/* Calendar scheduler option */}
-          <button 
-            onClick={() => navigate('/calendar')}
-            className="p-2 text-slate-400 hover:text-ink hover:bg-[#F1F3F6] rounded-lg transition-all"
-            title="Calendar"
-          >
-            <Calendar size={16} />
-          </button>
-
-          {/* Notifications bell button */}
-          <div className="relative">
-            <button 
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="p-2 text-slate-400 hover:text-ink hover:bg-[#F1F3F6] rounded-lg transition-all relative"
-              title="Notifications"
-            >
-              <Bell size={16} />
-              {notifications.length > 0 && (
-                <span className="absolute top-1 right-1.5 w-2 h-2 rounded-full bg-gold border border-white" />
-              )}
-            </button>
-
-            {/* Notification dropdown popover */}
-            {showNotifications && (
-              <div className="absolute right-0 mt-2 w-64 bg-white border border-line rounded-modal shadow-modal p-4 space-y-3 z-50">
-                <div className="flex justify-between items-center border-b border-line pb-2">
-                  <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 font-mono">Notifications</h4>
-                  <button 
-                    onClick={() => setNotifications([])} 
-                    className="text-[9px] text-gold hover:underline font-bold uppercase font-mono"
-                  >
-                    Clear All
-                  </button>
-                </div>
-                {notifications.length === 0 ? (
-                  <p className="text-[10px] text-slate-400 italic text-center py-2">No new notifications</p>
-                ) : (
-                  <div className="space-y-2.5 max-h-48 overflow-y-auto custom-scroll">
-                    {notifications.map((n) => (
-                      <div key={n.id} className="text-[10px] text-ink font-medium leading-relaxed">
-                        <p>{n.text}</p>
-                        <span className="text-[9px] text-slate-400 font-mono font-bold uppercase">{n.time}</span>
-                      </div>
-                    ))}
+        {/* Notifications Dropdown */}
+        {showNotifications && (
+          <div className="absolute right-24 mt-48 w-64 bg-white border border-[#e7e2d8] rounded-xl shadow-lg p-4 space-y-3 z-50">
+            <div className="flex justify-between items-center border-b border-[#e7e2d8] pb-2">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-[#5f5e5e] font-mono">Notifications</h4>
+              <button 
+                onClick={() => setNotifications([])} 
+                className="text-[9px] text-[#e3a62f] hover:underline font-bold uppercase font-mono"
+              >
+                Clear All
+              </button>
+            </div>
+            {notifications.length === 0 ? (
+              <p className="text-[10px] text-slate-400 italic text-center py-2">No new notifications</p>
+            ) : (
+              <div className="space-y-2.5 max-h-48 overflow-y-auto custom-scroll">
+                {notifications.map((n) => (
+                  <div key={n.id} className="text-[10px] text-[#1d1c16] font-medium leading-relaxed">
+                    <p>{n.text}</p>
+                    <span className="text-[9px] text-slate-400 font-mono font-bold uppercase">{n.time}</span>
                   </div>
-                )}
+                ))}
               </div>
             )}
           </div>
-        </div>
+        )}
 
-        {/* Profile Avatar & Navigation Link */}
-        <div className="flex items-center gap-2 pl-2 border-l border-line">
-          <button 
-            onClick={() => navigate('/settings')}
-            className="flex items-center gap-2 text-left hover:opacity-85 transition-opacity"
-            title="Profile & Settings"
-          >
-            <div className="w-8 h-8 rounded-full bg-gold text-ink flex items-center justify-center font-black font-display text-xs border border-gold/20 shadow-sm">
-              {activeUser?.name?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <div className="hidden lg:block select-none leading-none">
-              <p className="text-xs font-bold text-ink leading-none">{activeUser?.name?.split(' ')[0]}</p>
-              <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider font-mono mt-0.5">{activeUser?.role || 'User'}</p>
-            </div>
-          </button>
+        {/* Profile Info */}
+        <div className="flex items-center space-x-3 border-l border-[#e7e2d8] pl-6">
+          <div className="text-right">
+            <p className="text-xs font-bold text-[#1d1c16]">{activeUser?.name || 'Alex Mercer'}</p>
+            <p className="text-[9px] text-[#5f5e5e] font-bold uppercase tracking-wider font-mono">{activeUser?.role || 'Executive VP'}</p>
+          </div>
+          <div className="w-10 h-10 rounded-full border-2 border-[#e3a62f] bg-[#e3a62f] text-[#5b3e00] flex items-center justify-center font-black text-sm shadow-sm">
+            {activeUser?.name?.charAt(0).toUpperCase() || 'U'}
+          </div>
         </div>
       </div>
     </header>

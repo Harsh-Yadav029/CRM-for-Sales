@@ -4,7 +4,22 @@ const Invite = require('../models/Invite');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: '15m'
+  });
+};
+
+const generateRefreshToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET, {
     expiresIn: '7d'
+  });
+};
+
+const setRefreshTokenCookie = (res, token) => {
+  res.cookie('refreshToken', token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   });
 };
 
@@ -71,6 +86,9 @@ const registerUser = async (req, res, next) => {
       reportsTo: inviteReportsTo
     });
 
+    const refreshToken = generateRefreshToken(user._id);
+    setRefreshTokenCookie(res, refreshToken);
+
     res.status(201).json({
       _id: user._id,
       name: user.name,
@@ -105,6 +123,9 @@ const loginUser = async (req, res, next) => {
       user.loginAttempts = 0;
       user.lockUntil = null;
       await user.save();
+
+      const refreshToken = generateRefreshToken(user._id);
+      setRefreshTokenCookie(res, refreshToken);
 
       res.json({
         _id: user._id,
@@ -256,6 +277,9 @@ const googleLogin = async (req, res, next) => {
       });
     }
 
+    const refreshToken = generateRefreshToken(user._id);
+    setRefreshTokenCookie(res, refreshToken);
+
     res.status(200).json({
       _id: user._id,
       name: user.name,
@@ -268,6 +292,40 @@ const googleLogin = async (req, res, next) => {
   }
 };
 
+const refreshAccessToken = async (req, res, next) => {
+  const refreshToken = req.cookies?.refreshToken;
+  
+  if (!refreshToken) {
+    res.status(401);
+    return next(new Error('No refresh token provided'));
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      res.status(401);
+      return next(new Error('User not found'));
+    }
+
+    const accessToken = generateToken(user._id);
+    res.json({ token: accessToken });
+  } catch (err) {
+    res.status(401);
+    next(new Error('Invalid refresh token'));
+  }
+};
+
+const logoutUser = async (req, res, next) => {
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
+  res.json({ message: 'Logged out successfully' });
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -275,5 +333,7 @@ module.exports = {
   resetPassword,
   getUserProfile,
   getSalespeople,
-  googleLogin
+  googleLogin,
+  refreshAccessToken,
+  logoutUser
 };

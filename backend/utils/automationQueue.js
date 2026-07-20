@@ -46,12 +46,20 @@ try {
 function initializeBullMQ() {
   automationQueue = new Queue('automationQueue', { connection: redisConnection });
 
+  automationQueue.on('error', (err) => {
+    console.warn('[BullMQ Queue] Connection error:', err.message);
+  });
+
   // Initialize Worker
   const worker = new Worker('automationQueue', async (job) => {
     const { type, data, actorId } = job.data;
     console.log(`[BullMQ Worker] Processing job ${job.id} of type ${type}`);
     await processJobLogic(type, data, actorId);
   }, { connection: redisConnection });
+
+  worker.on('error', (err) => {
+    console.warn('[BullMQ Worker] Connection error:', err.message);
+  });
 
   worker.on('failed', (job, err) => {
     console.error(`[BullMQ Worker] Job ${job.id} failed:`, err);

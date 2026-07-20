@@ -43,6 +43,20 @@ app.use(express.json({
 }));
 app.use(express.urlencoded({ extended: true }));
 
+// Custom Cookie Parser Middleware
+app.use((req, res, next) => {
+  const list = {};
+  const cookieHeader = req.headers.cookie;
+  if (cookieHeader) {
+    cookieHeader.split(';').forEach((cookie) => {
+      const parts = cookie.split('=');
+      list[parts.shift().trim()] = decodeURI(parts.join('='));
+    });
+  }
+  req.cookies = list;
+  next();
+});
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,

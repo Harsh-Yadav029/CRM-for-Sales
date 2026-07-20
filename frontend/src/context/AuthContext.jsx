@@ -21,6 +21,16 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
           console.error('Failed to sync profile:', err);
         }
+      } else {
+        try {
+          const res = await api.post('/api/auth/refresh');
+          localStorage.setItem('token', res.data.token);
+          const profileRes = await api.get('/api/auth/profile');
+          setUser(profileRes.data);
+          localStorage.setItem('user', JSON.stringify(profileRes.data));
+        } catch (err) {
+          console.log('No active session found.');
+        }
       }
       setLoading(false);
     };
@@ -43,7 +53,12 @@ export const AuthProvider = ({ children }) => {
     return userProfile;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await api.post('/api/auth/logout');
+    } catch (err) {
+      console.error('Failed to logout on server:', err);
+    }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);

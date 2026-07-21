@@ -22,15 +22,15 @@ jobs:
 
     - name: Install & Compile Root Workspace
       run: |
-        npm ci
-        
+        npm install
+
     - name: Verify Backend Compilation
       run: |
         cd backend
-        npm ci
-        
+        npm install
+
     - name: Verify Frontend Compilation & Build
       run: |
         cd frontend
-        npm ci
+        npm install
         npm run build

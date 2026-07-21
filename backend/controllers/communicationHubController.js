@@ -13,6 +13,20 @@ const Notification = require('../models/Notification');
 const User = require('../models/User');
 const Lead = require('../models/Lead');
 const { emitUserEvent } = require('../utils/socket');
+const Nylas = require('nylas');
+
+let nylasClient = null;
+if (process.env.NYLAS_API_KEY) {
+  try {
+    const NylasConfig = Nylas.default || Nylas;
+    nylasClient = new NylasConfig({
+      apiKey: process.env.NYLAS_API_KEY,
+      apiUri: 'https://api.us.nylas.com'
+    });
+  } catch (err) {
+    console.error('Failed to initialize Nylas SDK client in Hub:', err.message);
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HELPERS
@@ -170,6 +184,23 @@ const sendEmail = async (req, res, next) => {
       activityType: 'Email Sent',
       description: `Outbound email dispatched to ${receiver}: "${subject}"`
     });
+
+    // Dispatch real outbound email via Nylas SDK if configured
+    if (nylasClient && process.env.NYLAS_GRANT_ID && receiver) {
+      try {
+        await nylasClient.messages.send({
+          identifier: process.env.NYLAS_GRANT_ID,
+          requestBody: {
+            to: [{ email: receiver }],
+            subject: subject,
+            body: body
+          }
+        });
+        console.log(`[Nylas Hub] Real outbound email dispatched to ${receiver}`);
+      } catch (nylasErr) {
+        console.error('[Nylas Hub] Outbound email dispatch error:', nylasErr.message);
+      }
+    }
 
     // Update AI Summary
     await updateAISummaryStats(emailRecord.clientId, emailRecord.clientType, {

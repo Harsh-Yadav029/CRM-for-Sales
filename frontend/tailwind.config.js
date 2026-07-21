@@ -44,6 +44,8 @@ export default {
         display: ['"Plus Jakarta Sans"', 'sans-serif'],
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
+        montserrat: ['"Montserrat"', 'sans-serif'],
+        accent: ['"Montserrat"', 'sans-serif'],
       },
       borderRadius: {
         btn: "10px",

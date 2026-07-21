@@ -19,7 +19,7 @@ const noteSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['note', 'call', 'email'],
+      enum: ['note', 'call', 'email', 'sms'],
       default: 'note'
     },
     subject: {

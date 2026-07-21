@@ -127,15 +127,101 @@ const logCall = async (req, res, next) => {
   }
 };
 
-// @desc    Simulate fetching Twilio Capability Token
+// @desc    Generate real Twilio Voice Access Token for browser client
 // @route   GET /api/communication/twilio-token
 // @access  Private
 const getTwilioToken = async (req, res, next) => {
   try {
-    const mockToken = 'mock_twilio_token_' + Math.random().toString(36).substring(2);
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const apiKey = process.env.TWILIO_API_KEY;
+    const apiSecret = process.env.TWILIO_API_SECRET;
+    const twimlAppSid = process.env.TWILIO_TWIML_APP_SID;
+
+    if (!accountSid || !apiKey || !apiSecret || !twimlAppSid) {
+      return next(new Error('Twilio Voice environment variables are missing'));
+    }
+
+    const AccessToken = twilio.jwt.AccessToken;
+    const VoiceGrant = AccessToken.VoiceGrant;
+
+    const identity = req.user.email.replace(/[^a-zA-Z0-9_]/g, '_');
+    const token = new AccessToken(accountSid, apiKey, apiSecret, { identity, ttl: 14400 });
+
+    const voiceGrant = new VoiceGrant({
+      outgoingApplicationSid: twimlAppSid,
+      incomingAllow: true
+    });
+
+    token.addGrant(voiceGrant);
+
     res.json({
-      token: mockToken,
-      identity: req.user.email
+      token: token.toJwt(),
+      identity
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Send real SMS text message via Twilio API
+// @route   POST /api/communication/sms
+// @access  Private
+const sendSMS = async (req, res, next) => {
+  const { leadId, to, message } = req.body;
+
+  try {
+    const lead = await Lead.findById(leadId);
+    if (!lead) {
+      res.status(404);
+      return next(new Error('Lead not found'));
+    }
+
+    let rawPhone = to || lead.phone;
+    if (!rawPhone || !message) {
+      res.status(400);
+      return next(new Error('Recipient phone and message body are required'));
+    }
+
+    // Sanitize phone number format (remove spaces, parentheses, dashes)
+    const recipientPhone = rawPhone.replace(/[\s\-\(\)]/g, '');
+
+    let twilioMsgSid = null;
+    let dispatched = false;
+
+    if (process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_PHONE_NUMBER) {
+      try {
+        const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+        const sent = await client.messages.create({
+          body: message,
+          from: process.env.TWILIO_PHONE_NUMBER,
+          to: recipientPhone
+        });
+        twilioMsgSid = sent.sid;
+        dispatched = true;
+        console.log(`[Twilio SMS] Real SMS sent to ${recipientPhone}. SID: ${sent.sid}`);
+      } catch (twErr) {
+        console.error('[Twilio SMS] Dispatch error:', twErr.message);
+      }
+    }
+
+    // Log SMS to lead timeline notes
+    lead.notes.push({
+      type: 'sms',
+      text: message,
+      status: dispatched ? 'sent' : 'failed',
+      addedBy: req.user._id
+    });
+
+    await lead.save();
+
+    const updatedLead = await Lead.findById(leadId)
+      .populate('assignedTo', 'name email')
+      .populate('notes.addedBy', 'name');
+
+    res.status(201).json({
+      message: dispatched ? 'SMS sent successfully via Twilio' : 'SMS logged (Simulated)',
+      sid: twilioMsgSid,
+      lead: updatedLead
     });
   } catch (error) {
     next(error);
@@ -272,42 +358,6 @@ const twilioWebhook = async (req, res, next) => {
   }
 };
 
-const sendSMS = async (req, res, next) => {
-  const { leadId, message } = req.body;
-
-  try {
-    const lead = await Lead.findById(leadId);
-    if (!lead) {
-      res.status(404);
-      return next(new Error('Lead not found'));
-    }
-
-    if (req.user.role === 'rep' && (!lead.assignedTo || lead.assignedTo.toString() !== req.user._id.toString())) {
-      res.status(403);
-      return next(new Error('Access denied'));
-    }
-
-    lead.notes.push({
-      type: 'note',
-      text: `[Outbound SMS] ${message}`,
-      status: 'completed',
-      addedBy: req.user._id
-    });
-
-    await lead.save();
-
-    const updatedLead = await Lead.findById(leadId)
-      .populate('assignedTo', 'name email')
-      .populate('notes.addedBy', 'name');
-
-    res.status(201).json({
-      message: 'SMS dispatched successfully (Simulated)',
-      lead: updatedLead
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 module.exports = {
   sendEmail,

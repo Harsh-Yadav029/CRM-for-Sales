@@ -21,7 +21,7 @@ const Settings = () => {
   const [workflows, setWorkflows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showPw, setShowPw] = useState(false);
-  const [regForm, setRegForm] = useState({ name: '', email: '', password: '', role: 'sales' });
+  const [regForm, setRegForm] = useState({ name: '', email: '', password: '', role: 'rep' });
   const [regLoading, setRegLoading] = useState(false);
   const [regMsg, setRegMsg] = useState('');
 
@@ -43,14 +43,14 @@ const Settings = () => {
   const fetchSettingsData = async () => {
     try {
       const fieldResponse = await api.get('/api/custom-fields');
-      setCustomFields(fieldResponse.data);
+      setCustomFields(Array.isArray(fieldResponse.data) ? fieldResponse.data : []);
       
       const workflowResponse = await api.get('/api/workflows');
-      setWorkflows(workflowResponse.data);
+      setWorkflows(Array.isArray(workflowResponse.data) ? workflowResponse.data : []);
 
       if (user?.role === 'admin' || user?.role === 'manager') {
         const teamResponse = await api.get('/api/users');
-        setSalespeople(teamResponse.data);
+        setSalespeople(Array.isArray(teamResponse.data) ? teamResponse.data : []);
       }
     } catch (e) {
       console.error('Error fetching settings configs:', e);
@@ -66,7 +66,7 @@ const Settings = () => {
   const handleUpdateTeammateStatus = async (id, isActive, role) => {
     try {
       const { data } = await api.put(`/api/users/${id}/status`, { isActive, role });
-      setSalespeople(prev => prev.map(s => s._id === id ? data : s));
+      setSalespeople(prev => (Array.isArray(prev) ? prev : []).map(s => s._id === id ? data : s));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update user status');
     }
@@ -79,9 +79,9 @@ const Settings = () => {
     try {
       await api.post('/api/auth/register', regForm);
       setRegMsg('User created successfully');
-      setRegForm({ name: '', email: '', password: '', role: 'sales' });
+      setRegForm({ name: '', email: '', password: '', role: 'rep' });
       const teamResponse = await api.get('/api/users');
-      setSalespeople(teamResponse.data);
+      setSalespeople(Array.isArray(teamResponse.data) ? teamResponse.data : []);
     } catch (err) {
       setRegMsg(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -332,7 +332,8 @@ const Settings = () => {
                         value={regForm.role}
                         onChange={(e) => setRegForm({ ...regForm, role: e.target.value })}
                         options={[
-                          { value: 'sales', label: 'Sales Executive' },
+                          { value: 'rep', label: 'Sales Executive (Rep)' },
+                          { value: 'manager', label: 'Sales Manager' },
                           { value: 'admin', label: 'Administrator' }
                         ]}
                       />

@@ -14,12 +14,18 @@ const validate = (schema) => {
       });
       next();
     } catch (error) {
+      if (error instanceof z.ZodError || error.errors) {
+        const errorMessages = (error.errors || []).map(err => err.message).join(', ');
+        return res.status(400).json({
+          message: errorMessages || 'Request payload validation failed',
+          errors: (error.errors || []).map(err => ({
+            path: Array.isArray(err.path) ? err.path.join('.') : '',
+            message: err.message
+          }))
+        });
+      }
       return res.status(400).json({
-        message: 'Request payload validation failed',
-        errors: error.errors.map(err => ({
-          path: err.path.join('.'),
-          message: err.message
-        }))
+        message: error.message || 'Request payload validation failed'
       });
     }
   };

@@ -5,7 +5,7 @@ const registerSchema = z.zodObject ? z.zodObject({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    role: z.enum(['admin', 'manager', 'rep']).optional(),
+    role: z.enum(['admin', 'manager', 'rep', 'sales']).optional(),
     tenantName: z.string().min(2, 'Organization name must be at least 2 characters').optional()
   })
 }) : z.object({
@@ -13,7 +13,7 @@ const registerSchema = z.zodObject ? z.zodObject({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    role: z.enum(['admin', 'manager', 'rep']).optional(),
+    role: z.enum(['admin', 'manager', 'rep', 'sales']).optional(),
     tenantName: z.string().min(2, 'Organization name must be at least 2 characters').optional()
   })
 });

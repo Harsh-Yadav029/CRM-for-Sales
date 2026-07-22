@@ -1,4 +1,5 @@
 import React from 'react';
+import { Loader2 } from 'lucide-react';
 
 const Button = ({
   children,
@@ -6,6 +7,7 @@ const Button = ({
   type = 'button',
   variant = 'primary', // primary, secondary, ghost, danger
   disabled = false,
+  loading = false,
   className = '',
   icon: Icon,
   ...props
@@ -23,11 +25,11 @@ const Button = ({
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={disabled || loading}
       className={`${baseClasses} ${variants[variant] || variants.primary} ${className}`}
       {...props}
     >
-      {Icon && <Icon size={14} className="shrink-0" />}
+      {loading ? <Loader2 size={14} className="animate-spin shrink-0" /> : (Icon && <Icon size={14} className="shrink-0" />)}
       {children}
     </button>
   );

@@ -16,7 +16,7 @@ router.route('/')
   .get(checkRole(['admin', 'manager']), getUsers);
 
 router.route('/:id/status')
-  .put(checkRole(['admin']), updateUserStatus);
+  .put(checkRole(['admin', 'manager']), updateUserStatus);
 
 router.route('/invites')
   .post(checkRole(['admin']), createInvite)

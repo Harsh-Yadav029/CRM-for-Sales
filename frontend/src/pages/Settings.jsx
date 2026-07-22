@@ -257,7 +257,7 @@ const Settings = () => {
                             <select
                               className="rounded-lg border border-line bg-white px-2 py-1 text-[10px] text-ink focus:outline-none disabled:opacity-75 font-mono font-bold uppercase tracking-wider"
                               value={s.role}
-                              disabled={user?.role !== 'admin' || s._id === user?._id}
+                              disabled={(user?.role !== 'admin' && user?.role !== 'manager') || s._id === user?._id}
                               onChange={(e) => handleUpdateTeammateStatus(s._id, s.isActive, e.target.value)}
                             >
                               <option value="rep">Rep</option>
@@ -270,7 +270,7 @@ const Settings = () => {
                                 type="checkbox"
                                 className="rounded border-line bg-white text-gold h-3.5 w-3.5"
                                 checked={s.isActive !== false}
-                                disabled={user?.role !== 'admin' || s._id === user?._id}
+                                disabled={(user?.role !== 'admin' && user?.role !== 'manager') || s._id === user?._id}
                                 onChange={(e) => handleUpdateTeammateStatus(s._id, e.target.checked, s.role)}
                               />
                               <span className="text-[9px] text-slate-500 font-bold uppercase font-mono">

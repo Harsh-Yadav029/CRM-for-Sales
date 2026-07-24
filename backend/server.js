@@ -23,23 +23,25 @@ app.use(mongoSanitize());
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  process.env.FRONTEND_URL,
-  process.env.FRONTEND_URL_ALT
+  'https://crm-for-sales-ten.vercel.app',
+  process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null,
+  process.env.FRONTEND_URL_ALT ? process.env.FRONTEND_URL_ALT.replace(/\/$/, '') : null
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (like mobile apps or curl)
-      // In production, strictly validate against allowedOrigins
-      // In development, allow all origins for convenience
       if (!origin) {
         return callback(null, true);
       }
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-      if (process.env.NODE_ENV !== 'production') {
+      const cleanOrigin = origin.replace(/\/$/, '');
+      if (
+        allowedOrigins.includes(cleanOrigin) ||
+        cleanOrigin.endsWith('.vercel.app') ||
+        cleanOrigin.includes('localhost') ||
+        process.env.NODE_ENV !== 'production'
+      ) {
         return callback(null, true);
       }
       return callback(new Error('Not allowed by CORS'));

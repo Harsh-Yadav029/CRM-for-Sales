@@ -9,7 +9,15 @@ let io = null;
 const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: '*', // Strict controls can be mapped using allowedOrigins if required
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        const clean = origin.replace(/\/$/, '');
+        if (clean.endsWith('.vercel.app') || clean.includes('localhost') || clean === process.env.FRONTEND_URL) {
+          callback(null, true);
+        } else {
+          callback(null, true); // Permissive socket connection fallback
+        }
+      },
       credentials: true
     }
   });

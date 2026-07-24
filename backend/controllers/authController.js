@@ -293,7 +293,19 @@ const googleLogin = async (req, res, next) => {
 };
 
 const refreshAccessToken = async (req, res, next) => {
-  const refreshToken = req.cookies?.refreshToken;
+  let refreshToken = req.cookies?.refreshToken || req.body?.refreshToken || req.headers['x-refresh-token'];
+
+  if (!refreshToken && req.headers.cookie) {
+    try {
+      const parsedCookies = Object.fromEntries(
+        req.headers.cookie.split(';').map(c => {
+          const [k, ...v] = c.trim().split('=');
+          return [k, decodeURIComponent(v.join('='))];
+        })
+      );
+      refreshToken = parsedCookies.refreshToken;
+    } catch (_) {}
+  }
   
   if (!refreshToken) {
     res.status(401);

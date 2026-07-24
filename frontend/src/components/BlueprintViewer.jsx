@@ -28,12 +28,21 @@ const BlueprintViewer = () => {
 
   const fetchBlueprintData = async () => {
     try {
-      const [pipeRes, blueRes] = await Promise.all([
-        api.get('/api/pipelines'),
-        api.get('/api/blueprints')
-      ]);
+      let loadedPipes = [];
+      try {
+        const pipeRes = await api.get('/api/pipelines');
+        loadedPipes = pipeRes.data;
+      } catch (err) {
+        console.error('Failed to load pipelines:', err);
+      }
 
-      let loadedPipes = pipeRes.data;
+      let loadedBlueprints = [];
+      try {
+        const blueRes = await api.get('/api/blueprints');
+        loadedBlueprints = blueRes.data;
+      } catch (_) {
+        // Fallback gracefully if blueprints route is disabled or not present
+      }
       
       // Seed a default pipeline if none exist
       if (loadedPipes.length === 0) {
@@ -48,9 +57,9 @@ const BlueprintViewer = () => {
       setPipelines(loadedPipes);
       const activePipe = loadedPipes[0];
       setSelectedPipelineId(activePipe._id);
-      setBlueprints(blueRes.data);
+      setBlueprints(loadedBlueprints);
 
-      const matchingBlueprint = blueRes.data.find(b => b.pipelineId?._id === activePipe._id || b.pipelineId === activePipe._id);
+      const matchingBlueprint = loadedBlueprints.find(b => b.pipelineId?._id === activePipe._id || b.pipelineId === activePipe._id);
       if (matchingBlueprint) {
         setActiveBlueprint(matchingBlueprint);
       } else {

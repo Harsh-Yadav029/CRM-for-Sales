@@ -13,24 +13,36 @@ connectDB();
 
 const app = express();
 
+// Trust Render/Vercel/Railway reverse proxy — required for rate-limiters to use real client IPs
+// and for secure cookies to be set correctly in production
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(mongoSanitize());
 
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  process.env.FRONTEND_URL
+  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL_ALT
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl) and dev environments
-      if (!origin || allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      // Allow requests with no origin (like mobile apps or curl)
+      // In production, strictly validate against allowedOrigins
+      // In development, allow all origins for convenience
+      if (!origin) {
+        return callback(null, true);
       }
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      if (process.env.NODE_ENV !== 'production') {
+        return callback(null, true);
+      }
+      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true
   })

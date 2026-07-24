@@ -13,38 +13,24 @@ connectDB();
 
 const app = express();
 
-// Trust Render/Vercel/Railway reverse proxy — required for rate-limiters to use real client IPs
-// and for secure cookies to be set correctly in production
-app.set('trust proxy', 1);
-
 app.use(helmet());
 app.use(mongoSanitize());
 
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://crm-for-sales-ten.vercel.app',
-  process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, '') : null,
-  process.env.FRONTEND_URL_ALT ? process.env.FRONTEND_URL_ALT.replace(/\/$/, '') : null
+  process.env.FRONTEND_URL
 ].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps or curl)
-      if (!origin) {
-        return callback(null, true);
+      // Allow requests with no origin (like mobile apps or curl) and dev environments
+      if (!origin || allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
       }
-      const cleanOrigin = origin.replace(/\/$/, '');
-      if (
-        allowedOrigins.includes(cleanOrigin) ||
-        cleanOrigin.endsWith('.vercel.app') ||
-        cleanOrigin.includes('localhost') ||
-        process.env.NODE_ENV !== 'production'
-      ) {
-        return callback(null, true);
-      }
-      return callback(new Error('Not allowed by CORS'));
     },
     credentials: true
   })

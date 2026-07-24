@@ -15,13 +15,11 @@ const generateRefreshToken = (id) => {
 };
 
 const setRefreshTokenCookie = (res, token) => {
-  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('refreshToken', token, {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: '/'
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   });
 };
 
@@ -320,12 +318,10 @@ const refreshAccessToken = async (req, res, next) => {
 };
 
 const logoutUser = async (req, res, next) => {
-  const isProduction = process.env.NODE_ENV === 'production';
   res.clearCookie('refreshToken', {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
-    path: '/'
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   });
   res.json({ message: 'Logged out successfully' });
 };

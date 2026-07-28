@@ -1,19 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import GlobalSearch from './GlobalSearch';
 import {
   Home,
   BarChart3,
   Users,
   UserCircle,
-  Building2,
   Briefcase,
   CalendarDays,
   LogOut,
   MessageSquare,
-  ChevronDown,
-  Search,
   Settings
 } from 'lucide-react';
 
@@ -21,7 +17,6 @@ const Sidebar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const isActive = (path) => {
     if (path === '/') return location.pathname === '/';
@@ -82,13 +77,6 @@ const Sidebar = () => {
 
       {/* Footer Settings / Support */}
       <div className="pt-4 border-t border-[#e7e2d8] space-y-1">
-        <button
-          onClick={() => setSearchOpen(true)}
-          className="w-full flex items-center space-x-3 px-3 py-2 text-[#5f5e5e] hover:bg-[#ede8de] rounded-lg text-xs font-bold text-left"
-        >
-          <Search size={16} />
-          <span>Search (⌘K)</span>
-        </button>
         <NavLink
           to="/settings"
           className={({ isActive: a }) =>
@@ -108,8 +96,6 @@ const Sidebar = () => {
           <span>Sign Out</span>
         </button>
       </div>
-
-      <GlobalSearch isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
     </aside>
   );
 };

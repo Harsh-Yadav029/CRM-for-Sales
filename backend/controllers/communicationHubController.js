@@ -14,7 +14,8 @@ const Notification = require('../models/Notification');
 const User = require('../models/User');
 const Lead = require('../models/Lead');
 const Contact = require('../models/Contact');
-const { emitUserEvent } = require('../utils/socket');
+const { emitUserEvent, emitCompanyEvent } = require('../utils/socket');
+const { autoAdvanceLeadStatus } = require('../utils/leadStatusAutomation');
 const Nylas = require('nylas');
 
 let nylasClient = null;
@@ -271,6 +272,16 @@ const sendEmail = async (req, res, next) => {
       meetingSummary: `Last outbound email sent: "${subject}"`
     });
 
+    if (normalizedClientType === 'Lead') {
+      await autoAdvanceLeadStatus(clientId, 'Contacted');
+    }
+
+    emitCompanyEvent('email_sent', {
+      to: recipientEmail,
+      subject: subject,
+      sender: req.user.name || 'Sales Representative'
+    });
+
     res.status(201).json(emailRecord);
   } catch (err) {
     next(err);
@@ -344,6 +355,16 @@ const sendWhatsappMessage = async (req, res, next) => {
     // Update AI Summary
     await updateAISummaryStats(wa.clientId, wa.clientType, {
       nextAction: 'Await WhatsApp response'
+    });
+
+    if (normalizedClientType === 'Lead') {
+      await autoAdvanceLeadStatus(clientId, 'Contacted');
+    }
+
+    emitCompanyEvent('whatsapp_sent', {
+      to: receiver || 'Client',
+      message: message,
+      sender: req.user.name || 'Sales Representative'
     });
 
     res.status(201).json(wa);
@@ -427,6 +448,17 @@ const logCall = async (req, res, next) => {
       meetingSummary: `Latest Call Notes: ${notes}`
     });
 
+    if (normalizedClientType === 'Lead') {
+      await autoAdvanceLeadStatus(clientId, 'Contacted');
+    }
+
+    emitCompanyEvent('call_logged', {
+      executive: req.user.name || 'Sales Representative',
+      duration,
+      status,
+      notes
+    });
+
     res.status(201).json(call);
   } catch (err) {
     next(err);
@@ -502,6 +534,10 @@ const scheduleMeeting = async (req, res, next) => {
       meetingSummary: `Upcoming Meeting: ${meet.meetingType} on ${new Date(date).toLocaleDateString()}`,
       nextAction: `Conduct VR Session`
     });
+
+    if (meet.clientType === 'Lead' && meet.clientId) {
+      await autoAdvanceLeadStatus(meet.clientId, 'Demo Scheduled');
+    }
 
     // Notify admins
     await dispatchNotificationsToAdmins(

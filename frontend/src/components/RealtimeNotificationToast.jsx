@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getSocket, initiateSocket } from '../utils/socket';
-import { Bell, Info, X, MessageSquare, Phone, PhoneCall, PhoneOff } from 'lucide-react';
+import { Bell, Info, X, MessageSquare, Phone, PhoneCall, PhoneOff, Mail, Calendar, CheckCircle2, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useVoice } from '../context/VoiceContext';
 import api from '../utils/api';
@@ -29,41 +29,77 @@ const RealtimeNotificationToast = () => {
     const socket = initiateSocket();
     if (!socket) return;
 
-    const handleNotification = (payload) => {
+    const addToast = (title, message, type = 'info') => {
       const newToast = {
         id: Date.now() + Math.random().toString(),
-        title: payload.title || 'System Notification',
-        message: payload.message || 'New update received',
-        type: 'alert'
+        title,
+        message,
+        type
       };
-      setToasts(prev => [newToast, ...prev]);
-      
+      setToasts(prev => [newToast, ...prev].slice(0, 5)); // Keep max 5 toasts
+
       // Auto dismiss after 5 seconds
       setTimeout(() => {
         setToasts(prev => prev.filter(t => t.id !== newToast.id));
       }, 5000);
     };
 
-    const handleLeadCreated = (payload) => {
-      const newToast = {
-        id: Date.now() + Math.random().toString(),
-        title: 'New Lead Captured',
-        message: `Lead ${payload.name} from ${payload.company} added to pipeline`,
-        type: 'lead'
-      };
-      setToasts(prev => [newToast, ...prev]);
+    const handleNotification = (payload) => {
+      addToast(payload.title || 'System Notification', payload.message || 'New update received', 'alert');
+    };
 
-      setTimeout(() => {
-        setToasts(prev => prev.filter(t => t.id !== newToast.id));
-      }, 5000);
+    const handleLeadCreated = (payload) => {
+      addToast('New Lead Captured', `Lead ${payload.name || ''} ${payload.company ? `from ${payload.company}` : ''} added to pipeline`, 'lead');
+    };
+
+    const handleLeadUpdated = (payload) => {
+      addToast('Lead Record Updated', `Lead ${payload.name || 'prospect'} status changed to ${payload.status || 'updated'}`, 'lead');
+    };
+
+    const handleSmsSent = (payload) => {
+      addToast('SMS Message Dispatched', `SMS sent to ${payload.to || 'recipient'}: "${payload.message || ''}"`, 'sms');
+    };
+
+    const handleSmsReceived = (payload) => {
+      addToast('New SMS Received 💬', `From ${payload.from || 'client'}: "${payload.message || ''}"`, 'sms');
+    };
+
+    const handleEmailSent = (payload) => {
+      addToast('Email Dispatched ✉️', `Sent to ${payload.to || 'recipient'}: "${payload.subject || ''}"`, 'email');
+    };
+
+    const handleWhatsappSent = (payload) => {
+      addToast('WhatsApp Sent 💬', `Sent to ${payload.to || 'client'}: "${payload.message || ''}"`, 'whatsapp');
+    };
+
+    const handleCallLogged = (payload) => {
+      addToast('Call Logged 📞', `${payload.executive || 'Rep'} logged call (${payload.status || 'completed'}): ${payload.notes || ''}`, 'call');
+    };
+
+    const handleMeetingScheduled = (payload) => {
+      addToast('Meeting Scheduled 📅', `${payload.meetingType || 'Consultation'} scheduled on ${new Date(payload.date).toLocaleDateString()}`, 'meeting');
     };
 
     socket.on('notification_received', handleNotification);
     socket.on('lead_created', handleLeadCreated);
+    socket.on('lead_updated', handleLeadUpdated);
+    socket.on('sms_sent', handleSmsSent);
+    socket.on('sms_received', handleSmsReceived);
+    socket.on('email_sent', handleEmailSent);
+    socket.on('whatsapp_sent', handleWhatsappSent);
+    socket.on('call_logged', handleCallLogged);
+    socket.on('meeting_scheduled', handleMeetingScheduled);
 
     return () => {
       socket.off('notification_received', handleNotification);
       socket.off('lead_created', handleLeadCreated);
+      socket.off('lead_updated', handleLeadUpdated);
+      socket.off('sms_sent', handleSmsSent);
+      socket.off('sms_received', handleSmsReceived);
+      socket.off('email_sent', handleEmailSent);
+      socket.off('whatsapp_sent', handleWhatsappSent);
+      socket.off('call_logged', handleCallLogged);
+      socket.off('meeting_scheduled', handleMeetingScheduled);
     };
   }, [user]);
 
@@ -175,11 +211,31 @@ const RealtimeNotificationToast = () => {
             className="pointer-events-auto flex items-start gap-3 rounded-xl border border-outline-variant/50 bg-white/90 p-4 shadow-card backdrop-blur-md animate-slide-in"
           >
             <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-              toast.type === 'lead'
-                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+              toast.type === 'sms' || toast.type === 'whatsapp'
+                ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                : toast.type === 'email'
+                ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20'
+                : toast.type === 'call'
+                ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                : toast.type === 'meeting'
+                ? 'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                : toast.type === 'lead'
+                ? 'bg-indigo-500/10 text-indigo-600 border border-indigo-500/20'
                 : 'bg-gold/10 text-primary border border-amber-500/20'
             }`}>
-              {toast.type === 'lead' ? <MessageSquare size={14} /> : <Bell size={14} />}
+              {toast.type === 'sms' || toast.type === 'whatsapp' ? (
+                <MessageSquare size={14} />
+              ) : toast.type === 'email' ? (
+                <Mail size={14} />
+              ) : toast.type === 'call' ? (
+                <Phone size={14} />
+              ) : toast.type === 'meeting' ? (
+                <Calendar size={14} />
+              ) : toast.type === 'lead' ? (
+                <UserPlus size={14} />
+              ) : (
+                <Bell size={14} />
+              )}
             </div>
 
             <div className="flex-1 min-w-0">

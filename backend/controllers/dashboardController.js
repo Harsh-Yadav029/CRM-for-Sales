@@ -6,7 +6,7 @@ const Event = require('../models/Event');
 const getStats = async (req, res, next) => {
   try {
     const query = {};
-    if (req.user.role === 'sales') {
+    if (req.user.role === 'sales' || req.user.role === 'rep') {
       query.assignedTo = req.user._id;
     }
 
@@ -71,7 +71,7 @@ const getStats = async (req, res, next) => {
       startTime: { $gte: today, $lte: endOfToday },
       status: { $ne: 'cancelled' }
     };
-    if (req.user.role === 'sales') {
+    if (req.user.role === 'sales' || req.user.role === 'rep') {
       meetingsQuery.assignedTo = req.user._id;
     }
     const todayMeetings = await Event.find(meetingsQuery)
@@ -97,18 +97,15 @@ const getStats = async (req, res, next) => {
     .limit(5);
 
     const tasksQuery = {
-      assignedTo: req.user._id,
       dueDate: { $gte: today, $lte: endOfToday }
     };
 
-    if (req.user.role === 'admin') {
-      delete tasksQuery.assignedTo;
-      tasksQuery.dueDate = { $gte: today, $lte: endOfToday };
+    if (req.user.role === 'sales' || req.user.role === 'rep') {
+      tasksQuery.assignedTo = req.user._id;
     }
 
     const todaysTasks = await Task.find(tasksQuery)
-      .populate('assignedTo', 'name')
-      .populate('leadId', 'name company');
+      .populate('assignedTo', 'name');
 
     res.json({
       totalLeads,
@@ -126,6 +123,7 @@ const getStats = async (req, res, next) => {
       dealsClosingThisMonth
     });
   } catch (error) {
+    console.error('getStats dashboard error:', error);
     next(error);
   }
 };

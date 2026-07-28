@@ -1,4 +1,5 @@
 const Quote = require('../models/Quote');
+const { autoAdvanceLeadStatus } = require('../utils/leadStatusAutomation');
 
 const getQuotes = async (req, res, next) => {
   try {
@@ -14,7 +15,7 @@ const getQuotes = async (req, res, next) => {
 
 const createQuote = async (req, res, next) => {
   try {
-    const { companyId, contactId, title, items, status, validUntil } = req.body;
+    const { companyId, contactId, leadId, title, items, status, validUntil } = req.body;
     const quote = await Quote.create({
       companyId,
       contactId,
@@ -23,6 +24,12 @@ const createQuote = async (req, res, next) => {
       status,
       validUntil
     });
+
+    const targetLeadId = leadId || contactId;
+    if (targetLeadId) {
+      await autoAdvanceLeadStatus(targetLeadId, 'Proposal Sent');
+    }
+
     res.status(201).json(quote);
   } catch (error) {
     next(error);
@@ -40,6 +47,12 @@ const updateQuote = async (req, res, next) => {
       res.status(404);
       return next(new Error('Quote not found'));
     }
+
+    const targetLeadId = req.body.leadId || quote.contactId;
+    if (targetLeadId) {
+      await autoAdvanceLeadStatus(targetLeadId, 'Proposal Sent');
+    }
+
     res.json(quote);
   } catch (error) {
     next(error);

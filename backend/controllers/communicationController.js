@@ -4,6 +4,8 @@ const Nylas = require('nylas');
 const Lead = require('../models/Lead');
 const WebhookEvent = require('../models/WebhookEvent');
 const { isDuplicateEvent, verifyNylasSignature, verifyTwilioSignature } = require('../middleware/webhookVerify');
+const { emitCompanyEvent } = require('../utils/socket');
+const { autoAdvanceLeadStatus } = require('../utils/leadStatusAutomation');
 
 let nylasClient = null;
 if (process.env.NYLAS_API_KEY) {
@@ -71,9 +73,17 @@ const sendEmail = async (req, res, next) => {
       }
     }
 
+    await autoAdvanceLeadStatus(leadId, 'Contacted');
+
     const updatedLead = await Lead.findById(leadId)
       .populate('assignedTo', 'name email')
       .populate('notes.addedBy', 'name');
+
+    emitCompanyEvent('email_sent', {
+      to: lead.email,
+      subject: subject,
+      sender: req.user.name || 'Sales Representative'
+    });
 
     res.status(201).json({
       message: dispatchedReal 
@@ -214,9 +224,17 @@ const sendSMS = async (req, res, next) => {
 
     await lead.save();
 
+    await autoAdvanceLeadStatus(leadId, 'Contacted');
+
     const updatedLead = await Lead.findById(leadId)
       .populate('assignedTo', 'name email')
       .populate('notes.addedBy', 'name');
+
+    emitCompanyEvent('sms_sent', {
+      to: recipientPhone,
+      message: message,
+      sender: req.user.name || 'Sales Representative'
+    });
 
     res.status(201).json({
       message: dispatched ? 'SMS sent successfully via Twilio' : 'SMS logged (Simulated)',

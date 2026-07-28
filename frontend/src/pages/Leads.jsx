@@ -222,7 +222,7 @@ const Leads = () => {
           >
             All
           </button>
-          {['New', 'Contacted', 'Proposal Sent', 'Won'].map((stage) => (
+          {STATUS.map((stage) => (
             <button
               key={stage}
               onClick={() => setStatusFilter(stage)}
@@ -249,8 +249,14 @@ const Leads = () => {
       <section className="pb-12">
         {leads.length === 0 ? (
           <EmptyState
-            title="No leads on this path yet"
-            description="Start capturing prospects and planning opportunities."
+            title={statusFilter ? `No ${statusFilter} Leads Found` : "No leads on this path yet"}
+            description={
+              statusFilter === 'Contacted'
+                ? "No leads in Contacted stage. Send an email, SMS, or log a call to automatically move a lead here."
+                : statusFilter
+                ? `There are currently no prospects in the ${statusFilter} stage.`
+                : "Start capturing prospects and planning opportunities."
+            }
             action={
               <Button onClick={openCreate} icon={Plus}>
                 Capture First Lead

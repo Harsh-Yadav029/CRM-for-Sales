@@ -20,6 +20,7 @@ import Quotes from './pages/Quotes';
 import Invoices from './pages/Invoices';
 import Calendar from './pages/Calendar';
 import CommunicationHub from './pages/CommunicationHub';
+import LandingPage from './pages/LandingPage';
 import { Loader2 } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import RealtimeNotificationToast from './components/RealtimeNotificationToast';
@@ -36,7 +37,7 @@ const ProtectedLayout = ({ children }) => {
     );
   }
 
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/landing" replace />;
 
   const titles = {
     '/': 'Home',
@@ -78,15 +79,35 @@ const ProtectedLayout = ({ children }) => {
   );
 };
 
+const RootRoute = () => {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary" size={28} />
+      </div>
+    );
+  }
+  if (!user) {
+    return <LandingPage />;
+  }
+  return (
+    <ProtectedLayout>
+      <Dashboard />
+    </ProtectedLayout>
+  );
+};
+
 function App() {
   return (
     <AuthProvider>
       <VoiceProvider>
         <Router>
           <Routes>
-            <Route path="/login" element={<Login />} />
+            <Route path="/" element={<RootRoute />} />
+            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/login" element={<LandingPage showLoginOnInit={true} />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/" element={<ProtectedLayout><Dashboard /></ProtectedLayout>} />
             <Route path="/leads" element={<ProtectedLayout><Leads /></ProtectedLayout>} />
             <Route path="/leads/:id" element={<ProtectedLayout><LeadDetails /></ProtectedLayout>} />
             <Route path="/deals" element={<ProtectedLayout><Deals /></ProtectedLayout>} />

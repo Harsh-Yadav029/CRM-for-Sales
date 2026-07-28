@@ -38,6 +38,7 @@ const CallWidget = ({ lead, onClose, onSuccess }) => {
   const timerRef = useRef(null);
   const callRef = useRef(null);
   const eventIdRef = useRef(null);
+  const isInitiatingRef = useRef(false);
 
   // Initialize lead data from prop if provided
   useEffect(() => {
@@ -60,34 +61,55 @@ const CallWidget = ({ lead, onClose, onSuccess }) => {
       return;
     }
 
+    if (isInitiatingRef.current) return;
+    isInitiatingRef.current = true;
+
     const startOutboundCall = async () => {
       try {
         setCallStatus('connecting');
 
-        // 1. Pre-create the Event record for outbound call
-        const { data: event } = await api.post('/api/events', {
-          type: 'call',
-          title: `Outbound Call to ${activeLead.name}`,
-          description: `Outbound VoIP call session to ${activeLead.phone}`,
-          startTime: new Date(),
-          endTime: new Date(Date.now() + 60000), // temp endTime
-          direction: 'outbound',
-          status: 'scheduled',
-          relatedTo: {
-            module: 'Lead',
-            recordId: activeLead._id
-          },
-          assignedTo: user._id
-        });
+        let createdEventId = null;
 
-        eventIdRef.current = event._id;
-        setCurrentEventId(event._id);
+        // 1. Pre-create the Event record for outbound call (safely wrapped so call proceeds even if event pre-log fails)
+        try {
+          const now = new Date();
+          const nextMin = new Date(now.getTime() + 60000);
+          const payload = {
+            type: 'call',
+            title: `Outbound Call to ${activeLead.name || 'Prospect'}`,
+            description: `Outbound VoIP call session to ${activeLead.phone || ''}`,
+            startTime: now.toISOString(),
+            endTime: nextMin.toISOString(),
+            direction: 'outbound',
+            status: 'scheduled'
+          };
+
+          if (activeLead?._id) {
+            payload.relatedTo = {
+              module: 'Lead',
+              recordId: activeLead._id
+            };
+          }
+
+          if (user?._id) {
+            payload.assignedTo = user._id;
+          }
+
+          const { data: event } = await api.post('/api/events', payload);
+          if (event?._id) {
+            createdEventId = event._id;
+            eventIdRef.current = event._id;
+            setCurrentEventId(event._id);
+          }
+        } catch (eventErr) {
+          console.warn('Pre-creating event log notice:', eventErr.response?.data?.message || eventErr.message);
+        }
 
         // 2. Connect the Twilio Voice session
         const call = await device.connect({
           params: {
             number: activeLead.phone,
-            eventId: event._id
+            eventId: createdEventId || ''
           }
         });
 

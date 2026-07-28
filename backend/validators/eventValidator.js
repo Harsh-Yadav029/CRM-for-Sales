@@ -37,12 +37,13 @@ const eventBodySchema = z.object({
   colorTag: z.enum(['gold', 'success', 'warning', 'danger', 'neutral']).optional().default('neutral'),
   recurrence: recurrenceValidator.optional(),
   reminders: z.array(reminderValidator).optional().default([]),
-  status: z.enum(['scheduled', 'completed', 'cancelled']).optional().default('scheduled')
-});
+  status: z.enum(['scheduled', 'completed', 'cancelled']).optional().default('scheduled'),
+  direction: z.string().optional()
+}).passthrough();
 
 const createEventSchema = z.object({
   body: eventBodySchema.refine((data) => {
-    return data.startTime < data.endTime;
+    return new Date(data.startTime).getTime() < new Date(data.endTime).getTime();
   }, {
     message: "startTime must be before endTime",
     path: ["endTime"]
@@ -60,7 +61,7 @@ const createEventSchema = z.object({
 const updateEventSchema = z.object({
   body: eventBodySchema.partial().refine((data) => {
     if (data.startTime && data.endTime) {
-      return data.startTime < data.endTime;
+      return new Date(data.startTime).getTime() < new Date(data.endTime).getTime();
     }
     return true;
   }, {

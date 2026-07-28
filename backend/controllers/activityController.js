@@ -401,7 +401,7 @@ const updateEvent = async (req, res, next) => {
       return next(new Error('Event not found'));
     }
 
-    if (req.user.role === 'sales' && event.assignedTo.toString() !== req.user._id.toString()) {
+    if (req.user.role === 'rep' && event.assignedTo && event.assignedTo.toString() !== req.user._id.toString()) {
       res.status(403);
       return next(new Error('Access denied to update this event'));
     }

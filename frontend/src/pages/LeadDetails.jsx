@@ -622,8 +622,12 @@ const LeadDetails = () => {
         <CallWidget
           lead={lead}
           onClose={() => setShowCallModal(false)}
-          onSuccess={(updatedLead) => {
-            setLead(updatedLead);
+          onSuccess={(updatedData) => {
+            if (updatedData && updatedData.name && updatedData.email) {
+              setLead(updatedData);
+            }
+            fetchLead();
+            fetchRecordActivities();
           }}
         />
       )}

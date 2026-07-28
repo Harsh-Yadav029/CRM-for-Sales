@@ -189,11 +189,7 @@ const Leads = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Pipeline Management</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1.5">Leads Inventory</h2>
-          <p className="text-xs text-slate-500 mt-1 leading-relaxed max-w-xl">
-            Track and manage high-potential architectural partnerships and construction site projects.
-          </p>
+          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight">LEADS</h2>
         </div>
         <Button onClick={openCreate} icon={Plus}>
           Capture New Lead

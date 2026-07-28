@@ -21,6 +21,7 @@ import Invoices from './pages/Invoices';
 import Calendar from './pages/Calendar';
 import CommunicationHub from './pages/CommunicationHub';
 import LandingPage from './pages/LandingPage';
+import Profile from './pages/Profile';
 import { Loader2 } from 'lucide-react';
 import BottomNav from './components/BottomNav';
 import RealtimeNotificationToast from './components/RealtimeNotificationToast';
@@ -53,7 +54,8 @@ const ProtectedLayout = ({ children }) => {
     '/quotes': 'Quotes & Proposals',
     '/invoices': 'Invoice Ledger',
     '/calendar': 'Calendar & Meetings',
-    '/communication-hub': 'Communication Hub'
+    '/communication-hub': 'Communication Hub',
+    '/profile': 'My Profile'
   };
   let title = titles[location.pathname] || 'Home';
   if (location.pathname.startsWith('/leads/')) title = 'Lead Profile';
@@ -122,6 +124,7 @@ function App() {
             <Route path="/reports" element={<ProtectedLayout><Reports /></ProtectedLayout>} />
             <Route path="/calendar" element={<ProtectedLayout><Calendar /></ProtectedLayout>} />
             <Route path="/communication-hub" element={<ProtectedLayout><CommunicationHub /></ProtectedLayout>} />
+            <Route path="/profile" element={<ProtectedLayout><Profile /></ProtectedLayout>} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Router>

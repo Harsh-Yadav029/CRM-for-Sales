@@ -127,9 +127,7 @@ const Contacts = () => {
       {/* Title & Toolbar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Contacts Directory</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Client Representatives</h2>
-          <p className="text-xs text-slate-500 mt-1">Keep track of key executives and account representatives</p>
+          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight">CONTACTS</h2>
         </div>
 
         <Button onClick={handleOpenCreate} icon={Plus}>

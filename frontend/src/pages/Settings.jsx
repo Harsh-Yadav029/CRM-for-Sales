@@ -15,7 +15,7 @@ import Badge from '../components/ui/Badge';
 
 const Settings = () => {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
+  const [activeTab, setActiveTab] = useState(user?.role === 'admin' || user?.role === 'manager' ? 'team' : 'pipeline');
   const [salespeople, setSalespeople] = useState([]);
   const [customFields, setCustomFields] = useState([]);
   const [workflows, setWorkflows] = useState([]);
@@ -168,7 +168,6 @@ const Settings = () => {
   }
 
   const navItems = [
-    { id: 'profile', label: 'My Profile', icon: User },
     { id: 'team', label: 'Team Directory', icon: Users, gate: ['admin', 'manager'] },
     { id: 'pipeline', label: 'Pipeline Config', icon: Sliders, gate: ['admin'] },
     { id: 'fields', label: 'Custom Parameters', icon: LayoutGrid, gate: ['admin'] },
@@ -182,9 +181,7 @@ const Settings = () => {
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
       {/* Title */}
       <div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">System Parameters</span>
-        <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Control Console</h2>
-        <p className="text-xs text-slate-500 mt-1">Configure profile data, pipeline controls, layout definitions, and rules</p>
+        <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight">SYSTEM SETTINGS</h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -208,29 +205,6 @@ const Settings = () => {
 
         {/* Right Details Panel */}
         <div className="lg:col-span-9 space-y-6">
-          {/* PROFILE Tab */}
-          {activeTab === 'profile' && (
-            <Card variant="raised" className="p-6 bg-white space-y-4">
-              <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Personal Profile</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-[#FAF9F6] rounded-card border border-line">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase block mb-1 font-mono">Full Name</span>
-                  <span className="text-xs font-bold text-ink">{user?.name}</span>
-                </div>
-                <div className="p-4 bg-[#FAF9F6] rounded-card border border-line">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase block mb-1 font-mono">Email Address</span>
-                  <span className="text-xs font-bold text-ink truncate block">{user?.email}</span>
-                </div>
-                <div className="p-4 bg-[#FAF9F6] rounded-card border border-line">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase block mb-1 font-mono">Assigned Role</span>
-                  <span className="text-xs font-bold text-ink flex items-center gap-1.5 capitalize">
-                    <Shield size={12} className="text-gold" />
-                    {user?.role}
-                  </span>
-                </div>
-              </div>
-            </Card>
-          )}
 
           {/* TEAM Directory Tab */}
           {activeTab === 'team' && (user?.role === 'admin' || user?.role === 'manager') && (

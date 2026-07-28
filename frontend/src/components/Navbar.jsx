@@ -88,13 +88,17 @@ const Navbar = ({ title }) => {
           </div>
         )}
 
-        {/* Profile Info */}
-        <div className="flex items-center space-x-3 border-l border-[#e7e2d8] pl-6">
+        {/* Profile Info Button */}
+        <div 
+          onClick={() => navigate('/profile')}
+          className="flex items-center space-x-3 border-l border-[#e7e2d8] pl-6 cursor-pointer hover:opacity-85 transition-opacity group"
+          title="Go to My Profile"
+        >
           <div className="text-right">
-            <p className="text-xs font-bold text-[#1d1c16]">{activeUser?.name || 'Alex Mercer'}</p>
+            <p className="text-xs font-bold text-[#1d1c16] group-hover:text-[#7e5700] transition-colors">{activeUser?.name || 'Alex Mercer'}</p>
             <p className="text-[9px] text-[#5f5e5e] font-bold uppercase tracking-wider font-mono">{activeUser?.role || 'Executive VP'}</p>
           </div>
-          <div className="w-10 h-10 rounded-full border-2 border-[#e3a62f] bg-[#e3a62f] text-[#5b3e00] flex items-center justify-center font-black text-sm shadow-sm">
+          <div className="w-10 h-10 rounded-full border-2 border-[#e3a62f] bg-[#e3a62f] text-[#5b3e00] flex items-center justify-center font-black text-sm shadow-sm group-hover:scale-105 transition-transform">
             {activeUser?.name?.charAt(0).toUpperCase() || 'U'}
           </div>
         </div>

@@ -6,6 +6,7 @@ const {
   forgotPassword,
   resetPassword,
   getUserProfile, 
+  updateUserProfile,
   getSalespeople, 
   googleLogin,
   refreshAccessToken,
@@ -32,6 +33,7 @@ router.post('/refresh', refreshAccessToken);
 router.post('/logout', logoutUser);
 
 router.get('/profile', protect, getUserProfile);
+router.put('/profile', protect, updateUserProfile);
 // Restrict to admins and managers of the tenant
 router.get('/salespeople', protect, checkRole(['admin', 'manager']), getSalespeople);
 

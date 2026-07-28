@@ -137,9 +137,7 @@ const Reports = () => {
       {/* Title & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Performance Builder</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Analytics Builder</h2>
-          <p className="text-xs text-slate-500 mt-1">Drag metric blocks onto the canvas to design custom business dashboards</p>
+          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight">ANALYTICS BUILDER</h2>
         </div>
 
         <Button

@@ -163,12 +163,7 @@ const Deals = () => {
       <div className="flex-1 flex flex-col overflow-hidden px-8 py-6">
         {/* Breadcrumbs & Title */}
         <div className="mb-6 shrink-0">
-          <div className="text-[11px] font-medium text-slate-450 flex items-center gap-1">
-            <span>Sales</span>
-            <span className="text-slate-350">/</span>
-            <span className="text-slate-500 font-bold uppercase tracking-wider font-mono">Opportunities</span>
-          </div>
-          <h2 className="text-2xl font-black text-ink mt-1.5 tracking-tight font-display uppercase">Deal Pipeline</h2>
+          <h2 className="text-2xl font-black text-ink tracking-tight font-display uppercase">Deal Pipeline</h2>
         </div>
 
         {/* Board Columns Canvas */}

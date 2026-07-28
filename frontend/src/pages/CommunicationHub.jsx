@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Loader2, Phone, Mail, MessageSquare, Plus, X, Calendar, 
-  FileText, Star, BrainCircuit, AlertTriangle, CheckSquare, 
-  Send, ShieldAlert, Award, ArrowUpRight, TrendingUp 
+import {
+  Loader2, Phone, Mail, MessageSquare, Plus, X, Calendar,
+  FileText, Star, BrainCircuit, AlertTriangle, CheckSquare,
+  Send, ShieldAlert, Award, ArrowUpRight, TrendingUp
 } from 'lucide-react';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
@@ -205,15 +205,15 @@ const CommunicationHub = () => {
 
   return (
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
-      
+
       {/* Title & Client Scope selector */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line/60 pb-5">
         <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Walk The Plan OS</span>
+
           <h1 className="text-3xl font-display font-black text-ink uppercase tracking-tight leading-none mt-1">
             Communication Hub
           </h1>
-          <p className="text-xs text-slate-500 mt-1">Single source of truth for all client interactions, schedules, and approvals.</p>
+
         </div>
 
         {/* Client selector dropdown */}
@@ -255,7 +255,7 @@ const CommunicationHub = () => {
 
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
         {/* Left Column: Timeline Feed */}
         <div className="lg:col-span-8 space-y-6">
           <Card variant="raised" className="p-6 bg-white">
@@ -311,11 +311,11 @@ const CommunicationHub = () => {
 
         {/* Right Column: AI Copilot & Internal notes */}
         <div className="lg:col-span-4 space-y-6">
-          
+
           {/* AI Copilot Card */}
           <Card variant="raised" className="p-6 bg-white border border-line/60 relative overflow-hidden group">
             <div className="absolute right-0 top-0 h-28 w-28 bg-gold/5 blur-3xl pointer-events-none rounded-full"></div>
-            
+
             <div className="flex items-center gap-2 mb-4 pb-2 border-b border-line/60">
               <BrainCircuit size={16} className="text-gold animate-pulse" />
               <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider">AI Summary Copilot</h3>

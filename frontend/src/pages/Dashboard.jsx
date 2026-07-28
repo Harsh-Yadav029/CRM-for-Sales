@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { 
-  Loader2, 
-  TrendingUp, 
+import {
+  Loader2,
+  TrendingUp,
   TrendingDown,
-  Users, 
-  DollarSign, 
-  Download, 
-  Plus, 
-  Bot, 
-  CheckCircle2, 
+  Users,
+  DollarSign,
+  Download,
+  Plus,
+  Bot,
+  CheckCircle2,
   ArrowRight,
   Briefcase,
   Layers,
@@ -19,14 +19,14 @@ import {
   CalendarDays,
   ListTodo
 } from 'lucide-react';
-import { 
-  ResponsiveContainer, 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  CartesianGrid 
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid
 } from 'recharts';
 import AIChatDrawer from '../components/AIChatDrawer';
 import Card from '../components/ui/Card';
@@ -45,14 +45,24 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsRes, revRes] = await Promise.all([
+      const [statsResult, revResult] = await Promise.allSettled([
         api.get('/api/dashboard/stats'),
         api.get('/api/dashboard/revenue')
       ]);
-      setStats(statsRes.data);
-      setRevenueData(revRes.data);
+
+      if (statsResult.status === 'fulfilled') {
+        setStats(statsResult.value.data);
+      } else {
+        console.error('Error fetching dashboard stats:', statsResult.reason);
+      }
+
+      if (revResult.status === 'fulfilled') {
+        setRevenueData(revResult.value.data);
+      } else {
+        console.error('Error fetching dashboard revenue:', revResult.reason);
+      }
     } catch (e) {
-      console.error('Error fetching dashboard stats:', e);
+      console.error('Error fetching dashboard data:', e);
     } finally {
       setLoading(false);
     }
@@ -139,11 +149,11 @@ const Dashboard = () => {
 
   return (
     <div className="p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans">
-      
+
       {/* Page Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="font-display text-2xl font-black text-[#7e5700] uppercase tracking-wide">Executive Dashboard</h2>
+          <h2 className="font-display text-2xl font-black text-[#7e5700] uppercase tracking-wide">Dashboard</h2>
           <p className="text-xs text-[#5f5e5e] mt-1">Welcome back, {user?.name || 'Alex Mercer'}. Here is what's happening with your pipeline today.</p>
         </div>
         <div className="flex space-x-2">
@@ -151,7 +161,7 @@ const Dashboard = () => {
             <span className="material-symbols-outlined text-sm">calendar_today</span>
             <span>Last 30 Days</span>
           </button>
-          <button 
+          <button
             onClick={() => window.print()}
             className="bg-white border border-[#e7e2d8] px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1 hover:bg-[#f8f3e9] active:scale-98 transition-all"
           >
@@ -251,41 +261,41 @@ const Dashboard = () => {
                 <AreaChart data={revenueData} margin={{ top: 10, right: 5, left: -20, bottom: 0 }}>
                   <defs>
                     <linearGradient id="colorPipeline" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#1d1c16" stopOpacity={0.12}/>
-                      <stop offset="95%" stopColor="#1d1c16" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#1d1c16" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="#1d1c16" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#E3A62F" stopOpacity={0.12}/>
-                      <stop offset="95%" stopColor="#E3A62F" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#E3A62F" stopOpacity={0.12} />
+                      <stop offset="95%" stopColor="#E3A62F" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f3ede3" vertical={false} />
                   <XAxis dataKey="month" stroke="#5f5e5e" fontSize={9} tickLine={false} axisLine={false} />
-                  <YAxis 
-                    stroke="#5f5e5e" 
-                    fontSize={9} 
-                    tickLine={false} 
-                    axisLine={false} 
-                    tickFormatter={(v) => v >= 100000 ? `₹${v/100000}L` : v >= 1000 ? `₹${v/1000}k` : `₹${v}`} 
+                  <YAxis
+                    stroke="#5f5e5e"
+                    fontSize={9}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v) => v >= 100000 ? `₹${v / 100000}L` : v >= 1000 ? `₹${v / 1000}k` : `₹${v}`}
                   />
                   <Tooltip content={<CustomTooltip />} />
-                  <Area 
-                    type="monotone" 
-                    dataKey="pipeline" 
-                    name="Pipeline" 
-                    stroke="#1d1c16" 
+                  <Area
+                    type="monotone"
+                    dataKey="pipeline"
+                    name="Pipeline"
+                    stroke="#1d1c16"
                     strokeWidth={2.5}
-                    fillOpacity={1} 
-                    fill="url(#colorPipeline)" 
+                    fillOpacity={1}
+                    fill="url(#colorPipeline)"
                   />
-                  <Area 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    name="Won" 
-                    stroke="#E3A62F" 
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    name="Won"
+                    stroke="#E3A62F"
                     strokeWidth={2.5}
-                    fillOpacity={1} 
-                    fill="url(#colorRevenue)" 
+                    fillOpacity={1}
+                    fill="url(#colorRevenue)"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -303,22 +313,21 @@ const Dashboard = () => {
               </h3>
               <Link to="/tasks" className="text-[#e3a62f] font-bold text-xs uppercase hover:underline">Tasks</Link>
             </div>
-            
+
             <div className="space-y-2.5 max-h-[220px] overflow-y-auto custom-scroll pr-1">
               {stats?.todaysTasks && stats.todaysTasks.length > 0 ? (
                 stats.todaysTasks.map((task) => (
-                  <div 
-                    key={task._id} 
+                  <div
+                    key={task._id}
                     className="flex items-start gap-3 p-3 border border-[#e7e2d8] bg-[#f8f3e9]/50 rounded-xl hover:border-slate-350 transition-all group"
                   >
                     <button
                       type="button"
                       onClick={() => handleTaskToggle(task._id, task.completed)}
-                      className={`mt-0.5 h-4 w-4 rounded border flex items-center justify-center shrink-0 transition-all ${
-                        task.completed 
-                          ? 'bg-[#e3a62f] border-[#e3a62f] text-[#5b3e00]' 
+                      className={`mt-0.5 h-4 w-4 rounded border flex items-center justify-center shrink-0 transition-all ${task.completed
+                          ? 'bg-[#e3a62f] border-[#e3a62f] text-[#5b3e00]'
                           : 'border-slate-300 bg-white hover:border-[#e3a62f]'
-                      }`}
+                        }`}
                     >
                       {task.completed && <span className="material-symbols-outlined text-[10px] font-bold">check</span>}
                     </button>
@@ -341,7 +350,7 @@ const Dashboard = () => {
               )}
             </div>
           </div>
-          <button 
+          <button
             onClick={() => navigate('/tasks')}
             className="w-full mt-4 py-2 border border-[#e7e2d8] rounded-lg text-xs font-bold text-[#7e5700] hover:bg-[#f8f3e9] transition-all"
           >
@@ -354,7 +363,7 @@ const Dashboard = () => {
       {wizard && (
         <div className="bg-white border border-[#e7e2d8] rounded-xl p-6 shadow-sm relative overflow-hidden group">
           <div className="absolute right-0 top-0 h-32 w-32 bg-[#e3a62f]/5 blur-3xl pointer-events-none rounded-full"></div>
-          
+
           <div className="flex justify-between items-start mb-6">
             <div>
               <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#7e5700] bg-[#fbbb44]/15 px-2 py-0.5 rounded">Setup Assistant</span>
@@ -409,7 +418,7 @@ const Dashboard = () => {
             <p className="text-xs text-[#504535] mt-0.5">"I've identified 3 high-probability upsell opportunities in your 'Negotiation' stage."</p>
           </div>
         </div>
-        <button 
+        <button
           onClick={() => setAiOpen(true)}
           className="bg-[#7e5700] text-white px-5 py-2.5 rounded-lg text-xs font-bold hover:brightness-105 active:scale-98 transition-all"
         >

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Project = require('../models/Project');
 const Communication = require('../models/Communication');
 const Email = require('../models/Email');
@@ -12,6 +13,7 @@ const Task = require('../models/Task');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const Lead = require('../models/Lead');
+const Contact = require('../models/Contact');
 const { emitUserEvent } = require('../utils/socket');
 const Nylas = require('nylas');
 
@@ -152,20 +154,63 @@ const sendEmail = async (req, res, next) => {
   const { subject, body, receiver, clientType, clientId, projectId, attachments } = req.body;
 
   try {
+    const normalizedClientType = (clientType && clientType.toString().toLowerCase() === 'contact') ? 'Contact' : 'Lead';
+
+    if (!clientId || !mongoose.Types.ObjectId.isValid(clientId)) {
+      res.status(400);
+      return next(new Error('A valid client ID is required'));
+    }
+
+    if (!subject || !body) {
+      res.status(400);
+      return next(new Error('Subject and email body are required'));
+    }
+
+    let recipientEmail = receiver ? receiver.trim() : '';
+
+    if (normalizedClientType === 'Lead') {
+      const lead = await Lead.findById(clientId);
+      if (!lead) {
+        res.status(404);
+        return next(new Error('Target Lead not found'));
+      }
+      // Access check for reps: Reps can only email leads assigned to them or unassigned leads
+      if (req.user.role === 'rep' && lead.assignedTo && lead.assignedTo.toString() !== req.user._id.toString()) {
+        res.status(403);
+        return next(new Error('Access denied: You can only contact prospects assigned to you'));
+      }
+      if (!recipientEmail) recipientEmail = lead.email;
+    } else {
+      const contact = await Contact.findById(clientId);
+      if (!contact) {
+        res.status(404);
+        return next(new Error('Target Contact not found'));
+      }
+      if (!recipientEmail) recipientEmail = contact.email;
+    }
+
+    if (!recipientEmail) {
+      res.status(400);
+      return next(new Error('Recipient email address is required'));
+    }
+
+    const validProjectId = (projectId && mongoose.Types.ObjectId.isValid(projectId)) ? projectId : null;
+    const senderEmail = req.user.email || 'system@walktheplan.in';
+
     const emailRecord = await Email.create({
       subject,
       body,
       attachments: attachments || [],
-      sender: req.user.email,
-      receiver,
-      clientType: clientType || 'Lead',
+      sender: senderEmail,
+      receiver: recipientEmail,
+      clientType: normalizedClientType,
       clientId,
-      projectId,
+      projectId: validProjectId,
       userId: req.user._id
     });
 
     // Create Index Communication
-    const comm = await Communication.create({
+    await Communication.create({
       clientType: emailRecord.clientType,
       clientId: emailRecord.clientId,
       projectId: emailRecord.projectId,
@@ -182,21 +227,40 @@ const sendEmail = async (req, res, next) => {
       projectId: emailRecord.projectId,
       userId: req.user._id,
       activityType: 'Email Sent',
-      description: `Outbound email dispatched to ${receiver}: "${subject}"`
+      description: `Outbound email dispatched to ${recipientEmail}: "${subject}"`
     });
 
+    // Also push to Lead timeline notes if client is Lead
+    if (normalizedClientType === 'Lead') {
+      try {
+        await Lead.findByIdAndUpdate(clientId, {
+          $push: {
+            notes: {
+              type: 'email',
+              text: body,
+              subject: subject,
+              status: 'sent',
+              addedBy: req.user._id
+            }
+          }
+        });
+      } catch (noteErr) {
+        console.error('Failed to append email note to Lead:', noteErr.message);
+      }
+    }
+
     // Dispatch real outbound email via Nylas SDK if configured
-    if (nylasClient && process.env.NYLAS_GRANT_ID && receiver) {
+    if (nylasClient && process.env.NYLAS_GRANT_ID && recipientEmail) {
       try {
         await nylasClient.messages.send({
           identifier: process.env.NYLAS_GRANT_ID,
           requestBody: {
-            to: [{ email: receiver }],
+            to: [{ email: recipientEmail }],
             subject: subject,
             body: body
           }
         });
-        console.log(`[Nylas Hub] Real outbound email dispatched to ${receiver}`);
+        console.log(`[Nylas Hub] Real outbound email dispatched to ${recipientEmail}`);
       } catch (nylasErr) {
         console.error('[Nylas Hub] Outbound email dispatch error:', nylasErr.message);
       }
@@ -232,14 +296,27 @@ const sendWhatsappMessage = async (req, res, next) => {
   const { message, receiver, clientType, clientId, projectId } = req.body;
 
   try {
+    const normalizedClientType = (clientType && clientType.toString().toLowerCase() === 'contact') ? 'Contact' : 'Lead';
+    const validProjectId = (projectId && mongoose.Types.ObjectId.isValid(projectId)) ? projectId : null;
+
+    if (!clientId || !mongoose.Types.ObjectId.isValid(clientId)) {
+      res.status(400);
+      return next(new Error('A valid client ID is required'));
+    }
+
+    if (!message) {
+      res.status(400);
+      return next(new Error('Message content is required'));
+    }
+
     const wa = await WhatsappMessage.create({
       message,
       sender: req.user.phone || 'Company',
-      receiver,
+      receiver: receiver || 'Client',
       status: 'sent',
-      clientType: clientType || 'Lead',
+      clientType: normalizedClientType,
       clientId,
-      projectId,
+      projectId: validProjectId,
       userId: req.user._id
     });
 
@@ -261,7 +338,7 @@ const sendWhatsappMessage = async (req, res, next) => {
       projectId: wa.projectId,
       userId: req.user._id,
       activityType: 'WhatsApp Sent',
-      description: `WhatsApp message to ${receiver}: "${message}"`
+      description: `WhatsApp message to ${receiver || 'Client'}: "${message}"`
     });
 
     // Update AI Summary
@@ -294,14 +371,22 @@ const logCall = async (req, res, next) => {
   const { duration, notes, status, clientType, clientId, projectId } = req.body;
 
   try {
+    const normalizedClientType = (clientType && clientType.toString().toLowerCase() === 'contact') ? 'Contact' : 'Lead';
+    const validProjectId = (projectId && mongoose.Types.ObjectId.isValid(projectId)) ? projectId : null;
+
+    if (!clientId || !mongoose.Types.ObjectId.isValid(clientId)) {
+      res.status(400);
+      return next(new Error('A valid client ID is required'));
+    }
+
     const call = await CallLog.create({
       duration: duration || 0,
-      executiveName: req.user.name,
+      executiveName: req.user.name || 'Sales Representative',
       notes: notes || '',
       status: status || 'completed',
-      clientType: clientType || 'Lead',
+      clientType: normalizedClientType,
       clientId,
-      projectId,
+      projectId: validProjectId,
       userId: req.user._id
     });
 

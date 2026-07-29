@@ -29,21 +29,21 @@ const Navbar = ({ title }) => {
   }, []);
 
   return (
-    <header className="w-full h-16 bg-white border-b border-[#e7e2d8] flex justify-between items-center px-8 sticky top-0 z-40 select-none">
+    <header className="w-full h-16 bg-white border-b border-[#e7e2d8] flex justify-between items-center px-4 md:px-8 sticky top-0 z-40 select-none gap-2">
       {/* Search Input Bar (Capsule style) */}
       <div 
         onClick={() => setIsSearchOpen(true)}
-        className="flex items-center bg-[#f8f3e9] border border-[#e7e2d8] rounded-full px-4 py-1.5 w-96 cursor-pointer hover:brightness-98 transition-all"
+        className="flex items-center bg-[#f8f3e9] border border-[#e7e2d8] rounded-full px-3 sm:px-4 py-1.5 w-full max-w-[180px] sm:max-w-xs md:w-96 cursor-pointer hover:brightness-98 transition-all shrink"
       >
-        <Search size={16} className="text-[#5f5e5e] mr-2" />
-        <span className="text-xs text-[#5f5e5e] font-medium">Search contacts, leads, or deals...</span>
+        <Search size={16} className="text-[#5f5e5e] mr-2 shrink-0" />
+        <span className="text-xs text-[#5f5e5e] font-medium truncate">Search contacts, leads...</span>
       </div>
 
       <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
       {/* Right User Actions */}
-      <div className="flex items-center space-x-6">
-        <div className="flex items-center space-x-4 text-[#5f5e5e]">
+      <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6 shrink-0">
+        <div className="flex items-center space-x-2 sm:space-x-4 text-[#5f5e5e]">
           <button 
             onClick={() => setShowNotifications(!showNotifications)} 
             className="hover:text-[#7e5700] transition-colors relative"

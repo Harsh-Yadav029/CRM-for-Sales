@@ -148,22 +148,22 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans">
 
       {/* Page Header */}
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
         <div>
-          <h2 className="font-poppins text-2xl font-bold text-[#7e5700] uppercase tracking-wide">Dashboard</h2>
+          <h2 className="font-poppins text-xl sm:text-2xl font-bold text-[#7e5700] uppercase tracking-wide">Dashboard</h2>
           <p className="text-xs text-[#5f5e5e] mt-1">Welcome back, {user?.name || 'Alex Mercer'}. Here is what's happening with your pipeline today.</p>
         </div>
-        <div className="flex space-x-2">
-          <button className="bg-white border border-[#e7e2d8] px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1 hover:bg-[#f8f3e9] active:scale-98 transition-all">
+        <div className="flex flex-wrap gap-2">
+          <button className="bg-white border border-[#e7e2d8] px-3 sm:px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1 hover:bg-[#f8f3e9] active:scale-98 transition-all">
             <CalendarDays size={14} />
             <span>Last 30 Days</span>
           </button>
           <button
             onClick={() => window.print()}
-            className="bg-white border border-[#e7e2d8] px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1 hover:bg-[#f8f3e9] active:scale-98 transition-all"
+            className="bg-white border border-[#e7e2d8] px-3 sm:px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1 hover:bg-[#f8f3e9] active:scale-98 transition-all"
           >
             <Download size={14} />
             <span>Export Report</span>
@@ -407,9 +407,9 @@ const Dashboard = () => {
       )}
 
       {/* Compass AI Assistant Widget */}
-      <div className="bg-[#f3ede3] border border-[#e7e2d8] rounded-xl p-6 flex items-center justify-between shadow-sm">
-        <div className="flex items-center space-x-6">
-          <div className="w-12 h-12 bg-[#7e5700] rounded-xl flex items-center justify-center relative shadow-md">
+      <div className="bg-[#f3ede3] border border-[#e7e2d8] rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+        <div className="flex items-center space-x-4 sm:space-x-6">
+          <div className="w-12 h-12 bg-[#7e5700] rounded-xl flex items-center justify-center relative shadow-md shrink-0">
             <Bot size={24} className="text-white" />
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#006e2d] rounded-full border-2 border-white animate-pulse"></div>
           </div>
@@ -420,7 +420,7 @@ const Dashboard = () => {
         </div>
         <button
           onClick={() => setAiOpen(true)}
-          className="bg-[#7e5700] text-white px-5 py-2.5 rounded-lg text-xs font-bold hover:brightness-105 active:scale-98 transition-all"
+          className="bg-[#7e5700] text-white px-5 py-2.5 rounded-lg text-xs font-bold hover:brightness-105 active:scale-98 transition-all w-full sm:w-auto text-center"
         >
           Review Insights
         </button>

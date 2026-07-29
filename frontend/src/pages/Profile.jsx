@@ -62,7 +62,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="p-6 md:p-8 space-y-6 max-w-5xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
+    <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-5xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
       {/* Header */}
       <div className="border-b border-line/60 pb-5">
         <h2 className="text-2xl font-poppins font-bold text-ink uppercase tracking-tight">MY PROFILE</h2>

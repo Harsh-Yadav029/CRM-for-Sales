@@ -159,6 +159,22 @@ const Settings = () => {
     }
   };
 
+  const navItems = [
+    { id: 'team', label: 'Team Directory', icon: Users, gate: ['admin', 'manager'] },
+    { id: 'pipeline', label: 'Pipeline Config', icon: Sliders },
+    { id: 'fields', label: 'Custom Parameters', icon: LayoutGrid },
+    { id: 'workflows', label: 'Automated Triggers', icon: Play, gate: ['admin', 'manager'] },
+    { id: 'security', label: 'Security & Logs', icon: Shield, gate: ['admin'] }
+  ];
+
+  const visibleNav = navItems.filter(item => !item.gate || item.gate.includes(user?.role));
+
+  useEffect(() => {
+    if (visibleNav.length > 0 && !visibleNav.some(n => n.id === activeTab)) {
+      setActiveTab(visibleNav[0].id);
+    }
+  }, [user, visibleNav]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -166,16 +182,6 @@ const Settings = () => {
       </div>
     );
   }
-
-  const navItems = [
-    { id: 'team', label: 'Team Directory', icon: Users, gate: ['admin', 'manager'] },
-    { id: 'pipeline', label: 'Pipeline Config', icon: Sliders, gate: ['admin'] },
-    { id: 'fields', label: 'Custom Parameters', icon: LayoutGrid, gate: ['admin'] },
-    { id: 'workflows', label: 'Automated Triggers', icon: Play, gate: ['admin'] },
-    { id: 'security', label: 'Security & Logs', icon: Shield, gate: ['admin'] }
-  ];
-
-  const visibleNav = navItems.filter(item => !item.gate || item.gate.includes(user?.role));
 
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
@@ -324,7 +330,7 @@ const Settings = () => {
           )}
 
           {/* PIPELINE Tab */}
-          {activeTab === 'pipeline' && user?.role === 'admin' && (
+          {activeTab === 'pipeline' && (user?.role === 'admin' || user?.role === 'manager') && (
             <div className="space-y-6">
               <PipelineSettings />
               <BlueprintViewer />
@@ -332,7 +338,7 @@ const Settings = () => {
           )}
 
           {/* CUSTOM FIELDS Tab */}
-          {activeTab === 'fields' && user?.role === 'admin' && (
+          {activeTab === 'fields' && (user?.role === 'admin' || user?.role === 'manager') && (
             <Card variant="raised" className="p-6 bg-white space-y-6">
               <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Layout Builder & Custom fields</h3>
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -414,7 +420,7 @@ const Settings = () => {
           )}
 
           {/* WORKFLOWS AUTOMATION Tab */}
-          {activeTab === 'workflows' && user?.role === 'admin' && (
+          {activeTab === 'workflows' && (user?.role === 'admin' || user?.role === 'manager') && (
             <Card variant="raised" className="p-6 bg-white space-y-6">
               <h3 className="text-xs font-display font-black text-ink uppercase tracking-wider pb-2 border-b border-line">Sales Automation Workflows</h3>
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

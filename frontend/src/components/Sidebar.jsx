@@ -78,17 +78,19 @@ const Sidebar = () => {
 
       {/* Footer Settings / Support */}
       <div className="pt-4 border-t border-[#e7e2d8] space-y-1">
-        <NavLink
-          to="/settings"
-          className={({ isActive: a }) =>
-            `flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-250 ${
-              a ? 'bg-[#e3a62f] text-[#5b3e00]' : 'text-[#5f5e5e] hover:bg-[#ede8de]'
-            }`
-          }
-        >
-          <Settings size={16} />
-          <span>Settings</span>
-        </NavLink>
+        {(user?.role === 'admin' || user?.role === 'manager') && (
+          <NavLink
+            to="/settings"
+            className={({ isActive: a }) =>
+              `flex items-center space-x-3 px-3 py-2 rounded-lg text-xs font-bold transition-all duration-250 ${
+                a ? 'bg-[#e3a62f] text-[#5b3e00]' : 'text-[#5f5e5e] hover:bg-[#ede8de]'
+              }`
+            }
+          >
+            <Settings size={16} />
+            <span>Settings</span>
+          </NavLink>
+        )}
         <button
           onClick={logout}
           className="w-full flex items-center space-x-3 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg text-xs font-bold text-left"

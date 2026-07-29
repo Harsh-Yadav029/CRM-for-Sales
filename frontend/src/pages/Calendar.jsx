@@ -328,7 +328,7 @@ const Calendar = () => {
   const weekDays = getWeekDays(currentDate);
 
   return (
-    <div className="min-h-screen bg-white font-sans flex flex-col">
+    <div className="min-h-screen bg-white font-sans flex flex-col pb-20 md:pb-0">
       {/* 1. Header Layout */}
       <div className="flex items-center justify-between px-6 py-3 border-b border-line select-none">
         <h1 className="text-lg font-poppins font-bold text-ink">My Calendar</h1>

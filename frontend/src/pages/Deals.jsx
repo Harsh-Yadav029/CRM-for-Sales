@@ -24,6 +24,7 @@ const Deals = () => {
   
   const [pipelines, setPipelines] = useState([]);
   const [activePipelineId, setActivePipelineId] = useState('');
+  const [activeMobileStage, setActiveMobileStage] = useState('ALL');
 
   const fetchLeads = async () => {
     try {
@@ -137,14 +138,13 @@ const Deals = () => {
       maximumFractionDigits: 0
     }).format(v);
 
-  // Filter leads based on simple search
   const filteredLeads = leads.filter(l => 
     l.company.toLowerCase().includes(search.toLowerCase()) ||
     l.name.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-paper font-sans">
+    <div className="flex flex-col min-h-screen bg-paper font-sans pb-20 md:pb-6">
       {/* Top Header Search Bar */}
       <header className="h-16 bg-white border-b border-line px-4 sm:px-8 flex items-center justify-between shrink-0">
         <div className="relative w-full max-w-[240px] sm:w-80">
@@ -160,36 +160,61 @@ const Deals = () => {
       </header>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col overflow-hidden px-4 sm:px-8 py-4 sm:py-6">
-        {/* Breadcrumbs & Title */}
-        <div className="mb-6 shrink-0">
-          <h2 className="text-2xl font-poppins font-bold text-ink tracking-tight uppercase">Deal Pipeline</h2>
+      <div className="flex-1 flex flex-col px-4 sm:px-8 py-4 sm:py-6">
+        {/* Title & Mobile Stage Filter Pills */}
+        <div className="mb-4 sm:mb-6 shrink-0 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <h2 className="text-xl sm:text-2xl font-poppins font-bold text-ink tracking-tight uppercase">Deal Pipeline</h2>
+          
+          {/* Mobile Stage Selector Pills */}
+          <div className="flex md:hidden overflow-x-auto custom-scroll pb-2 gap-1.5 text-xs font-bold">
+            <button
+              onClick={() => setActiveMobileStage('ALL')}
+              className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all ${
+                activeMobileStage === 'ALL' ? 'bg-[#7e5700] text-white' : 'bg-white border border-line text-slate-600'
+              }`}
+            >
+              All Columns
+            </button>
+            {stageColumns.map(col => (
+              <button
+                key={col.id}
+                onClick={() => setActiveMobileStage(col.id)}
+                className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all ${
+                  activeMobileStage === col.id ? 'bg-[#7e5700] text-white' : 'bg-white border border-line text-slate-600'
+                }`}
+              >
+                {col.title}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Board Columns Canvas */}
         <main className="flex-1 overflow-x-auto custom-scroll">
-          <div className="flex gap-6 h-full min-w-max pb-4">
-            {stageColumns.map(column => {
-              const columnLeads = filteredLeads.filter(l => column.statuses.includes(l.status));
-              const columnValue = columnLeads.reduce((acc, l) => acc + (l.expectedRevenue || 0), 0);
+          <div className="flex gap-4 sm:gap-6 min-w-full md:min-w-max pb-6 items-start">
+            {stageColumns
+              .filter(col => activeMobileStage === 'ALL' || activeMobileStage === col.id)
+              .map(column => {
+                const columnLeads = filteredLeads.filter(l => column.statuses.includes(l.status));
+                const columnValue = columnLeads.reduce((acc, l) => acc + (l.expectedRevenue || 0), 0);
 
-              return (
-                <div
-                  key={column.id}
-                  className="flex flex-col w-[340px] shrink-0"
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, column.id)}
-                >
-                  {/* Column Header Card */}
-                  <div className={`bg-white rounded-card border border-line/60 ${column.topBorder} p-5 shadow-card mb-4 shrink-0`}>
-                    <div className="flex justify-between items-center">
-                      <span className="text-[11px] font-black text-ink tracking-wider font-sans uppercase">
-                        {column.title}
-                      </span>
-                      <span className="text-[10px] font-bold bg-gold-soft text-[#705d00] w-5 h-5 rounded flex items-center justify-center font-label">
-                        {columnLeads.length}
-                      </span>
-                    </div>
+                return (
+                  <div
+                    key={column.id}
+                    className="flex flex-col w-full md:w-[320px] shrink-0"
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, column.id)}
+                  >
+                    {/* Column Header Card */}
+                    <div className={`bg-white rounded-card border border-line/60 ${column.topBorder} p-5 shadow-card mb-4 shrink-0`}>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[11px] font-black text-ink tracking-wider font-sans uppercase">
+                          {column.title}
+                        </span>
+                        <span className="text-[10px] font-bold bg-gold-soft text-[#705d00] w-5 h-5 rounded flex items-center justify-center font-label">
+                          {columnLeads.length}
+                        </span>
+                      </div>
                     <div className="text-lg font-black font-mono text-ink mt-2 tracking-tight">
                       {fmt(columnValue)}
                     </div>

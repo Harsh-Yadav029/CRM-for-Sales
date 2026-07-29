@@ -210,7 +210,7 @@ const CommunicationHub = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-line/60 pb-5">
         <div>
 
-          <h1 className="text-3xl font-display font-black text-ink uppercase tracking-tight leading-none mt-1">
+          <h1 className="text-3xl font-poppins font-bold text-ink uppercase tracking-tight leading-none mt-1">
             Communication Hub
           </h1>
 

@@ -174,7 +174,7 @@ const ImportWizardModal = ({ onClose, onImportSuccess }) => {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant bg-surface-container-low shrink-0">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">publish</span>
+            <Upload size={18} className="text-primary" />
             <h3 className="font-bold text-sm md:text-base text-on-surface">Prospect Import Wizard</h3>
           </div>
           <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface">

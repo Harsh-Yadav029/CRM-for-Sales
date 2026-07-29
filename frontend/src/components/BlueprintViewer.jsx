@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
-import { Layers, Plus, Trash2, Save, Play, GitCommit, CheckSquare, Settings, HelpCircle, Loader2 } from 'lucide-react';
+import { Layers, Plus, Trash2, Save, Play, GitCommit, CheckSquare, Settings, HelpCircle, Loader2, ChevronRight } from 'lucide-react';
 
 const BlueprintViewer = () => {
   const [pipelines, setPipelines] = useState([]);
@@ -232,7 +232,7 @@ const BlueprintViewer = () => {
                     {/* Node connector line */}
                     {idx < stagesList.length - 1 && (
                       <div className="h-0.5 w-8 bg-surface-container-high shrink-0 relative flex items-center justify-center">
-                        <span className="absolute text-[8px] text-primary material-symbols-outlined">chevron_right</span>
+                        <ChevronRight size={10} className="absolute text-primary" />
                       </div>
                     )}
                   </React.Fragment>

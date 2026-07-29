@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Check } from 'lucide-react';
 
 const BlueprintPath = ({
   steps = [],
@@ -31,13 +32,12 @@ const BlueprintPath = ({
               >
                 {/* Completed stop marker filled animation */}
                 {isCompleted ? (
-                  <motion.span
+                  <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="material-symbols-outlined text-[16px] font-bold"
                   >
-                    check
-                  </motion.span>
+                    <Check size={14} className="stroke-[3]" />
+                  </motion.div>
                 ) : (
                   <span>{idx + 1}</span>
                 )}

@@ -189,7 +189,7 @@ const Leads = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight">LEADS</h2>
+          <h2 className="text-2xl font-poppins font-bold text-ink uppercase tracking-tight">LEADS</h2>
         </div>
         <Button onClick={openCreate} icon={Plus}>
           Capture New Lead

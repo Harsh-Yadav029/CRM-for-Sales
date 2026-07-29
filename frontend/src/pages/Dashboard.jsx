@@ -153,19 +153,19 @@ const Dashboard = () => {
       {/* Page Header */}
       <div className="flex justify-between items-end">
         <div>
-          <h2 className="font-display text-2xl font-black text-[#7e5700] uppercase tracking-wide">Dashboard</h2>
+          <h2 className="font-poppins text-2xl font-bold text-[#7e5700] uppercase tracking-wide">Dashboard</h2>
           <p className="text-xs text-[#5f5e5e] mt-1">Welcome back, {user?.name || 'Alex Mercer'}. Here is what's happening with your pipeline today.</p>
         </div>
         <div className="flex space-x-2">
           <button className="bg-white border border-[#e7e2d8] px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1 hover:bg-[#f8f3e9] active:scale-98 transition-all">
-            <span className="material-symbols-outlined text-sm">calendar_today</span>
+            <CalendarDays size={14} />
             <span>Last 30 Days</span>
           </button>
           <button
             onClick={() => window.print()}
             className="bg-white border border-[#e7e2d8] px-4 py-2 rounded-lg font-bold text-xs flex items-center space-x-1 hover:bg-[#f8f3e9] active:scale-98 transition-all"
           >
-            <span className="material-symbols-outlined text-sm">download</span>
+            <Download size={14} />
             <span>Export Report</span>
           </button>
         </div>
@@ -175,19 +175,19 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Total Revenue */}
         <div className="bg-white border border-[#e7e2d8] rounded-xl p-6 shadow-sm hover:translate-y-[-2px] hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all">
-            <span className="material-symbols-outlined text-[64px]" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
+          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all text-[#7e5700]">
+            <DollarSign size={56} />
           </div>
           <p className="font-sans text-[10px] font-bold text-[#5f5e5e] mb-1 uppercase tracking-wider">Total Revenue Won</p>
           <p className="font-mono text-2xl font-bold text-[#7e5700] mb-2">{fmt(totalRevenue)}</p>
           {totalRevenue > 0 ? (
             <div className="flex items-center space-x-1 text-[#006e2d] font-bold text-xs">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <TrendingUp size={14} />
               <span>+12.5% vs last month</span>
             </div>
           ) : (
             <div className="flex items-center space-x-1 text-[#5f5e5e] font-bold text-xs">
-              <span className="material-symbols-outlined text-sm">trending_flat</span>
+              <ArrowRight size={14} />
               <span>0% vs last month</span>
             </div>
           )}
@@ -195,19 +195,19 @@ const Dashboard = () => {
 
         {/* New Leads */}
         <div className="bg-white border border-[#e7e2d8] rounded-xl p-6 shadow-sm hover:translate-y-[-2px] hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all">
-            <span className="material-symbols-outlined text-[64px]" style={{ fontVariationSettings: "'FILL' 1" }}>person_add</span>
+          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all text-[#7e5700]">
+            <Users size={56} />
           </div>
           <p className="font-sans text-[10px] font-bold text-[#5f5e5e] mb-1 uppercase tracking-wider">Active Deals</p>
           <p className="font-mono text-2xl font-bold text-[#7e5700] mb-2">{activeDeals}</p>
           {activeDeals > 0 ? (
             <div className="flex items-center space-x-1 text-[#006e2d] font-bold text-xs">
-              <span className="material-symbols-outlined text-sm">trending_up</span>
+              <TrendingUp size={14} />
               <span>+8.2% vs last month</span>
             </div>
           ) : (
             <div className="flex items-center space-x-1 text-[#5f5e5e] font-bold text-xs">
-              <span className="material-symbols-outlined text-sm">trending_flat</span>
+              <ArrowRight size={14} />
               <span>0% vs last month</span>
             </div>
           )}
@@ -215,19 +215,19 @@ const Dashboard = () => {
 
         {/* Win Rate */}
         <div className="bg-white border border-[#e7e2d8] rounded-xl p-6 shadow-sm hover:translate-y-[-2px] hover:shadow-md transition-all relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all">
-            <span className="material-symbols-outlined text-[64px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+          <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-all text-[#7e5700]">
+            <CheckCircle2 size={56} />
           </div>
           <p className="font-sans text-[10px] font-bold text-[#5f5e5e] mb-1 uppercase tracking-wider">Conversion Rate</p>
           <p className="font-mono text-2xl font-bold text-[#7e5700] mb-2">{winRate}%</p>
           {winRate > 0 ? (
             <div className="flex items-center space-x-1 text-[#ba1a1a] font-bold text-xs">
-              <span className="material-symbols-outlined text-sm">trending_down</span>
+              <TrendingDown size={14} />
               <span>-1.4% vs last month</span>
             </div>
           ) : (
             <div className="flex items-center space-x-1 text-[#5f5e5e] font-bold text-xs">
-              <span className="material-symbols-outlined text-sm">trending_flat</span>
+              <ArrowRight size={14} />
               <span>0% vs last month</span>
             </div>
           )}
@@ -329,7 +329,7 @@ const Dashboard = () => {
                           : 'border-slate-300 bg-white hover:border-[#e3a62f]'
                         }`}
                     >
-                      {task.completed && <span className="material-symbols-outlined text-[10px] font-bold">check</span>}
+                      {task.completed && <CheckCircle2 size={12} />}
                     </button>
                     <div className="min-w-0 flex-1">
                       <p className={`text-xs font-bold text-[#1d1c16] leading-tight transition-all ${task.completed ? 'line-through text-slate-450' : 'group-hover:text-[#7e5700]'}`}>
@@ -410,7 +410,7 @@ const Dashboard = () => {
       <div className="bg-[#f3ede3] border border-[#e7e2d8] rounded-xl p-6 flex items-center justify-between shadow-sm">
         <div className="flex items-center space-x-6">
           <div className="w-12 h-12 bg-[#7e5700] rounded-xl flex items-center justify-center relative shadow-md">
-            <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>psychology</span>
+            <Bot size={24} className="text-white" />
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-[#006e2d] rounded-full border-2 border-white animate-pulse"></div>
           </div>
           <div>

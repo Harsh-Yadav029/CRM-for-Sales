@@ -13,6 +13,7 @@ import {
   Clock, 
   Calendar, 
   CheckSquare, 
+  Check, 
   Sparkles, 
   Bot, 
   X, 
@@ -332,7 +333,7 @@ const LeadDetails = () => {
           >
             {isCompleted ? (
               <div className="w-4.5 h-4.5 rounded-full border border-gold bg-gold/10 flex items-center justify-center text-gold">
-                <span className="material-symbols-outlined text-[10px] font-bold">check</span>
+                <Check size={10} className="stroke-[3]" />
               </div>
             ) : (
               <div className="w-4.5 h-4.5 rounded-full border border-slate-350 bg-white hover:border-gold transition-colors" />

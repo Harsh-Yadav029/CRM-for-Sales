@@ -137,7 +137,7 @@ const Reports = () => {
       {/* Title & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight">ANALYTICS BUILDER</h2>
+          <h2 className="text-2xl font-poppins font-bold text-ink uppercase tracking-tight">ANALYTICS BUILDER</h2>
         </div>
 
         <Button

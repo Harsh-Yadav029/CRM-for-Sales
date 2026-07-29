@@ -41,11 +41,10 @@ export default {
         stitchTertiaryContainer: "#4ac86a"
       },
       fontFamily: {
-        display: ['"Plus Jakarta Sans"', 'sans-serif'],
+        display: ['"Space Grotesk"', 'sans-serif'],
         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
-        montserrat: ['"Montserrat"', 'sans-serif'],
-        accent: ['"Montserrat"', 'sans-serif'],
+        poppins: ['"Poppins"', 'sans-serif'],
       },
       fontSize: {
         '2xs': ['0.75rem', { lineHeight: '1rem' }],

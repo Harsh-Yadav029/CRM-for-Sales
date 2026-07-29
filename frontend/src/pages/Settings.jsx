@@ -181,7 +181,7 @@ const Settings = () => {
     <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
       {/* Title */}
       <div>
-        <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight">SYSTEM SETTINGS</h2>
+        <h2 className="text-2xl font-poppins font-bold text-ink uppercase tracking-tight">SYSTEM SETTINGS</h2>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

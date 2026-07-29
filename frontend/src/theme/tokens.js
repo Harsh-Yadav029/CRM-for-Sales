@@ -11,7 +11,7 @@ export const TOKENS = {
     danger: "#DC2626"
   },
   fonts: {
-    display: '"Plus Jakarta Sans", sans-serif',
+    display: '"Space Grotesk", sans-serif',
     sans: '"Plus Jakarta Sans", sans-serif',
     mono: '"IBM Plex Mono", monospace'
   },

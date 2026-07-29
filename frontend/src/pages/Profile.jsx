@@ -65,7 +65,7 @@ const Profile = () => {
     <div className="p-6 md:p-8 space-y-6 max-w-5xl mx-auto pb-24 md:pb-8 font-sans bg-paper">
       {/* Header */}
       <div className="border-b border-line/60 pb-5">
-        <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight">MY PROFILE</h2>
+        <h2 className="text-2xl font-poppins font-bold text-ink uppercase tracking-tight">MY PROFILE</h2>
       </div>
 
       {/* Main Profile Info Card */}

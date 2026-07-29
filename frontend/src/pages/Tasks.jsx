@@ -7,6 +7,7 @@ import {
   Plus, 
   Calendar as CalendarIcon, 
   CheckSquare, 
+  Check, 
   Square, 
   X, 
   Trash2, 
@@ -227,7 +228,7 @@ const Tasks = () => {
           >
             {isCompleted ? (
               <div className="w-5 h-5 rounded-full border border-gold bg-gold/10 flex items-center justify-center text-gold">
-                <span className="material-symbols-outlined text-[12px] font-bold">check</span>
+                <Check size={12} className="stroke-[3]" />
               </div>
             ) : (
               <div className="w-5 h-5 rounded-full border border-slate-350 bg-white hover:border-gold transition-colors" />
@@ -302,7 +303,7 @@ const Tasks = () => {
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Schedule & Execution</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Activities Command</h2>
+          <h2 className="text-2xl font-poppins font-bold text-ink uppercase tracking-tight mt-1">Activities Command</h2>
           <p className="text-xs text-slate-500 mt-1">
             {openActivities.length} open activities remaining out of {activities.length} total stops
           </p>

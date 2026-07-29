@@ -120,7 +120,7 @@ const Accounts = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-gold font-mono">Company Accounts</span>
-          <h2 className="text-2xl font-display font-black text-ink uppercase tracking-tight mt-1">Client Accounts</h2>
+          <h2 className="text-2xl font-poppins font-bold text-ink uppercase tracking-tight mt-1">Client Accounts</h2>
           <p className="text-xs text-slate-500 mt-1">Manage client organizations and business entities</p>
         </div>
 

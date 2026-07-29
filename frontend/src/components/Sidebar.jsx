@@ -10,7 +10,8 @@ import {
   CalendarDays,
   LogOut,
   MessageSquare,
-  Settings
+  Settings,
+  Plus
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -71,7 +72,7 @@ const Sidebar = () => {
         onClick={() => navigate('/leads')}
         className="w-full py-2.5 bg-[#7e5700] text-white font-bold rounded-lg text-xs hover:brightness-105 active:scale-98 transition-all flex items-center justify-center space-x-2"
       >
-        <span className="material-symbols-outlined text-sm">add</span>
+        <Plus size={16} />
         <span>New Lead</span>
       </button>
 

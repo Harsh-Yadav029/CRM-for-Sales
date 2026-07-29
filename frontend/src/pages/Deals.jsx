@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
-import { Loader2, Calendar, MoreVertical, Clock } from 'lucide-react';
+import { Loader2, Calendar, MoreVertical, Clock, Search } from 'lucide-react';
 
 const STAGE_WEIGHTS = {
   'New': 0.1,
@@ -148,7 +148,7 @@ const Deals = () => {
       {/* Top Header Search Bar */}
       <header className="h-16 bg-white border-b border-line px-8 flex items-center justify-between shrink-0">
         <div className="relative w-80">
-          <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
           <input
             type="text"
             value={search}
@@ -163,7 +163,7 @@ const Deals = () => {
       <div className="flex-1 flex flex-col overflow-hidden px-8 py-6">
         {/* Breadcrumbs & Title */}
         <div className="mb-6 shrink-0">
-          <h2 className="text-2xl font-black text-ink tracking-tight font-display uppercase">Deal Pipeline</h2>
+          <h2 className="text-2xl font-poppins font-bold text-ink tracking-tight uppercase">Deal Pipeline</h2>
         </div>
 
         {/* Board Columns Canvas */}

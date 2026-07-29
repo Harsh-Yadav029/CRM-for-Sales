@@ -1,4 +1,5 @@
 import React from 'react';
+import { Compass } from 'lucide-react';
 
 const EmptyState = ({
   title = 'No one on this path yet',
@@ -14,7 +15,7 @@ const EmptyState = ({
         {/* Schematic Box */}
         <div className="absolute inset-0 border border-gold/40 rounded-lg flex items-center justify-center">
           <div className="w-16 h-16 border border-dashed border-gold/30 rounded flex items-center justify-center">
-            <span className="material-symbols-outlined text-gold/60 text-3xl font-light">architecture</span>
+            <Compass className="text-gold/60 w-8 h-8 stroke-[1.5]" />
           </div>
         </div>
         {/* Custom gold dashed connecting lines */}

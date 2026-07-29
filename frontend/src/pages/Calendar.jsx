@@ -331,7 +331,7 @@ const Calendar = () => {
     <div className="min-h-screen bg-white font-sans flex flex-col">
       {/* 1. Header Layout */}
       <div className="flex items-center justify-between px-6 py-3 border-b border-line select-none">
-        <h1 className="text-lg font-bold text-ink">My Calendar</h1>
+        <h1 className="text-lg font-poppins font-bold text-ink">My Calendar</h1>
 
         {/* View Switcher Pill */}
         <div className="flex border border-line bg-[#F1F3F6] p-0.5 rounded-full text-xs font-semibold">

@@ -37,12 +37,13 @@ const BlueprintViewer = () => {
       }
 
       let loadedBlueprints = [];
-      try {
-        const blueRes = await api.get('/api/blueprints');
-        loadedBlueprints = blueRes.data;
-      } catch (_) {
-        // Fallback gracefully if blueprints route is disabled or not present
-      }
+      // Backend route for blueprints does not exist yet.
+      // try {
+      //   const blueRes = await api.get('/api/blueprints');
+      //   loadedBlueprints = blueRes.data;
+      // } catch (_) {
+      //   // Fallback gracefully if blueprints route is disabled or not present
+      // }
       
       // Seed a default pipeline if none exist
       if (loadedPipes.length === 0) {

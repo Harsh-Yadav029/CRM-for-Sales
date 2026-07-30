@@ -56,9 +56,11 @@ const Navbar = ({ title }) => {
           <button onClick={() => navigate('/calendar')} className="hover:text-[#7e5700] transition-colors">
             <Calendar size={18} />
           </button>
-          <button onClick={() => navigate('/settings')} className="hover:text-[#7e5700] transition-colors">
-            <Settings size={18} />
-          </button>
+          {(activeUser?.role === 'admin' || activeUser?.role === 'manager') && (
+            <button onClick={() => navigate('/settings')} className="hover:text-[#7e5700] transition-colors">
+              <Settings size={18} />
+            </button>
+          )}
         </div>
 
         {/* Notifications Dropdown */}

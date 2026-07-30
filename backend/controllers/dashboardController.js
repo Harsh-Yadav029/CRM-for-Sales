@@ -10,102 +10,66 @@ const getStats = async (req, res, next) => {
       query.assignedTo = req.user._id;
     }
 
-    const totalLeads = await Lead.countDocuments(query);
-    
-    const activeDeals = await Lead.countDocuments({
-      ...query,
-      status: { $nin: ['Won', 'Lost'] }
-    });
-
-    const wonDeals = await Lead.countDocuments({
-      ...query,
-      status: 'Won'
-    });
-
-    const lostDeals = await Lead.countDocuments({
-      ...query,
-      status: 'Lost'
-    });
-
-    const revenueData = await Lead.aggregate([
-      { $match: query },
-      {
-        $group: {
-          _id: null,
-          totalExpected: { $sum: '$expectedRevenue' },
-          totalWon: {
-            $sum: {
-              $cond: [{ $eq: ['$status', 'Won'] }, '$expectedRevenue', 0]
-            }
-          }
-        }
-      }
-    ]);
-
-    const expectedRevenue = revenueData.length > 0 ? revenueData[0].totalExpected : 0;
-    const wonRevenue = revenueData.length > 0 ? revenueData[0].totalWon : 0;
-
-    const closedDeals = wonDeals + lostDeals;
-    const conversionRate = closedDeals > 0 ? Math.round((wonDeals / closedDeals) * 100) : 0;
-
-    const recentLeads = await Lead.find(query)
-      .populate('assignedTo', 'name')
-      .sort({ createdAt: -1 })
-      .limit(5);
-
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const endOfToday = new Date();
     endOfToday.setHours(23, 59, 59, 999);
 
-    // Today's Leads
-    const todayLeads = await Lead.find({
-      ...query,
-      createdAt: { $gte: today, $lte: endOfToday }
-    })
-    .populate('assignedTo', 'name')
-    .sort({ createdAt: -1 });
-
-    // Today's Meetings (Calendar Events)
     const meetingsQuery = {
       startTime: { $gte: today, $lte: endOfToday },
       status: { $ne: 'cancelled' }
     };
-    if (req.user.role === 'sales' || req.user.role === 'rep') {
-      meetingsQuery.assignedTo = req.user._id;
-    }
-    const todayMeetings = await Event.find(meetingsQuery)
-      .populate('assignedTo', 'name')
-      .sort({ startTime: 1 });
-
-    // Deals Section (Active deals in the pipeline)
-    const activeDealsList = await Lead.find({
-      ...query,
-      status: { $nin: ['Won', 'Lost'] }
-    })
-    .populate('assignedTo', 'name')
-    .sort({ expectedRevenue: -1 })
-    .limit(5);
-
-    // Deals Closing This Month (Negotiation / Proposal Sent / Demo Scheduled)
-    const dealsClosingThisMonth = await Lead.find({
-      ...query,
-      status: { $in: ['Proposal Sent', 'Negotiation', 'Demo Scheduled'] }
-    })
-    .populate('assignedTo', 'name')
-    .sort({ expectedRevenue: -1 })
-    .limit(5);
-
     const tasksQuery = {
       dueDate: { $gte: today, $lte: endOfToday }
     };
 
     if (req.user.role === 'sales' || req.user.role === 'rep') {
+      meetingsQuery.assignedTo = req.user._id;
       tasksQuery.assignedTo = req.user._id;
     }
 
-    const todaysTasks = await Task.find(tasksQuery)
-      .populate('assignedTo', 'name');
+    // Execute all database queries in parallel for maximum performance
+    const [
+      totalLeads,
+      activeDeals,
+      wonDeals,
+      lostDeals,
+      revenueData,
+      recentLeads,
+      todayLeads,
+      todayMeetings,
+      activeDealsList,
+      dealsClosingThisMonth,
+      todaysTasks
+    ] = await Promise.all([
+      Lead.countDocuments(query),
+      Lead.countDocuments({ ...query, status: { $nin: ['Won', 'Lost'] } }),
+      Lead.countDocuments({ ...query, status: 'Won' }),
+      Lead.countDocuments({ ...query, status: 'Lost' }),
+      Lead.aggregate([
+        { $match: query },
+        {
+          $group: {
+            _id: null,
+            totalExpected: { $sum: '$expectedRevenue' },
+            totalWon: {
+              $sum: { $cond: [{ $eq: ['$status', 'Won'] }, '$expectedRevenue', 0] }
+            }
+          }
+        }
+      ]),
+      Lead.find(query).populate('assignedTo', 'name').sort({ createdAt: -1 }).limit(5),
+      Lead.find({ ...query, createdAt: { $gte: today, $lte: endOfToday } }).populate('assignedTo', 'name').sort({ createdAt: -1 }),
+      Event.find(meetingsQuery).populate('assignedTo', 'name').sort({ startTime: 1 }),
+      Lead.find({ ...query, status: { $nin: ['Won', 'Lost'] } }).populate('assignedTo', 'name').sort({ expectedRevenue: -1 }).limit(5),
+      Lead.find({ ...query, status: { $in: ['Proposal Sent', 'Negotiation', 'Demo Scheduled'] } }).populate('assignedTo', 'name').sort({ expectedRevenue: -1 }).limit(5),
+      Task.find(tasksQuery).populate('assignedTo', 'name')
+    ]);
+
+    const expectedRevenue = revenueData.length > 0 ? revenueData[0].totalExpected : 0;
+    const wonRevenue = revenueData.length > 0 ? revenueData[0].totalWon : 0;
+    const closedDeals = wonDeals + lostDeals;
+    const conversionRate = closedDeals > 0 ? Math.round((wonDeals / closedDeals) * 100) : 0;
 
     res.json({
       totalLeads,

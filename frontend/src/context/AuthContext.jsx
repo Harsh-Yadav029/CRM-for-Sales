@@ -13,8 +13,12 @@ export const AuthProvider = ({ children }) => {
       const savedUser = localStorage.getItem('user');
 
       if (token && savedUser) {
+        // Render instantly using cached data
+        setUser(JSON.parse(savedUser));
+        setLoading(false); 
+        
+        // Sync silently in background
         try {
-          setUser(JSON.parse(savedUser));
           const res = await api.get('/api/auth/profile');
           setUser(res.data);
           localStorage.setItem('user', JSON.stringify(res.data));
@@ -31,8 +35,8 @@ export const AuthProvider = ({ children }) => {
         } catch (err) {
           console.log('No active session found.');
         }
+        setLoading(false); // End loading if no cached user was found
       }
-      setLoading(false);
     };
 
     checkUserLoggedIn();

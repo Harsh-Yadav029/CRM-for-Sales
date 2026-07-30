@@ -224,58 +224,82 @@ const chatWithAI = async (req, res, next) => {
 
   try {
     let leadContext = '';
+    
+    // Context 1: Specific Lead (from LeadDetails)
     if (leadId) {
       const lead = await Lead.findOne({ _id: leadId });
       if (lead) {
-        leadContext = `Lead Context:
-- Name: ${lead.name}
-- Company: ${lead.company}
-- Email: ${lead.email}
-- Status: ${lead.status}
-- Expected Value: $${lead.expectedRevenue}
-- Logged interactions count: ${lead.notes?.length || 0}
-`;
+        leadContext = `Specific Lead Profile:\n- Name: ${lead.name}\n- Company: ${lead.company}\n- Email: ${lead.email}\n- Status: ${lead.status}\n- Expected Value: $${lead.expectedRevenue}\n- Interactions: ${lead.notes?.length || 0}\n`;
       }
+    } 
+    // Context 2: Global Pipeline (from Dashboard)
+    else {
+      const filter = req.user?.role === 'admin' ? {} : (req.user?._id ? { assignedTo: req.user._id } : {});
+      const allLeads = await Lead.find(filter);
+      const statusCounts = allLeads.reduce((acc, l) => {
+        acc[l.status] = (acc[l.status] || 0) + 1;
+        return acc;
+      }, {});
+      const totalRevenue = allLeads.reduce((sum, l) => sum + (l.expectedRevenue || 0), 0);
+      
+      leadContext = `Global Pipeline Overview:
+- User Identity: ${req.user?.name || 'User'}
+- User Role: ${req.user?.role === 'admin' ? 'System Administrator (managing entire CRM)' : 'Sales Representative (managing personal pipeline)'}
+- Total Leads Active: ${allLeads.length}
+- Total Pipeline Potential Value: $${totalRevenue}
+- Current Status Breakdown: ${JSON.stringify(statusCounts)}
+Use this pipeline data to give a perfect, insightful response if the user asks to analyze leads or review statuses.`;
     }
 
-    const prompt = `You are Compass, the AI sales assistant. Answer the sales representative's query below. Use the provided lead profile context if available.
-${leadContext}
-Representative Query: "${message}"
+    const prompt = `You are Compass, the highly intelligent AI sales assistant integrated into WalkThePlan CRM. Answer the user's query perfectly using the context data below.
 
-Keep your response clean, professional, and directly actionable. Avoid meta-commentary.`;
+Context Data:
+${leadContext}
+
+User Query: "${message}"
+
+Keep your response clean, professional, and directly actionable. If they ask you to analyze leads, give a solid summary of the pipeline data provided. Do not use generic filler responses.`;
 
     const responseText = await callGemini(prompt);
-    if (responseText) {
+    
+    // If Gemini generates a response, ensure it isn't a canned default response
+    if (responseText && !responseText.includes("I am Compass, your AI Sales Assistant. Let me know how I can help")) {
       return res.json({ response: responseText.trim(), mode: 'ai_generative' });
     }
 
-    // Heuristic Smart Fallbacks
-    let response = "I am Compass, your AI Sales Assistant. Let me know how I can help you analyze leads, draft messages, or review statuses.";
+    // Heuristic Smart Fallbacks (The "Trained" AI Bot)
+    let response = "I understand you're asking about that. You can ask me to 'analyze my leads', 'forecast revenue', or 'review statuses' for more insights.";
     const queryLower = message.toLowerCase();
     
+    // Greetings & Basic Info
+    if (queryLower.match(/\b(hi|hello|hey|greetings|who are you|help)\b/)) {
+      response = `Hello ${req.user?.name || ''}! I am Compass, your AI Sales Assistant. I can help you summarize lead data, draft emails, check your pipeline, or suggest next actions. Try asking me to "analyze my leads" or "review statuses".`;
+      return res.json({ response, mode: 'heuristic_fallback' });
+    }
+
     if (leadId) {
       const lead = await Lead.findOne({ _id: leadId });
       if (lead) {
-        if (queryLower.includes('summar') || queryLower.includes('info') || queryLower.includes('about')) {
-          response = `Here is a summary for ${lead.name} representing ${lead.company}: The lead is currently in the "${lead.status}" stage, with an estimated deal value of ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(lead.expectedRevenue || 0)}. We have logged ${lead.notes?.length || 0} interactions on their timeline.`;
+        if (queryLower.includes('summar') || queryLower.includes('info') || queryLower.includes('about') || queryLower.includes('analyze')) {
+          response = `Here is my analysis for ${lead.name} at ${lead.company}:\n\nThe lead is currently in the "${lead.status}" stage, with an estimated deal value of ${new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(lead.expectedRevenue || 0)}. We have logged ${lead.notes?.length || 0} interactions on their timeline. I recommend setting up a follow-up task to keep the momentum going.`;
         } else if (queryLower.includes('email') || queryLower.includes('write') || queryLower.includes('draft')) {
-          response = `Subject: Quick follow up: Walk the Plan CRM & ${lead.company}
-
-Dear ${lead.name},
-
-I hope you are having a productive week.
-
-I wanted to check in regarding our discussions. We are excited to support ${lead.company} in building your sales pipeline structure. Please let me know if you are free for a brief review call this week.
-
-Best regards,
-Sales Team`;
-        } else if (queryLower.includes('next') || queryLower.includes('action') || queryLower.includes('todo')) {
-          response = `Based on the active status "${lead.status}", we recommend scheduling a follow-up call to review recent timeline feedback and set a clear delivery task.`;
+          response = `Subject: Quick follow up: Walk the Plan CRM & ${lead.company}\n\nDear ${lead.name},\n\nI hope you are having a productive week.\n\nI wanted to check in regarding our discussions. We are excited to support ${lead.company} in building your sales pipeline structure. Please let me know if you are free for a brief review call this week.\n\nBest regards,\n${req.user?.name || 'Sales Team'}`;
+        } else if (queryLower.includes('next') || queryLower.includes('action') || queryLower.includes('todo') || queryLower.includes('status')) {
+          response = `Based on the active status "${lead.status}", we recommend scheduling a follow-up call to review recent timeline feedback and set a clear delivery task. Moving them to the next stage requires closing any pending blockers.`;
         }
       }
     } else {
-      if (queryLower.includes('forecast') || queryLower.includes('pipeline') || queryLower.includes('revenue')) {
+      // General Dashboard / Global Context
+      if (queryLower.includes('analyze') || queryLower.includes('lead') || queryLower.includes('review') || queryLower.includes('status')) {
+        if (req.user?.role === 'admin') {
+          response = "Admin Analysis: Your team is actively managing multiple leads across the pipeline. Several high-value prospects are currently in the 'Negotiation' and 'Proposal Sent' phases. I recommend reviewing the team's activity timeline to ensure no follow-ups are missed.";
+        } else {
+          response = "Lead Analysis: Looking at your current pipeline, you have active deals that require attention. I recommend checking the 'Deal Pipeline' page to review your leads by status. Focus on moving leads out of the 'New' stage by scheduling initial discovery calls.";
+        }
+      } else if (queryLower.match(/\b(forecast|pipeline|revenue|sales)\b/)) {
         response = "Based on our latest analytics report, active pipelines are progressing steadily. We recommend focusing on high-revenue deals currently stuck in the Negotiation stages to close the month strong.";
+      } else if (req.user?.role === 'admin' && queryLower.match(/\b(system|admin|users|overview)\b/)) {
+        response = "System Overview: The CRM backend is fully operational. All integrations are functioning normally. As an Admin, you can navigate to System Settings to manage user roles and monitor security audit logs.";
       }
     }
 

@@ -43,7 +43,7 @@ const sendEmail = async (req, res, next) => {
       return next(new Error('Subject and body are required'));
     }
 
-    // Log the communication as an activity in the timeline
+    // Log the communication as an activity in the timeline (Internal notes)
     lead.notes.push({
       type: 'email',
       text: body,
@@ -53,6 +53,17 @@ const sendEmail = async (req, res, next) => {
     });
 
     await lead.save();
+
+    // Log to global ActivityTimeline so it shows up in Communication Hub
+    const ActivityTimeline = require('../models/ActivityTimeline');
+    await ActivityTimeline.create({
+      clientType: 'Lead',
+      clientId: leadId,
+      userId: req.user._id,
+      activityType: 'Email Sent',
+      description: `Outbound email dispatched to ${lead.email}: "${subject}"`
+    });
+
 
     // Send real email via Nylas if configured
     let dispatchedReal = false;
@@ -123,6 +134,17 @@ const logCall = async (req, res, next) => {
     });
 
     await lead.save();
+
+    // Log to global ActivityTimeline so it shows up in Communication Hub
+    const ActivityTimeline = require('../models/ActivityTimeline');
+    await ActivityTimeline.create({
+      clientType: 'Lead',
+      clientId: leadId,
+      userId: req.user._id,
+      activityType: 'Call Completed',
+      description: `Outbound call logs - duration: ${duration || 0}s, status: ${status || 'completed'}. Notes: ${notes || ''}`
+    });
+
 
     const updatedLead = await Lead.findById(leadId)
       .populate('assignedTo', 'name email')

@@ -241,9 +241,9 @@ const Deals = () => {
                         >
                           <div className="flex justify-between items-center mb-3">
                             <span className={priority.class}>{priority.label}</span>
-                            <button className="text-slate-400 hover:text-slate-600 transition-colors">
+                            <Link to={`/leads/${lead._id}`} title="View Deal Details" className="text-slate-400 hover:text-slate-600 transition-colors">
                               <MoreVertical size={14} />
-                            </button>
+                            </Link>
                           </div>
 
                           <h4 className="font-extrabold text-slate-900 text-sm tracking-tight leading-snug group-hover:text-primary transition-colors">

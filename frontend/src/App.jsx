@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { VoiceProvider } from './context/VoiceContext';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
-import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Leads from './pages/Leads';
@@ -38,7 +37,7 @@ const ProtectedLayout = ({ children }) => {
     );
   }
 
-  if (!user) return <Navigate to="/landing" replace />;
+  if (!user) return <Navigate to="/login" replace />;
 
   const titles = {
     '/': 'Home',

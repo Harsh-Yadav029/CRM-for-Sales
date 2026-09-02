@@ -14,7 +14,6 @@ import {
   Loader2,
   Lock,
   Mail,
-  User as UserIcon,
   Sparkles,
   TrendingUp,
   Compass,
@@ -36,8 +35,7 @@ const LandingPage = ({ showLoginOnInit = false }) => {
 
   // Modal & Auth state
   const [showAuthModal, setShowAuthModal] = useState(showLoginOnInit);
-  const [isRegister, setIsRegister] = useState(false);
-  const [authForm, setAuthForm] = useState({ name: '', email: '', password: '' });
+  const [authForm, setAuthForm] = useState({ email: '', password: '' });
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState('');
 
@@ -54,11 +52,10 @@ const LandingPage = ({ showLoginOnInit = false }) => {
     }
   }, [showLoginOnInit, location.pathname]);
 
-  const handleOpenAuth = (register = false) => {
+  const handleOpenAuth = () => {
     if (user) {
       navigate('/');
     } else {
-      setIsRegister(register);
       setAuthError('');
       setShowAuthModal(true);
     }
@@ -76,22 +73,10 @@ const LandingPage = ({ showLoginOnInit = false }) => {
     setAuthError('');
     setAuthLoading(true);
     try {
-      if (isRegister) {
-        const { data } = await api.post('/api/auth/register', {
-          name: authForm.name,
-          email: authForm.email,
-          password: authForm.password,
-          role: 'admin'
-        });
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data));
-        window.location.href = '/';
-      } else {
-        await login(authForm.email, authForm.password);
-        window.location.href = '/';
-      }
+      await login(authForm.email, authForm.password);
+      window.location.href = '/';
     } catch (err) {
-      setAuthError(err.response?.data?.message || 'Authentication failed');
+      setAuthError(err.response?.data?.message || 'Authentication failed. Please verify your credentials.');
     } finally {
       setAuthLoading(false);
     }
@@ -158,7 +143,7 @@ const LandingPage = ({ showLoginOnInit = false }) => {
               </button>
             ) : (
               <button
-                onClick={() => handleOpenAuth(false)}
+                onClick={handleOpenAuth}
                 className="px-4 py-2 rounded-lg bg-[#e3a62f] text-[#5b3e00] font-bold text-xs hover:bg-[#fbbb44] active:scale-98 transition-all flex items-center space-x-1.5 shadow-xs"
               >
                 <span>Sign In</span>
@@ -199,7 +184,7 @@ const LandingPage = ({ showLoginOnInit = false }) => {
           {/* Call to actions */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto mb-10">
             <button
-              onClick={() => handleOpenAuth(false)}
+              onClick={handleOpenAuth}
               className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#e3a62f] hover:bg-[#fbbb44] text-[#5b3e00] font-bold text-xs sm:text-sm transition-all flex items-center justify-center space-x-2 shadow-sm active:scale-95"
             >
               <span>Launch Studio CRM</span>
@@ -838,17 +823,11 @@ const LandingPage = ({ showLoginOnInit = false }) => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 max-w-md mx-auto">
             <button
-              onClick={() => handleOpenAuth(true)}
+              onClick={handleOpenAuth}
               className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-[#e3a62f] hover:bg-[#fbbb44] text-[#5b3e00] font-bold text-xs sm:text-sm transition-all shadow-sm flex items-center justify-center space-x-2 active:scale-95"
             >
-              <span>Get Started</span>
-              <ArrowRight size={16} />
-            </button>
-            <button
-              onClick={() => handleOpenAuth(false)}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-white border border-[#e7e2d8] text-[#1d1c16] font-semibold text-xs sm:text-sm hover:bg-[#ede8de] transition-all"
-            >
               <span>Sign In to Studio</span>
+              <ArrowRight size={16} />
             </button>
           </div>
         </div>
@@ -881,7 +860,7 @@ const LandingPage = ({ showLoginOnInit = false }) => {
           <div className="flex items-center space-x-6 text-xs font-semibold text-[#5f5e5e]">
             <a href="#features" className="hover:text-[#7e5700] transition-colors">Features</a>
             <a href="#showcase" className="hover:text-[#7e5700] transition-colors">Showcase</a>
-            <button onClick={() => handleOpenAuth(false)} className="hover:text-[#7e5700] transition-colors">
+            <button onClick={handleOpenAuth} className="hover:text-[#7e5700] transition-colors">
               Sign In
             </button>
           </div>
@@ -889,7 +868,7 @@ const LandingPage = ({ showLoginOnInit = false }) => {
       </footer>
 
       {/* ───────────────────────────────────────────────────────────────────────── */}
-      {/* 11. AUTH POPUP MODAL (SIGN IN / REGISTER) */}
+      {/* 11. AUTH POPUP MODAL (EXCLUSIVE TO SIGN IN) */}
       {/* ───────────────────────────────────────────────────────────────────────── */}
       {showAuthModal && (
         <div
@@ -908,7 +887,7 @@ const LandingPage = ({ showLoginOnInit = false }) => {
                 </div>
                 <div>
                   <h3 className="font-display font-bold text-sm text-[#7e5700] uppercase">
-                    {isRegister ? 'Create Studio Workspace' : 'Sign In to Workspace'}
+                    Sign In to Workspace
                   </h3>
                   <p className="text-[10px] text-[#5f5e5e] font-mono">Walk The Plan Sales CRM</p>
                 </div>
@@ -952,23 +931,6 @@ const LandingPage = ({ showLoginOnInit = false }) => {
 
             {/* Form */}
             <form onSubmit={handleAuthSubmit} className="space-y-4">
-              {isRegister && (
-                <div>
-                  <label className="block text-[10px] font-mono uppercase text-[#5f5e5e] font-semibold mb-1">Full Name</label>
-                  <div className="relative">
-                    <UserIcon size={14} className="absolute left-3 top-3.5 text-[#5f5e5e]" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="Alex Mercer"
-                      className="w-full rounded-xl border border-[#e7e2d8] bg-white pl-9 pr-4 py-2.5 text-xs text-[#1d1c16] placeholder-[#5f5e5e]/50 focus:border-[#e3a62f] focus:outline-none"
-                      value={authForm.name}
-                      onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })}
-                    />
-                  </div>
-                </div>
-              )}
-
               <div>
                 <label className="block text-[10px] font-mono uppercase text-[#5f5e5e] font-semibold mb-1">Studio Work Email</label>
                 <div className="relative">
@@ -1008,30 +970,18 @@ const LandingPage = ({ showLoginOnInit = false }) => {
                   <Loader2 size={16} className="animate-spin" />
                 ) : (
                   <>
-                    <span>{isRegister ? 'Create Account & Enter' : 'Sign In to Workspace'}</span>
+                    <span>Sign In to Workspace</span>
                     <ArrowRight size={14} />
                   </>
                 )}
               </button>
             </form>
 
-            {/* Modal Footer Toggle */}
-            <div className="mt-5 text-center text-xs text-[#5f5e5e]">
-              {isRegister ? (
-                <span>
-                  Already registered?{' '}
-                  <button onClick={() => setIsRegister(false)} className="text-[#7e5700] font-bold hover:underline">
-                    Sign In
-                  </button>
-                </span>
-              ) : (
-                <span>
-                  New studio team?{' '}
-                  <button onClick={() => setIsRegister(true)} className="text-[#7e5700] font-bold hover:underline">
-                    Create Workspace
-                  </button>
-                </span>
-              )}
+            {/* Admin Provisioning Note */}
+            <div className="mt-5 text-center text-xs text-[#5f5e5e] border-t border-[#e7e2d8] pt-4 leading-relaxed">
+              <span>Need an account? Contact your </span>
+              <strong className="text-[#7e5700] font-semibold">Studio Administrator</strong>
+              <span> to receive an invitation.</span>
             </div>
           </div>
         </div>

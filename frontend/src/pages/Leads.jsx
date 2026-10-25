@@ -4,6 +4,7 @@ import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { Search, Plus, Trash2, Edit2, Shield, Settings, Import, Filter, X, Loader2, ArrowRight } from 'lucide-react';
 import ImportWizardModal from '../components/ImportWizardModal';
+import TransferLeadModal from '../components/TransferLeadModal';
 import { CardSkeleton } from '../components/Skeletons';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
@@ -11,13 +12,28 @@ import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Badge from '../components/ui/Badge';
 import EmptyState from '../components/ui/EmptyState';
+import { UserCheck } from 'lucide-react';
 
-const STATUS = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'];
+const STATUS = [
+  'New',
+  'Pre-Sales Contacted',
+  'Pre-Sales Qualified',
+  'Transferred to Sales',
+  'Contacted',
+  'Demo Scheduled',
+  'Proposal Sent',
+  'Negotiation',
+  'Won',
+  'Lost'
+];
 const SOURCES = ['Website', 'Referral', 'Social Media', 'Cold Call', 'Email Campaign', 'Other'];
 
 const statusColorVariant = (s) =>
   ({
     New: 'neutral',
+    'Pre-Sales Contacted': 'neutral',
+    'Pre-Sales Qualified': 'gold',
+    'Transferred to Sales': 'success',
     Contacted: 'neutral',
     'Demo Scheduled': 'gold',
     'Proposal Sent': 'warning',
@@ -49,6 +65,7 @@ const Leads = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
+  const [transferLeadTarget, setTransferLeadTarget] = useState(null);
   const [editing, setEditing] = useState(null);
   
   const [form, setForm] = useState({
@@ -329,16 +346,27 @@ const Leads = () => {
                     <div className="grid grid-cols-2 gap-2 pt-2">
                       <Link
                         to={`/leads/${l._id}`}
-                        className="border border-line hover:bg-gold-soft rounded-btn py-2.5 text-center text-[10px] font-bold uppercase tracking-wider text-ink transition-all flex items-center justify-center"
+                        className="border border-line hover:bg-gold-soft rounded-btn py-2 text-center text-[10px] font-bold uppercase tracking-wider text-ink transition-all flex items-center justify-center"
                       >
                         Details
                       </Link>
                       <Button
+                        variant="secondary"
+                        onClick={() => setTransferLeadTarget(l)}
+                        className="py-2 rounded-btn text-[10px] border-primary/30 text-primary hover:bg-primary/10 flex items-center justify-center gap-1"
+                      >
+                        <UserCheck size={11} />
+                        Transfer
+                      </Button>
+                    </div>
+
+                    <div className="pt-1">
+                      <Button
                         variant="primary"
                         onClick={() => openEdit(l)}
-                        className="py-2.5 rounded-btn text-[10px]"
+                        className="w-full py-1.5 rounded-btn text-[9px] uppercase tracking-wider"
                       >
-                        Update
+                        Edit Profile
                       </Button>
                     </div>
 
@@ -528,6 +556,20 @@ const Leads = () => {
         <ImportWizardModal 
           onClose={() => setShowImportModal(false)} 
           onImportSuccess={fetchLeads} 
+        />
+      )}
+
+      {/* Transfer Lead Modal */}
+      {transferLeadTarget && (
+        <TransferLeadModal
+          isOpen={Boolean(transferLeadTarget)}
+          onClose={() => setTransferLeadTarget(null)}
+          lead={transferLeadTarget}
+          teamMembers={salespeople}
+          onSuccess={() => {
+            fetchLeads();
+            setTransferLeadTarget(null);
+          }}
         />
       )}
     </div>

@@ -18,20 +18,33 @@ import {
   Bot, 
   X, 
   CalendarDays, 
-  AlertTriangle 
+  AlertTriangle,
+  UserCheck
 } from 'lucide-react';
 import Timeline from '../components/Timeline';
 import EmailComposer from '../components/EmailComposer';
 import CallWidget from '../components/CallWidget';
 import MessageComposer from '../components/MessageComposer';
 import AIChatDrawer from '../components/AIChatDrawer';
+import TransferLeadModal from '../components/TransferLeadModal';
 import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 
-const STAGES = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'];
+const STAGES = [
+  'New',
+  'Pre-Sales Contacted',
+  'Pre-Sales Qualified',
+  'Transferred to Sales',
+  'Contacted',
+  'Demo Scheduled',
+  'Proposal Sent',
+  'Negotiation',
+  'Won',
+  'Lost'
+];
 
 const stageColor = (s, active, currentStatus) => {
   if (currentStatus === 'Lost' && s === 'Lost') return 'bg-danger text-white border-danger';
@@ -55,6 +68,8 @@ const LeadDetails = () => {
   const [showCallModal, setShowCallModal] = useState(false);
   const [showSMSModal, setShowSMSModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [teamMembers, setTeamMembers] = useState([]);
   const [aiOpen, setAiOpen] = useState(false);
 
   // Form state for activity quick-create
@@ -99,10 +114,20 @@ const LeadDetails = () => {
     } catch (_) {}
   };
 
+  const fetchUsers = async () => {
+    try {
+      const { data } = await api.get('/api/users');
+      setTeamMembers(data || []);
+    } catch (err) {
+      console.error('Failed to load users for transfer:', err);
+    }
+  };
+
   useEffect(() => {
     fetchLead();
     fetchRecordActivities();
     fetchCustomFields();
+    fetchUsers();
   }, [id]);
 
   const updateStatus = async (status) => {
@@ -387,6 +412,9 @@ const LeadDetails = () => {
       <div className="flex flex-wrap gap-2.5">
         <Button onClick={() => setShowCallModal(true)} icon={Phone}>
           Call Client
+        </Button>
+        <Button variant="secondary" onClick={() => setShowTransferModal(true)} icon={UserCheck} className="border-primary/40 text-primary hover:bg-primary/10">
+          Transfer to Sales
         </Button>
         <Button variant="secondary" onClick={() => setShowEmailModal(true)} icon={Mail}>
           Send Email
@@ -788,6 +816,18 @@ const LeadDetails = () => {
           </div>
         </div>
       )}
+
+      {/* Transfer to Sales Modal */}
+      <TransferLeadModal
+        isOpen={showTransferModal}
+        onClose={() => setShowTransferModal(false)}
+        lead={lead}
+        teamMembers={teamMembers}
+        onSuccess={(updatedLead) => {
+          setLead(updatedLead);
+          fetchRecordActivities();
+        }}
+      />
 
       {/* Floating Compass AI Chat Trigger Button */}
       <button

@@ -69,13 +69,52 @@ const leadSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Negotiation', 'Won', 'Lost'],
+      enum: [
+        'New',
+        'Pre-Sales Contacted',
+        'Pre-Sales Qualified',
+        'Transferred to Sales',
+        'Contacted',
+        'Demo Scheduled',
+        'Proposal Sent',
+        'Negotiation',
+        'Won',
+        'Lost',
+        'Junk'
+      ],
       default: 'New'
     },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       default: null
+    },
+    // Pre-Sales Qualification & Handoff Tracking
+    qualificationDetails: {
+      budgetVerified: { type: Boolean, default: false },
+      decisionMaker: { type: Boolean, default: false },
+      timeline: { type: String, default: 'Flexible' },
+      requirementSummary: { type: String, default: '' },
+      preSalesNotes: { type: String, default: '' }
+    },
+    transferredBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    transferredTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null
+    },
+    transferredAt: {
+      type: Date,
+      default: null
+    },
+    transferStatus: {
+      type: String,
+      enum: ['None', 'Transferred', 'Accepted', 'Rejected'],
+      default: 'None'
     },
     expectedRevenue: {
       type: Number,

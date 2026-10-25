@@ -38,6 +38,68 @@ const generateVoiceToken = async (req, res, next) => {
   }
 };
 
-module.exports = {
-  generateVoiceToken
+const Event = require('../models/Event');
+
+// @desc    Get all call recordings for QA audit & monitoring
+// @route   GET /api/v1/voice/recordings (or /api/voice/recordings)
+// @access  Private
+const getCallRecordings = async (req, res, next) => {
+  try {
+    const { repId, search, disposition, startDate, endDate, limit = 50, page = 1 } = req.query;
+
+    const query = {
+      type: 'call',
+      // Include all call events, prioritizing those with recordingUrl or twilioCallSid
+      $or: [
+        { recordingUrl: { $exists: true, $ne: '' } },
+        { twilioCallSid: { $exists: true, $ne: '' } },
+        { status: 'completed' }
+      ]
+    };
+
+    if (repId) {
+      query.assignedTo = repId;
+    }
+
+    if (disposition) {
+      query.disposition = disposition;
+    }
+
+    if (startDate || endDate) {
+      query.startTime = {};
+      if (startDate) query.startTime.$gte = new Date(startDate);
+      if (endDate) query.startTime.$lte = new Date(endDate);
+    }
+
+    const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+
+    let events = await Event.find(query)
+      .populate('assignedTo', 'name email role')
+      .populate({
+        path: 'relatedTo.recordId',
+        select: 'name company phone email status'
+      })
+      .sort({ startTime: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(parseInt(limit, 10));
+
+    const total = await Event.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      count: events.length,
+      total,
+      page: parseInt(page, 10),
+      totalPages: Math.ceil(total / parseInt(limit, 10)),
+      recordings: events
+    });
+  } catch (error) {
+    next(error);
+  }
 };
+
+module.exports = {
+  generateVoiceToken,
+  getCallRecordings
+};
+

@@ -12,6 +12,7 @@ import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
 import Select from '../components/ui/Select';
 import Textarea from '../components/ui/Textarea';
+import CallRecordingsAudit from '../components/CallRecordingsAudit';
 
 const CommunicationHub = () => {
   const { user } = useAuth();
@@ -42,6 +43,7 @@ const CommunicationHub = () => {
   const [noteForm, setNoteForm] = useState({ type: 'Sales', text: '' });
   const [feedbackForm, setFeedbackForm] = useState({ rating: 5, feedbackType: 'VR Experience', comments: '', revisionRequests: '' });
 
+  const [activeTab, setActiveTab] = useState('timeline'); // 'timeline' or 'recordings'
   const [loading, setLoading] = useState(true);
 
   // Initial fetch
@@ -234,30 +236,59 @@ const CommunicationHub = () => {
         </div>
       </div>
 
-      {/* Today's Quick Triggers */}
-      <div className="flex flex-wrap gap-2.5">
-        <Button onClick={() => setShowCallModal(true)} icon={Phone}>
-          Log Call Notes
-        </Button>
-        <Button variant="secondary" onClick={() => setShowEmailModal(true)} icon={Mail}>
-          Send Email Draft
-        </Button>
-        <Button variant="secondary" onClick={() => setShowMeetModal(true)} icon={Calendar}>
-          Schedule Meeting
-        </Button>
-        <Button variant="secondary" onClick={() => setShowNoteModal(true)} icon={FileText}>
-          Add Internal Note
-        </Button>
-        <Button variant="secondary" onClick={() => setShowFeedbackModal(true)} icon={Star}>
-          Record Feedback
-        </Button>
+      {/* Sub-Navigation Tabs */}
+      <div className="flex items-center gap-3 border-b border-line/60 pb-1">
+        <button
+          onClick={() => setActiveTab('timeline')}
+          className={`pb-3 px-2 text-xs font-bold uppercase tracking-wider transition-all border-b-2 ${
+            activeTab === 'timeline'
+              ? 'border-gold text-ink font-black'
+              : 'border-transparent text-slate-400 hover:text-ink'
+          }`}
+        >
+          Omnichannel Timeline & AI Insights
+        </button>
+
+        <button
+          onClick={() => setActiveTab('recordings')}
+          className={`pb-3 px-2 text-xs font-bold uppercase tracking-wider transition-all border-b-2 flex items-center gap-1.5 ${
+            activeTab === 'recordings'
+              ? 'border-gold text-ink font-black'
+              : 'border-transparent text-slate-400 hover:text-ink'
+          }`}
+        >
+          <Phone size={14} className={activeTab === 'recordings' ? 'text-primary' : ''} />
+          Sales Call Recordings & QA Audio
+        </button>
       </div>
 
-      {/* Main Grid Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {activeTab === 'recordings' ? (
+        <CallRecordingsAudit />
+      ) : (
+        <>
+          {/* Today's Quick Triggers */}
+          <div className="flex flex-wrap gap-2.5">
+            <Button onClick={() => setShowCallModal(true)} icon={Phone}>
+              Log Call Notes
+            </Button>
+            <Button variant="secondary" onClick={() => setShowEmailModal(true)} icon={Mail}>
+              Send Email Draft
+            </Button>
+            <Button variant="secondary" onClick={() => setShowMeetModal(true)} icon={Calendar}>
+              Schedule Meeting
+            </Button>
+            <Button variant="secondary" onClick={() => setShowNoteModal(true)} icon={FileText}>
+              Add Internal Note
+            </Button>
+            <Button variant="secondary" onClick={() => setShowFeedbackModal(true)} icon={Star}>
+              Record Feedback
+            </Button>
+          </div>
 
-        {/* Left Column: Timeline Feed */}
-        <div className="lg:col-span-8 space-y-6">
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Left Column: Timeline Feed */}
+            <div className="lg:col-span-8 space-y-6">
           <Card variant="raised" className="p-6 bg-white">
             <h2 className="text-xs font-display font-black text-ink uppercase tracking-wider mb-6 pb-2 border-b border-line/60">
               Communication Timeline
@@ -421,6 +452,8 @@ const CommunicationHub = () => {
 
         </div>
       </div>
+      </>
+      )}
 
       {/* ─────────────────────────────────────────────────────────────────────────────
           MODAL SHEET VIEWFORMS

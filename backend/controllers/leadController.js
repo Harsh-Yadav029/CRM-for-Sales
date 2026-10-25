@@ -324,6 +324,83 @@ const importLeads = async (req, res, next) => {
   }
 };
 
+const transferLead = async (req, res, next) => {
+  const { id } = req.params;
+  const {
+    targetUserId,
+    budgetVerified,
+    decisionMaker,
+    timeline,
+    requirementSummary,
+    preSalesNotes
+  } = req.body;
+
+  try {
+    const lead = await Lead.findById(id);
+    if (!lead) {
+      res.status(404);
+      return next(new Error('Lead not found'));
+    }
+
+    const assignedToUser = targetUserId || lead.assignedTo;
+
+    lead.status = 'Transferred to Sales';
+    lead.transferStatus = 'Transferred';
+    lead.transferredBy = req.user._id;
+    lead.transferredTo = assignedToUser;
+    lead.transferredAt = new Date();
+    lead.assignedTo = assignedToUser;
+
+    lead.qualificationDetails = {
+      budgetVerified: Boolean(budgetVerified),
+      decisionMaker: Boolean(decisionMaker),
+      timeline: timeline || 'Flexible',
+      requirementSummary: requirementSummary || '',
+      preSalesNotes: preSalesNotes || ''
+    };
+
+    // Append system note for audit trail
+    const transferNote = {
+      text: `[Pre-Sales Handoff] Qualified and transferred to sales by ${req.user.name}. Notes: ${preSalesNotes || 'N/A'}. Budget Verified: ${budgetVerified ? 'Yes' : 'No'}, Decision Maker: ${decisionMaker ? 'Yes' : 'No'}.`,
+      addedBy: req.user._id,
+      addedBySystem: true,
+      type: 'note',
+      subject: 'Lead Transferred to Sales'
+    };
+    lead.notes.push(transferNote);
+
+    await lead.save();
+
+    // Trigger Notification for target user
+    if (assignedToUser) {
+      try {
+        const Notification = require('../models/Notification');
+        const notif = await Notification.create({
+          userId: assignedToUser,
+          title: 'Qualified Lead Transferred',
+          message: `${req.user.name} (Pre-Sales) has qualified & transferred lead "${lead.name}" (${lead.company}) to you.`,
+          link: `/leads/${lead._id}`
+        });
+        const { emitUserEvent } = require('../utils/socket');
+        emitUserEvent(assignedToUser.toString(), 'notification_received', notif);
+      } catch (notifErr) {
+        console.error('Failed to create transfer notification:', notifErr.message);
+      }
+    }
+
+    emitCompanyEvent('lead_updated', lead);
+
+    const populatedLead = await Lead.findById(lead._id)
+      .populate('assignedTo', 'name email')
+      .populate('transferredBy', 'name email')
+      .populate('transferredTo', 'name email');
+
+    res.json(populatedLead);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getLeads,
   createLead,
@@ -333,5 +410,7 @@ module.exports = {
   assignLead,
   updateLeadStatus,
   addLeadNote,
-  importLeads
+  importLeads,
+  transferLead
 };
+

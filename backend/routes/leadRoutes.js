@@ -9,7 +9,8 @@ const {
   assignLead,
   updateLeadStatus,
   addLeadNote,
-  importLeads
+  importLeads,
+  transferLead
 } = require('../controllers/leadController');
 const { protect, authorize } = require('../middleware/authMiddleware');
 const audit = require('../middleware/auditMiddleware');
@@ -30,5 +31,6 @@ router.route('/:id')
 router.put('/:id/assign', authorize('admin'), audit('Lead'), assignLead);
 router.put('/:id/status', audit('Lead'), updateLeadStatus);
 router.post('/:id/notes', audit('Lead'), addLeadNote);
+router.post('/:id/transfer', audit('Lead'), transferLead);
 
 module.exports = router;
